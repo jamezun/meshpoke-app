@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env
+.env.local
+.env.production
+*.Zone.Identifier
+.claude/
+__pycache__/
+.DS_Store
+dist/
+build/
+.turbo/
