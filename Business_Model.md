@@ -208,7 +208,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 | Phase | Timeline | Focus | Pricing action |
 |---|---|---|---|
 | **0. Seed** | Month 0–2 | 1 neighborhood / campus / event; 10–15 free merchants; 20–30 founding hosts; **keyword profiles seeded during onboarding** | Free everything |
-| **1. Validate** | Month 2–5 | QR check-in, 10-cap scarcity, poke consent flow; **keyword filters + vibe match % (1 filter free)** | Introduce Plus at $4.99 |
+| **1. Validate** | Month 2–5 | QR check-in, member-cap scarcity, poke consent flow; **keyword filters + vibe match % (1 filter free)** | Introduce Plus at $4.99 |
 | **2. Monetize merchants** | Month 5–8 | Convert founding merchants to Growth; **spot keyword tags** | $39/mo Growth |
 | **3. Scale** | Month 8–12 | Second neighborhood; Pro tier; credits; **keyword alerts, peer-verified keywords, filter passes** | $9.99 Pro + credit packs |
 | **4. Expand** | Year 2 | Multi-city; POS/API; sponsored events; **evaluate degree-trust expansion with real density data** | Pro merchant $99 |
