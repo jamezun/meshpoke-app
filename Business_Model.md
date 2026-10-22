@@ -102,7 +102,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 |---|---|---|---|
 | **Price** | **Free** | **$39/mo** or $390/yr | **$99/mo** or $990/yr |
 | Venue profile + map pin | ✓ | ✓ | ✓ |
-| Member cap (adjustable) | 5–25 | 5–25 | 5–25 (+ per-location caps) |
+| Member cap (merchant's choice) | up to 25 | up to 100 | **Unlimited** (+ per-location caps) |
 | Seat auto-release | 60-day idle rule | ✓ (configurable 30–90) | ✓ |
 | QR check-in | Basic | ✓ | ✓ |
 | Discount ladder config | Fixed | Custom | Custom |
@@ -112,7 +112,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 | Event spots / mo | — | 3 | Unlimited |
 | **Spot keyword tags** | — | **✓** | **✓ (A/B tested tags)** |
 | **Keyword-driven demand analytics** | — | — | **✓ (which keywords bring members to your venue)** |
-| Reserved founding seats | — | ~20% of cap (min 2) | ~20% of cap (min 2) |
+| Founding circle (social core) | — | ✓ ~20% (min 2, max 25) | ✓ ~20% (min 2, max 25) |
 | POS / API integration | — | — | ✓ |
 | Multi-location | — | — | ✓ |
 | Support | Community | Email | Priority |
@@ -123,10 +123,11 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 
 **The flywheel:** drops recruit strangers → membership keeps regulars → verified check-ins feed venue map size + CRM data → merchant pays SaaS for retention tools → better perks keep members active.
 
-**Member seats**
-- Cap **5–25, same price every tier** — merchant trades exclusivity ↔ reach by strategy, never by payment.
-- Seats are **kept by activity**: no check-in for 60 days → auto-released to waitlist (no dead names; CRM data stays live).
-- **Founding seats ≈ 20% of cap (min 2):** merchant-assigned VIPs, never auto-expire.
+**Member seats — two layers**
+- **Founding circle (social core):** merchant-assigned VIPs, ~20% of members (min 2, max 25), never auto-expire. This is the lobby room / "who's here" community — the social object that makes MeshPoke social, not a coupon app.
+- **Membership (loyalty layer):** merchant's chosen cap within tier headroom — **Starter 25 · Growth 100 · Pro unlimited**. Capacity is a classic SaaS lever; sell it freely.
+- **The rule that never moves: marker size & ranking = verified check-in activity only — never member count, never tier.** Money buys tool capacity; the map only reports reality. Pins display activity ("42 check-ins this week"), never member totals.
+- Regular seats are **kept by activity**: no check-in for 60 days → auto-released to waitlist (no dead names; CRM data stays live).
 - Consumer holds: Free 1 · Plus 3 · Pro 10 memberships.
 
 **Discount ladder (members-only loyalty)**
@@ -195,7 +196,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 
 1. **Pay for reach, not for visibility.** Hosting and pokes are the paid actions; map prominence is earned.
 2. **Pay for search depth, not for signal quality.** Keyword *filters* and *alerts* are paid; keyword *levels* are earned and peer-verified — never sold.
-3. **Scarcity stays real.** The member cap (5–25) is adjustable but never purchasable — bigger caps are never a pricing tier.
+3. **Scarcity stays real where it's social.** The founding circle stays small and merchant-chosen. Membership headroom is capacity for sale (SaaS-style), but map prominence never is — prominence is check-in-verified only.
 4. **Two-sided lock-in.** Users protect spot tiers; merchants protect member data. Both churn less.
 5. **Credits beat paywalls** for casual users — lower friction, better spam control.
 6. **Merchant revenue is the floor.** Consumer revenue is the ceiling. Don't depend on consumer subs alone.
@@ -208,7 +209,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 | Phase | Timeline | Focus | Pricing action |
 |---|---|---|---|
 | **0. Seed** | Month 0–2 | 1 neighborhood / campus / event; 10–15 free merchants; 20–30 founding hosts; **keyword profiles seeded during onboarding** | Free everything |
-| **1. Validate** | Month 2–5 | QR check-in, member-cap scarcity, poke consent flow; **keyword filters + vibe match % (1 filter free)** | Introduce Plus at $4.99 |
+| **1. Validate** | Month 2–5 | QR check-in, founding-circle scarcity + founding merchants, poke consent flow; **keyword filters + vibe match % (1 filter free)** | Introduce Plus at $4.99 |
 | **2. Monetize merchants** | Month 5–8 | Convert founding merchants to Growth; **spot keyword tags** | $39/mo Growth |
 | **3. Scale** | Month 8–12 | Second neighborhood; Pro tier; credits; **keyword alerts, peer-verified keywords, filter passes** | $9.99 Pro + credit packs |
 | **4. Expand** | Year 2 | Multi-city; POS/API; sponsored events; **evaluate degree-trust expansion with real density data** | Pro merchant $99 |
@@ -230,7 +231,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 | Paid-only spot creation starves supply | Founding hosts, earned credits, event-based seeding |
 | Poke spam / harassment | Consent toggle, rate limits, credit cost per poke beyond free tier |
 | Merchants resist discount escalation | Cap cash discounts at ~15%; shift high tiers to perks |
-| **Tiered/unlimited member caps demanded by big merchants** | Cap stays 5–25 same-price; sell **locations, not members** (multi-location Pro) |
+| **Big member counts gamed into prominence** | Marker/ranking keyed strictly to verified check-ins (GPS + 1/day + anomaly flags); member count never displayed on pin |
 | **Members game the ladder (check-in farms)** | GPS proximity + 1/day + anomaly flags; decay punishes idleness |
 | Logo size seen as pay-to-win | Never sell it; tie to verified check-ins + retention |
 | Low local density | Launch event-first, one hyper-local cluster at a time |
