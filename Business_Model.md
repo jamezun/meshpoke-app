@@ -102,20 +102,48 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 |---|---|---|---|
 | **Price** | **Free** | **$39/mo** or $390/yr | **$99/mo** or $990/yr |
 | Venue profile + map pin | ✓ | ✓ | ✓ |
-| Member quota | 10 | 10 | 10 (+ multi-location) |
+| Member cap (adjustable) | 5–25 | 5–25 | 5–25 (+ per-location caps) |
+| Seat auto-release | 60-day idle rule | ✓ (configurable 30–90) | ✓ |
 | QR check-in | Basic | ✓ | ✓ |
 | Discount ladder config | Fixed | Custom | Custom |
+| Discount drops (count + expiry) | 1 active | ✓ | ✓ (unlimited) |
 | Member CRM | — | ✓ | ✓ |
 | Retention analytics | — | ✓ | Advanced |
 | Event spots / mo | — | 3 | Unlimited |
 | **Spot keyword tags** | — | **✓** | **✓ (A/B tested tags)** |
 | **Keyword-driven demand analytics** | — | — | **✓ (which keywords bring members to your venue)** |
-| Reserved founding slots | — | 2 of 10 | 2 of 10 |
+| Reserved founding seats | — | ~20% of cap (min 2) | ~20% of cap (min 2) |
 | POS / API integration | — | — | ✓ |
 | Multi-location | — | — | ✓ |
 | Support | Community | Email | Priority |
 
 **Why merchants pay:** identifiable repeat customers, retention data, member management, event hosting — **not** logo size.
+
+### 5.2 Membership & discount mechanics
+
+**The flywheel:** drops recruit strangers → membership keeps regulars → verified check-ins feed venue map size + CRM data → merchant pays SaaS for retention tools → better perks keep members active.
+
+**Member seats**
+- Cap **5–25, same price every tier** — merchant trades exclusivity ↔ reach by strategy, never by payment.
+- Seats are **kept by activity**: no check-in for 60 days → auto-released to waitlist (no dead names; CRM data stays live).
+- **Founding seats ≈ 20% of cap (min 2):** merchant-assigned VIPs, never auto-expire.
+- Consumer holds: Free 1 · Plus 3 · Pro 10 memberships.
+
+**Discount ladder (members-only loyalty)**
+- Steps configured by merchant, e.g. `3 visits → 10% · 5 → 15% · 10 → 20% or free item`.
+- Visit = QR check-in, GPS-proximity-verified, max 1/day counts.
+- **Cash discount ceiling ~15%** — beyond that, perks (free item, priority, event access) protect merchant margin.
+- Ladder decays one step after 60 days idle.
+
+**Discount drops (campaigns, open to anyone)**
+- Merchant publishes count + discount + expiry ("25 spots, 15% off, ends Friday").
+- Claim → QR redeem at venue (proximity-gated); unclaimed/expired vanish automatically. Max ~3 active/week per venue.
+- **Acquisition layer:** strangers sample the venue → some apply for membership.
+
+**Money flows**
+- All discounts funded by merchant margin. **MeshPoke never subsidizes and never takes a cut** (no payment processing, no SVF licensing, no adversarial rev-share).
+- MeshPoke earns: SaaS tiers + labeled drop amplification + event spots.
+- Marker size grows **only** from verified check-ins — never from payment.
 
 ### 5.1 Founding merchant program (cold start)
 
@@ -131,10 +159,10 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 |---|---|---|
 | **Sponsored event spots** | Merchant pays for a labeled event room on the map | Clearly marked "Sponsored"; never affects logo size |
 | **Founding-member sponsorship** | Merchant reserves 2 of 10 slots for high-value customers | Must be tied to real check-in activity |
-| **Featured perk drops** | Brand pays for a limited member perk (e.g., free coffee) | Labeled; opt-in only |
+| **Discount drop amplification** | Merchant pays to feature a drop (district feed / push), labeled | Clearly marked "Sponsored"; does not affect marker size; ~3 drops/venue/week free anyway |
 | **Booking/event fees** | Later phase — small fee on ticketed venue events | Not core; avoid early |
 
-**Explicitly NOT monetized:** network-degree depth, map prominence, keyword levels themselves (levels are earned/peer-verified, never purchased — buying levels would destroy the discovery signal).
+**Explicitly NOT monetized:** network-degree depth, map prominence/marker size, keyword levels themselves (levels are earned/peer-verified, never purchased — buying levels would destroy the discovery signal). **No cut is taken from merchant discounts** — MeshPoke is never the payment path for offers.
 
 ---
 
@@ -167,7 +195,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 
 1. **Pay for reach, not for visibility.** Hosting and pokes are the paid actions; map prominence is earned.
 2. **Pay for search depth, not for signal quality.** Keyword *filters* and *alerts* are paid; keyword *levels* are earned and peer-verified — never sold.
-3. **Scarcity stays real.** The 10-member venue cap is never sold away — it's the product.
+3. **Scarcity stays real.** The member cap (5–25) is adjustable but never purchasable — bigger caps are never a pricing tier.
 4. **Two-sided lock-in.** Users protect spot tiers; merchants protect member data. Both churn less.
 5. **Credits beat paywalls** for casual users — lower friction, better spam control.
 6. **Merchant revenue is the floor.** Consumer revenue is the ceiling. Don't depend on consumer subs alone.
@@ -201,7 +229,9 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 |---|---|
 | Paid-only spot creation starves supply | Founding hosts, earned credits, event-based seeding |
 | Poke spam / harassment | Consent toggle, rate limits, credit cost per poke beyond free tier |
-| Merchants resist discount escalation | Cap discounts at 10–15%; shift high tiers to perks |
+| Merchants resist discount escalation | Cap cash discounts at ~15%; shift high tiers to perks |
+| **Tiered/unlimited member caps demanded by big merchants** | Cap stays 5–25 same-price; sell **locations, not members** (multi-location Pro) |
+| **Members game the ladder (check-in farms)** | GPS proximity + 1/day + anomaly flags; decay punishes idleness |
 | Logo size seen as pay-to-win | Never sell it; tie to verified check-ins + retention |
 | Low local density | Launch event-first, one hyper-local cluster at a time |
 | **Keyword level inflation ("everyone's level 10")** | Max 3 keywords at level 8+; peer-verification weighting; verified-vs-declared shown to viewers |
