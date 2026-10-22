@@ -69,6 +69,8 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 | **Keyword filters** | **1 keyword, any level** | **3 simultaneous filters** | **Unlimited filters + level ranges** |
 | **Keyword-match alerts** | — | **—"someone tennis ≥8 joined a nearby spot"** | **Full: who's searching your keywords** |
 | **Peer-verified keywords** | **1** | **3** | **10** |
+| **Priority waitlist & auto-join** | — | **2× weight, auto-join 1 saved venue** | **3× weight, auto-join 3 saved venues** |
+| **Auto-claim drops (saved venues)** | — | **1/week** | **3/week** |
 | Host analytics | — | Basic | Full |
 | Priority joining | — | — | Yes |
 | Open-to-poke toggle | Yes | Yes | Yes |
@@ -128,6 +130,7 @@ Every user builds a **keyword profile** in their active mode. Each keyword carri
 - **Membership (loyalty layer):** merchant's chosen cap within tier headroom — **Starter 25 · Growth 100 · Pro unlimited**. Capacity is a classic SaaS lever; sell it freely.
 - **The rule that never moves: marker size & ranking = verified check-in activity only — never member count, never tier.** Money buys tool capacity; the map only reports reality. Pins display activity ("42 check-ins this week"), never member totals.
 - Regular seats are **kept by activity**: no check-in for 60 days → auto-released to waitlist (no dead names; CRM data stays live).
+- **Waitlist mechanics:** seat opens → waitlisted users notified (Free: claim within 24h). Plus/Pro get **auto-join** for saved venues and **weighted priority** (2×/3×) — weighted, never absolute, so free users aren't locked out of hot venues; 60-day turnover keeps queues moving.
 - Consumer holds: Free 1 · Plus 3 · Pro 10 memberships.
 
 **Discount ladder (members-only loyalty)**
