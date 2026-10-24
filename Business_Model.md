@@ -13,10 +13,13 @@ MeshPoke is marketed as a **live networking map** — not a dating app, not a di
 **Primary (HK launch, Canto):** *「成個城市，就係你嘅人脈。」* (The whole city is your network.)
 
 **Alternates:**
+- *LinkedIn introduced you. We'll get you a table.* (professional jab)
+- *Feed less. Meet more.* (anti-app, ad-ready)
+- *Dinner, drinks, or doubles — the crew forms on the map.* (any-activity/sports angle)
 - *Your city is your network.* (ecosystem angle — shortest)
 - *Networking that happens in real life — dinner's just the excuse.* (spot-as-tool angle)
+- *人脈唔係connect，係見面。* (Canto LinkedIn jab)
 - *人脈，原來就喺附近。* (Canto soft version — your network is closer than you think)
-- *Real contacts are a map away.* (smile angle)
 
 **Elevator (app store / investors):** MeshPoke is a live map for meeting people in real life: join a spot by shared vibe — a dinner, a hike, a board-game night, an industry mingle — connect with the ones who click, and one-tap rebook the crew. Networking without the LinkedIn feed; nobody can ever pay to be more visible on the map.
 
@@ -30,7 +33,7 @@ MeshPoke is marketed as a **live networking map** — not a dating app, not a di
 | Timeleft | one curated stranger dinner on Wednesdays | any activity, any night, city-wide — and the crew rebooks |
 | Dating apps | high-stakes looks market | zero-pressure mingling; romance isn't banned, it just isn't the frame |
 
-**Practical consequences:** App Store category = **Social** (not Dating) — stigma-free, broader search reach. Spot-creation templates cover dinner / drinks / hike / games / industry mingle / coffee — no dinner default. Copy says **"connect"** (mutual poke → connection), never "match" — mechanic unchanged, vocabulary de-dating-ified. Product stays a neutral mesh; users who find dates or friends on it are wins, not violations.
+**Practical consequences:** App Store category = **Social** (not Dating) — stigma-free, broader search reach. Spot-creation templates cover Dinner · Drinks · Coffee · Hike · Run · Tennis · Pickleball · Badminton · Board games · Industry mingle · Open sport — no dinner default. Copy says **"connect"** (mutual poke → connection), never "match" — mechanic unchanged, vocabulary de-dating-ified. Product stays a neutral mesh; users who find dates or friends on it are wins, not violations.
 
 ---
 
@@ -125,7 +128,7 @@ Packs exist for **free users only in practice** — subscriber regen makes them 
 
 ### 4.4 Group formation & Show-up Score
 
-**Spot states:** `forming → confirmed → live → done`. Spots span dinners, drinks, hikes, board games, coffee chats, industry minglers — **the spot is a tool for meeting people; dinner is not the product**.
+**Spot states:** `forming → confirmed → live → done`. Spots span dinners, drinks, coffees, hikes, runs, tennis/pickleball/badminton games, board games, industry minglers — **the spot is a tool for meeting people; dinner is not the product**.
 
 **Creator-admin (democratized Timeleft ops):**
 - Sets: name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (district anchor while forming; **venue pin required on confirm** — QR check-in needs a real place), min/max headcount, date range.
