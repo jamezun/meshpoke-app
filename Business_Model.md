@@ -8,16 +8,19 @@
 
 MeshPoke is marketed as a **live networking map** — not a dating app, not a dinner-strangers app. Eating out is one venue type among many (drinks, hikes, board games, coffee chats, industry minglers); spots are **tools for meeting people**, not the product. Lower stakes than dating, more real than LinkedIn.
 
-**Primary (EN):** *"See who's out. Meet on purpose. Grow your circle."* — discover → mingle → network growth.
+**Primary (EN):** *"Poke the mesh. Meet the people."* — action + payoff: the verb is the brand, the promise is human.
 
 **Primary (HK launch, Canto):** *「成個城市，就係你嘅人脈。」* (The whole city is your network.)
 
 **Alternates:**
+- *A network isn't a list. It's a mesh. Poke it.* (anti-LinkedIn, defines the product)
+- *Poke by vibe. Network by night.* (campaign rhythm pair)
+- *Poke. Meet. Mesh.* (ultra-short — subtitle length)
+- *See who's out. Meet on purpose. Grow your circle.* (loop-describing fallback)
 - *LinkedIn introduced you. We'll get you a table.* (professional jab)
 - *Feed less. Meet more.* (anti-app, ad-ready)
 - *Dinner, drinks, or doubles — the crew forms on the map.* (any-activity/sports angle)
 - *Your city is your network.* (ecosystem angle — shortest)
-- *Networking that happens in real life — dinner's just the excuse.* (spot-as-tool angle)
 - *人脈唔係connect，係見面。* (Canto LinkedIn jab)
 - *人脈，原來就喺附近。* (Canto soft version — your network is closer than you think)
 
