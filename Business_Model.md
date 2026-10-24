@@ -4,20 +4,33 @@
 
 **A map-native social mesh where users pay for reach and comfort, merchants pay to retain, discovery runs on self-declared keywords — and the map's popularity signal stays activity-based, never pay-to-win.**
 
-### 1.1 Pitch & taglines
+### 1.1 Positioning: **networking-first**
 
-**Primary (EN):** *"See who's out. Join the table. Keep the crew."* — the product loop in three verbs: discover → join → rebook.
+MeshPoke is marketed as a **live networking map** — not a dating app, not a dinner-strangers app. Eating out is one venue type among many (drinks, hikes, board games, coffee chats, industry minglers); spots are **tools for meeting people**, not the product. Lower stakes than dating, more real than LinkedIn.
 
-**Primary (HK launch, Canto):** *「今晚去邊？張地圖話你知。」* (Where tonight? The map knows.)
+**Primary (EN):** *"See who's out. Meet on purpose. Grow your circle."* — discover → mingle → network growth.
+
+**Primary (HK launch, Canto):** *「成個城市，就係你嘅人脈。」* (The whole city is your network.)
 
 **Alternates:**
-- *Your city, one live invitation.* (ecosystem angle)
-- *Real friends are a map away — dinner's already forming.* (smile angle)
-- *成個城市，一張請柬。* (Canto ecosystem)
+- *Your city is your network.* (ecosystem angle — shortest)
+- *Networking that happens in real life — dinner's just the excuse.* (spot-as-tool angle)
+- *人脈，原來就喺附近。* (Canto soft version — your network is closer than you think)
+- *Real contacts are a map away.* (smile angle)
 
-**Elevator (app store / investors):** MeshPoke turns the city map into live invitations: join a table by **vibe, not looks**, meet the same crew again with **one-tap rebook**, and never chat in purgatory — spots happen at real places, verified by QR check-in. Venues keep regulars with memberships and loyalty ladders; nobody can ever pay us to be more visible on the map.
+**Elevator (app store / investors):** MeshPoke is a live map for meeting people in real life: join a spot by shared vibe — a dinner, a hike, a board-game night, an industry mingle — connect with the ones who click, and one-tap rebook the crew. Networking without the LinkedIn feed; nobody can ever pay to be more visible on the map.
 
-**Pitch pillars (what every pitch must hit):** vibe-not-looks · live map not dead feed · rebook-the-crew (the loop Timeleft lacks) · real tables not chat purgatory · merchants earn prominence through check-ins, not payments.
+**Pitch pillars (what every pitch must hit):** networking without dating pressure · vibe-first, not looks · live map not dead feed · any-activity spots (dinner is a tool) · rebook-the-crew compounding · merchants earn prominence through check-ins, never payments.
+
+**Positioning table:**
+
+| vs | They are | We are |
+|---|---|---|
+| LinkedIn | a feed of resumes and humblebrags | facetime — your network built in rooms, not comments |
+| Timeleft | one curated stranger dinner on Wednesdays | any activity, any night, city-wide — and the crew rebooks |
+| Dating apps | high-stakes looks market | zero-pressure mingling; romance isn't banned, it just isn't the frame |
+
+**Practical consequences:** App Store category = **Social** (not Dating) — stigma-free, broader search reach. Spot-creation templates cover dinner / drinks / hike / games / industry mingle / coffee — no dinner default. Copy says **"connect"** (mutual poke → connection), never "match" — mechanic unchanged, vocabulary de-dating-ified. Product stays a neutral mesh; users who find dates or friends on it are wins, not violations.
 
 ---
 
@@ -91,7 +104,7 @@
 | **Hosting event spots** | 1 | → 3 | → 5 — **earned via Show-up Score, never by tier** |
 | Profile, prompts, photo ladder, socials reveal | ✅ identical all tiers — never purchasable | ✅ | ✅ |
 
-**Poke inbox & queue ordering:** Pro → Plus → Free, then timestamp (FIFO) within tier. **Sorted, never hidden** — express pokes carry a visible badge, inbox shows total counts; a free poke can be below the fold, never off it. Accepting pokes and matches is always free.
+**Poke inbox & queue ordering:** Pro → Plus → Free, then timestamp (FIFO) within tier. **Sorted, never hidden** — express pokes carry a visible badge, inbox shows total counts; a free poke can be below the fold, never off it. Accepting pokes and connecting is always free.
 
 ### 4.2 À-la-carte packs (no subscription needed)
 
@@ -112,7 +125,7 @@ Packs exist for **free users only in practice** — subscriber regen makes them 
 
 ### 4.4 Group formation & Show-up Score
 
-**Spot states:** `forming → confirmed → live → done`.
+**Spot states:** `forming → confirmed → live → done`. Spots span dinners, drinks, hikes, board games, coffee chats, industry minglers — **the spot is a tool for meeting people; dinner is not the product**.
 
 **Creator-admin (democratized Timeleft ops):**
 - Sets: name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (district anchor while forming; **venue pin required on confirm** — QR check-in needs a real place), min/max headcount, date range.
