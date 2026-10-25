@@ -28,4 +28,4 @@ pnpm build          # build all packages (populated per milestone)
 pnpm dev            # dev servers (populated per milestone)
 ```
 
-Per package: `pnpm --filter @meshpoke/api dev` etc. Full command table (docker compose, db, openapi generation) lands at T0.2.
+Per package: `pnpm --filter @meshpoke/api dev` etc. Local dev stack: `docker compose -f infra/docker-compose.dev.yml up -d` (PostGIS + Redis + GoTrue auth + Mailpit). See `infra/` README for endpoints.

@@ -67,11 +67,11 @@ pnpm install
 pnpm dev               # api + web
 pnpm test              # all unit + integration (Testcontainers)
 pnpm typecheck && pnpm lint
-pnpm db:generate       # drizzle migration from schema
-pnpm db:migrate        # apply migrations
-pnpm db:seed           # districts, templates, constants, admin
-pnpm api:openapi       # regenerate openapi.json + TS client + Dart client
-cd apps/mobile && flutter run
+pnpm db:generate       # drizzle migration from schema (from M1)
+pnpm db:migrate        # apply migrations (from M1)
+pnpm db:seed           # districts, templates, constants, admin (from M1)
+pnpm api:openapi       # regenerate openapi.json + TS client + Dart client (from T0.4)
+cd apps/mobile && flutter run          # (from T5.1)
 docker compose -f infra/docker-compose.dev.yml up -d
 ```
 
@@ -83,7 +83,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
-| M0 Foundations | 0 | 6 | 1 | ◐ |
+| M0 Foundations | 0 | 6 | 2 | ◐ |
 | M1 Database & shared package | 0 | 5 | 0 | ☐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
@@ -122,13 +122,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `README.md` with the commands from §0.5
 **Acceptance:** `pnpm install` and `pnpm typecheck` succeed on an empty skeleton.
 
-### [ ] T0.2 Local development stack
+### [x] T0.2 Local development stack
 **PRD refs:** §2.3 · **Depends:** T0.1
-- [ ] `infra/docker-compose.dev.yml`: `postgis/postgis:15-3.4` (db `meshpoke`), `supabase/gotrue` (pointed at db, `GOTRUE_SMS_TEST_OTP` for local phone OTP), `redis:7`, `axllent/mailpit` (local email)
-- [ ] `infra/gotrue.dev.env` with Apple/Google placeholders, phone provider Twilio (test mode), JWT secret
-- [ ] `.env.example` covering every variable in PRD §2 (DB URL, Redis URL, GoTrue URL + JWT secret, Twilio, Resend, Stripe, RevenueCat, Google Maps key, R2, PII encryption key, PostHog, Sentry, QR HMAC secret)
-- [ ] `apps/api/src/config.ts` — Zod-validated env loader (fails fast on missing vars)
-- [ ] Fill in §0.5 commands
+- [x] `infra/docker-compose.dev.yml`: `postgis/postgis:15-3.4` (db `meshpoke`), `supabase/gotrue` (pointed at db, `GOTRUE_SMS_TEST_OTP` for local phone OTP), `redis:7`, `axllent/mailpit` (local email)
+- [x] `infra/gotrue.dev.env` with Apple/Google placeholders, phone provider Twilio (test mode), JWT secret
+- [x] `.env.example` covering every variable in PRD §2 (DB URL, Redis URL, GoTrue URL + JWT secret, Twilio, Resend, Stripe, RevenueCat, Google Maps key, R2, PII encryption key, PostHog, Sentry, QR HMAC secret)
+- [x] `apps/api/src/config.ts` — Zod-validated env loader (fails fast on missing vars)
+- [x] Fill in §0.5 commands
 **Acceptance:** `docker compose up -d` brings up all services; `psql` connects; `SELECT postgis_version();` works; GoTrue `/health` returns ok.
 
 ### [ ] T0.3 API skeleton
@@ -1065,3 +1065,4 @@ Append one line per completed task (newest at the bottom).
 | Date | Task | Summary | Deferred / notes |
 | --- | --- | --- | --- |
 | 2026-10-26 | T0.1 | Monorepo scaffold: pnpm workspace + turbo, ts strict base, eslint9 flat + prettier, README, 5 package skeletons; install+typecheck+lint green | .nvmrc pins 20, local runs Node 22 |
+| 2026-10-26 | T0.2 | Dev stack: postgis 15-3.4 + redis 7 + mailpit + standalone GoTrue (v2.132.3) + db-init (auth schema, postgis ext, supabase_auth_admin role w/ search_path); .env.example; Zod config loader; acceptance verified (health/postgis/signup+token) | GoTrue v2.158+ broken standalone (mixed env prefixes, half-applied migrations) — pinned v2.132.3; autoconfirm spelling to verify at T2.1 |

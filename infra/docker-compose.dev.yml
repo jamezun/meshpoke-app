@@ -1,0 +1,50 @@
+name: meshpoke-dev
+
+services:
+  db:
+    image: postgis/postgis:15-3.4
+    environment:
+      POSTGRES_DB: meshpoke
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - meshpoke_pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d meshpoke"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  gotrue:
+    image: supabase/gotrue:v2.132.3
+    env_file: gotrue.dev.env
+    environment:
+      DATABASE_URL: postgres://supabase_auth_admin:postgres_dev_2026@db:5432/meshpoke?sslmode=disable
+    ports:
+      - "9999:9999"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+volumes:
+  meshpoke_pgdata:
