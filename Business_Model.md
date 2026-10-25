@@ -372,7 +372,7 @@ Assumptions: 2.5% paid conversion (4% = upside case); 80/20 Plus/Pro; effective 
 | Sponsored amplification | 5,000 | 4,850 |
 | **Total** | **≈147,000** | **≈138,650** |
 
-Operating costs at steady state ≈ HK$31,000/month: infra 6k (single Hetzner VPS + Dokploy + R2 + Cloudflare, per PRD §2.3) · trust & safety 12k · support 6k · liveness verification ~6.5k (≈1,000 new verified users × HK$4–8, assuming liveness has been switched on by this scale) · SMS phone verification ~0.5k. Payment and store fees are already deducted above. **Contribution ≈ HK$107,650/month (~73% of gross).**
+Operating costs at steady state ≈ HK$31,000/month: infra 6k (Hetzner VPS running self-hosted Supabase + Dokploy + R2 + Cloudflare, per PRD §2.3) · trust & safety 12k · support 6k · liveness verification ~6.5k (≈1,000 new verified users × HK$4–8, assuming liveness has been switched on by this scale) · SMS phone verification ~0.5k. Payment and store fees are already deducted above. **Contribution ≈ HK$107,650/month (~73% of gross).**
 
 At launch, liveness is off and phone verification is the only per-user verification cost (a few hundred HKD a month), keeping the bootstrap cost base minimal.
 

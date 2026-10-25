@@ -49,7 +49,7 @@ We are networking-first. Romance isn't banned; it just isn't the frame. The App 
 | Marketing site + authenticated web | React (self-hosted, served by Dokploy) | Acquisition, pricing, support; lightweight account access (profile, pokes, chat, billing) |
 | Merchant portal | React (web) | Venue claim, standing spots, drops, membership CRM, per-seat billing, QR tablet mode |
 | Admin dashboard | React (web, RBAC) | Moderation, users, merchants, disputes, metrics |
-| Backend API | Node.js (Fastify) + PostgreSQL 16 + PostGIS + Redis | All business logic, one API for all clients |
+| Backend API | Node.js (Fastify) + PostgreSQL 15 + PostGIS (Supabase) + Redis | All business logic, one API for all clients |
 
 ### 1.3 Target Users
 
@@ -107,10 +107,10 @@ PostgreSQL   Redis         R2 (media)    External:
 | Mobile | Flutter 3 (Dart) | Single codebase iOS + Android; `google_maps_flutter` for the map |
 | Web | React 18 + TypeScript + Vite + Tailwind 3 | Marketing, authenticated, merchant portal, admin |
 | API | Node.js + Fastify (TypeScript) | REST + WebSocket (Socket.io over Redis adapter) |
-| DB | PostgreSQL 16 + PostGIS 3.5 (self-hosted in Dokploy) | Districts (18 HK polygons), spot geo queries, geofence checks; same image as `docker-compose.dev.yml` (`postgis/postgis:16-3.5-alpine`) — no Supabase (own auth/storage/realtime already in stack; plain Postgres keeps dev–prod parity and cloud-migration trivial) |
+| DB | **Self-hosted Supabase** (PostgreSQL 15 + PostGIS) — same stack as SupremaNode | Districts (18 HK polygons), spot geo queries, geofence checks; Studio for DB admin; PostgREST/Realtime **not publicly exposed** — Fastify is the only public API |
 | Cache | Redis 7 | Sessions, presence TTL, pub/sub, rate-limit counters |
 | Media | Cloudflare R2 | Profile photos (private, signed URLs), venue images |
-| Auth | JWT (15 min) + refresh; OAuth (Apple/Google); email+password fallback | Phone verification via Twilio SMS (+852) gates actions, not login |
+| Auth | **Supabase Auth (GoTrue)**: Apple/Google OAuth, email+password fallback, phone OTP (Twilio) | GoTrue JWTs (~1h, refresh rotation + reuse detection built in); Fastify verifies each request; phone verification gates actions, not login |
 | Maps | Google Maps SDK (mobile $0 loads) + one-time Google Places import | See §4; semantic layer is ours (PostGIS), picture is rented |
 | Payments | Stripe (web checkout + merchant billing), Apple/Google IAP via RevenueCat | Dual-channel pricing, §8; RevenueCat unifies entitlements |
 | Push | FCM + APNs | Spot confirmations, queue decisions, drops, pokes |
@@ -118,25 +118,25 @@ PostgreSQL   Redis         R2 (media)    External:
 | SMS | Twilio | +852 phone verification |
 | Analytics | PostHog | Funnel, retention, feature flags |
 | CI/CD | Codemagic (mobile, incl. iOS builds — no Mac needed) + GitHub Actions (API + web images) | Dokploy pulls from GitHub on push (GitHub App webhook) |
-| Hosting | **Dokploy on Hetzner VPS** — all services (web, api, admin, PG, Redis) as Docker Compose apps behind Dokploy's Traefik (auto Let's Encrypt) | Cloudflare for DNS + CDN; no Vercel/Neon |
+| Hosting | **Dokploy on Hetzner VPS** — all services (web, api, admin, self-hosted Supabase, Redis) as Docker Compose apps behind Dokploy's Traefik (auto Let's Encrypt) | Cloudflare for DNS + CDN; no Vercel/Neon |
 
 **Hybrid web policy:** marketing pages public; authenticated web covers profile editing, poke inbox (view + poke back), chat read/reply, spots district list + apply + RSVP/date confirm, host console (queue review, date pinning), People-you-met + connections, subscription management with **web checkout prices**; public spot share pages (`/s/{id}`) for WhatsApp sharing and SEO; anything requiring GPS/map/swipe-grade UI (map browsing, spot creation with venue pin, QR check-in, drops redemption) is mobile-only with a clear "open in app" deep link.
 
 ### 2.3 Infrastructure and Deployment (Dokploy on Hetzner)
 
-Same hosting pattern as the SupremaNode project: **local-first, deploy last.** Build and test everything against `docker-compose.dev.yml` (PostGIS 16 + Redis 7); the Hetzner VPS + domain + DNS + TLS are final-step launch tasks, not day-1 concerns.
+Same hosting pattern as the SupremaNode project: **local-first, deploy last.** Build and test everything against the local Supabase stack (`supabase start`: PG 15 + Auth, matching prod) plus `docker-compose.dev.yml` (API + Redis); the Hetzner VPS + domain + DNS + TLS are final-step launch tasks, not day-1 concerns.
 
 | Concern | Decision |
 | --- | --- |
-| VPS | Single Hetzner box (4 GB min, 8 GB recommended; Dokploy + all MeshPoke containers), reachable over Tailscale (`hetzner-vps` in tailnet) for SSH/admin. No second VPS until scale demands it. |
-| Orchestration | **Dokploy** (Docker Swarm). Every product = one Dokploy **Docker Compose application**: `meshpoke-api` (Fastify + WS), `meshpoke-web` (React, static via nginx), `meshpoke-db` (PostGIS 16), `meshpoke-redis` (Redis 7). No second reverse proxy beside Dokploy — only one process owns 80/443; all TLS is Dokploy's Traefik with automatic Let's Encrypt. |
+| VPS | Single Hetzner box (**8 GB recommended** — the self-hosted Supabase stack alone wants 4 GB; Dokploy + all MeshPoke containers), reachable over Tailscale (`hetzner-vps` in tailnet) for SSH/admin. No second VPS until scale demands it. |
+| Orchestration | **Dokploy** (Docker Swarm). Every product = one Dokploy **Docker Compose application**: `meshpoke-api` (Fastify + WS), `meshpoke-web` (React, static via nginx), `meshpoke-supabase` (self-hosted Supabase — ~10 containers, deployed exactly per SupremaNode's `DEPLOY-SUPABASE.md`; only `/auth/v1/*` is publicly routed, Studio stays Tailscale-internal), `meshpoke-redis` (Redis 7). No second reverse proxy beside Dokploy — only one process owns 80/443; all TLS is Dokploy's Traefik with automatic Let's Encrypt. |
 | Networking | Apps share one Dokploy Docker network; API reaches DB/Redis by service name (`db`, `redis`), never public ports. Postgres and Redis expose **no** public ports. |
 | Deploys | GitHub integration (GitHub App webhook → Dokploy) on push to `main`; Codemagic builds the Flutter apps and ships to TestFlight/Play internal. Build args/secrets per app set in Dokploy's build config. |
 | Domains | `meshpoke.com` (register at Cloudflare — at-cost registrar, DNS + CDN + email routing in one). `www.meshpoke.com` → web app; `api.meshpoke.com` → API; admin + merchant portal on `www.meshpoke.com/admin`, `/merchant`. TLS via Traefik automatically. |
 | Email | Inbound: Cloudflare Email Routing (free) — `info@` (general), `legal@` (legal/ToS/privacy requests), `privacy@` (PDPO data-access/rectification), `support@` (user support + bug reports) → forwarded to founder inbox. Outbound: Resend with a verified sender identity on `meshpoke.com` (receipts, verification codes, digests) — separate sending domain auth (SPF/DKIM) configured in DNS. |
 | Backups | Nightly `pg_dump` to R2 (encrypted), 30-day retention; R2 also holds user media. Restore drill once before public launch. Dokploy volumes for PG/Redis data. |
 | Secrets | One `.env` per Dokploy app, mirroring `.env.example`; PII field-encryption key (32-byte hex) for sensitive columns; never committed. |
-| Admin access | Dokploy dashboard proxied through Tailscale HTTPS (`tailscale serve --bg --https 8443 --set-path / http://127.0.0.1:3000` on the VPS) — never exposed on the public internet. |
+| Admin access | Dokploy dashboard **and Supabase Studio** proxied through Tailscale HTTPS (`tailscale serve --bg --https 8443 --set-path / http://127.0.0.1:3000` on the VPS) — never exposed on the public internet. |
 
 **Local-first principle:** `docker-compose.dev.yml` + Vite/Flutter dev servers cover all of Phases 0–1. The VPS is provisioned when the waitlist opens (landing page can sit on the same box). Budget impact: ~HK$100–150/mo for a 4 GB Hetzner box — well inside the HK$10k budget.
 
@@ -507,7 +507,7 @@ Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48/98); 7-day keywo
 
 | Service | Responsibilities |
 | --- | --- |
-| **Auth** | OAuth (Apple/Google), email+password, JWT issue/refresh, device sessions, phone verification state machine (send/verify/retry/rate-limit) |
+| **Auth** | Supabase Auth config (OAuth Apple/Google, phone OTP via Twilio), GoTrue JWT verification middleware, device sessions, OTP-verified webhook → `phone_verified_at` sync |
 | **User/Profile** | Sketch CRUD, keywords + levels (max 10, max 3 at 8+), prompts, photos (R2 signed), photo-ladder visibility resolution, socials (revealed at connection) |
 | **Map/Places** | POI seed (one-time Google Places import, `place_id` binding + minimal snapshot), venue search proxy, district resolution (PostGIS point-in-polygon), viewport-scoped spot queries (never global) |
 | **Spots** | State machine forming→confirmed→live→done (+cancelled/dissolved), date-on-fill timer (48h confirm window), headcount + overbook buffer, waitlist backfill, hosting-capacity checks (trust ladder 1/3/5), templates |
@@ -537,7 +537,7 @@ Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48/98); 7-day keywo
 
 ---
 
-## 11. Database Schema (PostgreSQL 16 + PostGIS)
+## 11. Database Schema (PostgreSQL 15 + PostGIS — Supabase image)
 
 ### 11.1 Core Tables
 
@@ -545,9 +545,9 @@ Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48/98); 7-day keywo
 -- Identity
 users(id, email_hash, auth_provider, display_name, gender_self, birthday(18+ check),
       phone_verified bool, phone_e164 unique, liveness_state enum(none,pending,verified),
-      signup_district, created_at, deleted_at)
-phone_verifications(id, user_id, phone_e164, code_hash, attempts, expires_at, verified_at)
-oauth_accounts(id, user_id, provider, provider_uid)
+      -- phone_verified + phone_e164 synced from Supabase Auth on OTP-verified webhook;
+      -- OTP lifecycle (send/verify/expiry/attempts) owned by GoTrue — no phone_verifications table
+oauth_accounts(id, user_id, provider, provider_uid)  -- shadow of Supabase auth.identities
 
 -- Profile
 profiles(id, user_id, industry enum(10), role_oneliner varchar(40),
@@ -654,11 +654,16 @@ safety_ratings(id, spot_id, rater_id, rated_user_id, rating, created_at)  -- pri
 Base: `https://api.meshpoke.com/v1` · Auth: `Authorization: Bearer <JWT>` · Errors: RFC 7807 problem+json
 
 ### 12.1 Authentication
+Auth delegated to self-hosted **Supabase Auth (GoTrue)** — same deployment pattern as SupremaNode.
 ```
-POST /auth/oauth/{apple|google}        POST /auth/email/signup   POST /auth/login
-POST /auth/refresh                     POST /auth/logout
-POST /auth/phone/request  → Twilio send (rate-limited 3/h)
-POST /auth/phone/verify   → verified badge; gates poke/apply/host/DM
+Client (supabase_flutter / supabase-js):
+  OAuth sign-in (Apple/Google) · email+password fallback · phone OTP attach (Twilio, +852)
+  GoTrue issues JWT (~1h) + refresh (rotation + reuse detection built in)
+
+api.meshpoke.com (Fastify):
+  Verifies GoTrue JWT on every request (shared secret / JWKS) — no auth endpoints of our own
+  OTP-verified event → profiles.phone_verified_at set → gates poke/apply/host/DM
+  Rate limits: OTP send 3/h (GoTrue config + API gate); one account per phone (unique check)
 ```
 
 ### 12.2 Users & Profile
@@ -788,7 +793,7 @@ GET /admin/metrics          GET /admin/finance/*
 | Battery | No background location ever; map use only when app foreground; geofencing native events only |
 | Privacy | Photos private-by-default; socials at connection; presence venue-granular TTL; no raw coordinate history; PDPO export/delete |
 | Availability | 99.9% API; 99.5% chat (WS); graceful degradation: map fails → list view |
-| Security | JWT rotation, refresh reuse detection, rate limits (phone 3/h, pokes/min, messages/min), R2 signed URLs expiring 10min, webhooks signature-verified, admin 2FA |
+| Security | GoTrue JWT verification (refresh rotation + reuse detection by Supabase Auth), rate limits (phone 3/h, pokes/min, messages/min), R2 signed URLs expiring 10min, webhooks signature-verified, admin 2FA |
 | Data retention | Check-in events retained for score integrity; raw QR tokens rotated; pokes/expired content purged on schedule; deleted accounts → 30-day soft delete then anonymize |
 
 ## 16. Implementation Phases
@@ -803,7 +808,7 @@ Mirrors Business Model §11 (pricing actions) with build order:
 
 - **Repo layout (monorepo):** `apps/api` (Fastify + TS), `apps/web` (React + Vite + Tailwind), `apps/admin` (admin routes within web), `mobile/` (Flutter), `packages/shared` (types, keyword lists, district data, entitlement definitions shared across API/web/mobile), `infra/` (docker-compose.dev.yml, Dokploy compose files, seed SQL, CI workflows).
 - **Seed data (shipped in `infra/seed/`, applied on first boot):** the 18 HK district polygons (GeoJSON → `districts` table), first POI cluster import for the launch district (bound to `google_place_id`), spot templates (Dinner · Drinks · Coffee · Hike · Run · Tennis · Pickleball · Badminton · Board games · Industry mingle · Open sport), membership ladder steps, plan entitlement matrix (Free/Plus/Pro + packs + pass), hosting-capacity tiers, founding-500 + founding-merchant counters, admin bootstrap from `ADMIN_EMAIL` (same pattern as SupremaNode `.env.example`).
-- **Env contract:** every service reads from one `.env` schema documented in `.env.example` (DB/Redis URLs, JWT secrets, Twilio/Resend/Stripe/RevenueCat keys, Google Maps key, R2 credentials, PII encryption key, PostHog token). Local dev = docker-compose + `.env.local`; production = same keys pasted into Dokploy per-app environment settings.
+- **Env contract:** every service reads from one `.env` schema documented in `.env.example` (DB/Redis URLs, Supabase JWT secret + anon/service keys, Twilio/Resend/Stripe/RevenueCat keys, Google Maps key, R2 credentials, PII encryption key, PostHog token). Local dev = `supabase start` (CLI: PG + Auth, matching prod) + `docker-compose.dev.yml` (API + Redis); production = same keys pasted into Dokploy per-app environment settings.
 | **1. Validate** | Month 2–5 | Spot lifecycle + date-on-fill + queues, check-in (GPS+QR), Show-up Score telemetry, pokes + People-you-met + connections + DMs, crews + rebook, safety kit (reports, link lock, women-only), consumer billing (Plus + 7-day pass; web Stripe + IAP via RevenueCat), PostHog funnels. |
 | **2. Monetise merchants** | Month 5–8 | Membership ladder + caps + 60d release, drops + claims + per-seat ledger + shadow-invoice promo, Growth conversions, admin: claim approvals, band-audit workspace, dispute flow. |
 | **3. Scale** | Month 8–12 | Second district, Pro consumer tier, poke packs + filter pass, host-reward days, sponsored amplification (budget caps, district/day send caps), admin: finance + metrics dashboards. |
