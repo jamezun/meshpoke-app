@@ -8,7 +8,10 @@
 
 MeshPoke is marketed as a **live networking map** — not a dating app, not a dinner-strangers app. Eating out is one venue type among many (drinks, hikes, board games, coffee chats, industry minglers); spots are **tools for meeting people**, not the product. Lower stakes than dating, more real than LinkedIn.
 
-**Primary (EN):** *"Poke the mesh. Meet the people."* — action + payoff: the verb is the brand, the promise is human.
+**Primary (EN):** *"Poke the mesh. Watch your network ripple."*
+**Descriptor:** *A live map for meeting people in real life.*
+
+(Together they form the App Store pair: tagline on top, one-line descriptor beneath — action + compounding payoff, then plain-language what-it-is.)
 
 **Primary (HK launch, Canto):** *「成個城市，就係你嘅人脈。」* (The whole city is your network.)
 
