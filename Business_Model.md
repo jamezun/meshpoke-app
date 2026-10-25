@@ -135,6 +135,8 @@ Packs exist for free users in practice — subscriber regen makes them redundant
 
 Follows the TradingView model: plans can be bought on the MeshPoke website or in the iOS / Android apps, and a subscription bought on either works everywhere after login.
 
+**Global payments (decided 26 Oct 2026):** Stripe stays the only card processor while HK-only — Hong Kong has no VAT/sales tax, and in-app purchases must run through Apple/Google (RevenueCat) regardless, which no merchant-of-record can touch. When MeshPoke sells into its first non-HK market (merchant SaaS or web subscriptions into EU/UK/US), add a merchant-of-record (Polar or Paddle) for those regions: they become seller of record and absorb VAT/sales-tax registration, invoicing and compliance. The entitlements layer is provider-agnostic (webhooks → entitlements service), so adding Polar later is one more webhook route, not a rewrite. Never run HK domestic volume through an MoR — ~5% + fixed to solve a tax problem Hong Kong doesn't have.
+
 | Plan | Web | In-app (iOS / Android) |
 | --- | --- | --- |
 | Plus monthly | HK$128 | HK$148 |
@@ -191,7 +193,8 @@ Creator-admin (democratised Timeleft ops):
 No separate connect or follow feature — everything runs on pokes.
 - When a spot is marked done, everyone who checked in (GPS + QR verified) sees a **"People you met"** list for 48 hours.
 - Each poke button is labelled **"Free poke · met at [spot] · 31h left"** and does not use the weekly allowance.
-- **Mutual pokes = connected**, as everywhere else. Either side can disconnect any time, silently.
+- **Mutual pokes = connected** — automatic, no extra acceptance step beyond the second poke. Once connected, every CTA on that person's cards and profile changes **Poke → Message**.
+- **Connections list** (own profile, private — nobody sees who you're connected to): tap a connected user → entry with **Message**; **Disconnect** (from the list or from their profile) asks for confirmation. Disconnect is one-way and silent (no notification), closes the 1:1 thread for both sides, and does not remove either person from People-you-met (that list is check-in-based). Reconnect any time via a new mutual poke.
 - After 48 hours, poking someone from that spot costs a normal poke.
 - Chatroom co-presence does **not** qualify — only verified check-in at the same spot.
 

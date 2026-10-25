@@ -311,6 +311,7 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 **Poke → connection:**
 1. See someone in a room, on a spot card, or via People-you-met → view sketch → Poke with optional note (200/500 chars).
 2. Recipient sees poke in Inbox with sender's trust signals (member since, verified check-ins, Show-up Score). Accept (free, always) → **connection**: 1:1 DM opens, full profiles + photos + socials revealed. Decline/expire silently (7-day expiry, no notification of expiry).
+3. Connected state: CTA on that person's cards/profile changes **Poke → Message**. Connections list (own profile, private) shows each connection with Message + Disconnect (confirmation dialog). Disconnect: one-way, silent, closes the thread for both, does not affect People-you-met; reconnect via new mutual poke.
 
 **Crew & rebook:**
 1. Spot done → "Keep the crew?" → Keep (members join crew chat) or Leave.
@@ -333,7 +334,7 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 | 1:1 chat (connection) | Text-first (photos/links after first verified meet — link lock), report/block inline, disconnect (silent) |
 | Inbox | Pokes (note preview + trust signals), application status cards, drop notifications |
 | People you met | Post-spot 48h list of co-checked-in members → free poke CTAs |
-| Profile (mine) | Sketch, keywords with levels + verified ticks, prompts, Show-up Score + factors, photo ladder state, memberships & coupons, plan/billing |
+| Profile (mine) | Sketch, keywords with levels + verified ticks, prompts, Show-up Score + factors, photo ladder state, connections list (private — per user: Message, Disconnect with confirm), memberships & coupons, plan/billing |
 | Profile (other) | Pre-connection: sketch (+ primary photo if co-members of a room). Post-connection: full — photos, socials (IG/LinkedIn), history (check-in count, crews in common) |
 | Venue profile | Merchant page: rich pin content (menu/hours/photos on Growth+), membership offer, ladder, active drops, verified check-in stats, claimed badge |
 | Drop feed | District-scoped active drops (claimed state, capacity), "Sponsored" label where amplified |
@@ -560,7 +561,7 @@ hosting_capacity(user_id pk, current enum(1,3,5), earned_at)
 -- Pokes / connections
 pokes(id, from_user, to_user, note varchar(500), source enum(map,room,people_you_met,profile),
       spot_id NULL, created_at, expires_at +7d, status enum(pending,accepted,declined,expired))
-connections(id, user_a, user_b, created_at, active bool)   -- mutual poke; unique pair
+connections(id, user_a, user_b, created_at, active bool, disconnected_at, disconnected_by)  -- mutual poke; unique pair; disconnect silent, closes thread both sides
 poke_ledger(user_id pk, weekly_regen_cap, current_balance, last_regen_at,
             post_spot_free_until, packs jsonb)
 
@@ -673,6 +674,8 @@ POST /applications/{id}/decision        (accept/decline+reason; waitlist)
 ```
 GET  /pokes/incoming        POST /pokes {to, note, source}
 POST /pokes/{id}/accept     (free, always)  → connection created
+GET  /connections            (own list: face, name, vibe, Message CTA)
+POST /connections/{id}/disconnect  (silent; thread closes both sides; re-connect = new mutual poke)
 GET  /people-you-met/{spot_id}             (48h free-poke window)
 WS   /ws/chat               (rooms: spot/crew/merchant; DMs post-connection; link-lock enforced server-side)
 GET  /rooms   GET /rooms/{id}/messages     POST /rooms/{id}/messages
