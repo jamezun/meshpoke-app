@@ -120,7 +120,7 @@ PostgreSQL   Redis         R2 (media)    External:
 | CI/CD | Codemagic (mobile, incl. iOS builds — no Mac needed), Vercel (web), GitHub Actions (API) | |
 | Hosting | Vercel (web), Neon/managed PG (or self-host on Hetzner), Cloudflare CDN | |
 
-**Hybrid web policy (unchanged):** marketing pages public; authenticated web covers profile editing, poke inbox (view + poke back), chat read/reply, subscription management with **web checkout prices**; anything requiring GPS/map/swipe-grade UI (map browsing, spot creation with venue pin, QR check-in, drops redemption) is mobile-only with a clear "open in app" deep link.
+**Hybrid web policy:** marketing pages public; authenticated web covers profile editing, poke inbox (view + poke back), chat read/reply, spots district list + apply + RSVP/date confirm, host console (queue review, date pinning), People-you-met + connections, subscription management with **web checkout prices**; public spot share pages (`/s/{id}`) for WhatsApp sharing and SEO; anything requiring GPS/map/swipe-grade UI (map browsing, spot creation with venue pin, QR check-in, drops redemption) is mobile-only with a clear "open in app" deep link.
 
 
 ---
@@ -379,13 +379,19 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 | `/about` | Public | Founder story, HK-first manifesto |
 | `/venue` → `/venue/claim`, `/venue/pricing` | Public | Merchant landing: claim flow, Growth/Pro value, per-seat fee explainer |
 | `/login`, `/signup` | Public | Apple/Google/email → browse-only account |
-| `/app/*` | Authenticated | Lightweight account: profile editor, inbox (view/poke back), chats (read/reply), memberships, billing (web checkout), settings |
+| `/app/*` | Authenticated | Lightweight account: profile editor, inbox (view/poke back), chats (read/reply), **spots district list + apply + RSVP/date confirm**, **host console (queue review, date pinning, spot management)**, People-you-met + connections, memberships, billing (web checkout), settings |
+| `/s/{id}` | Public | Spot share page: OG preview card (template, district, date state, seats left) + "open in app" CTA — no member data; WhatsApp-shareable, indexable for SEO |
 | `/merchant/*` | Authenticated (merchant) | Portal: dashboard, spots, drops, membership CRM, per-seat ledger, QR tablet mode, billing |
 | `/admin/*` | Authenticated (RBAC) | Admin dashboard (see §10) |
 
 ### 6.2 Authenticated Web Experience (Mobile-app Complement)
 
-Included: profile/sketch editing (better on big screen), keyword management, poke inbox + poke-back with notes, 1:1 chat read/reply, crew chat read/reply, membership wallet + coupon management, subscription management with **web Stripe checkout** (HK$128/198 etc.), account settings, data export.
+Included: profile/sketch editing (better on big screen), keyword management, poke inbox + poke-back with notes, 1:1 chat read/reply, crew chat read/reply, membership wallet + coupon management, subscription management with **web Stripe checkout** (HK$128/198 etc.), account settings, data export. Plus the desk-utility layer:
+
+- **Spots district list** (card view, no map): browse by district, apply with note, manage RSVPs, confirm the 48h date, take the 24h bail.
+- **Host console:** application queue review (sketch cards, accept / decline with reason, Recommended ordering), date pinning, spot settings edits, member removal (audited). Venue *pinning on the map* stays mobile.
+- **People-you-met** (48h window) and **connections list** (Message / Disconnect) — the conversation surface is fully on web.
+- **Spot share links** (`/s/{id}`): OG cards for WhatsApp / IG / Telegram sharing; no member data exposed.
 
 Excluded (mobile-only, with "open in app" deep-link cards): map browsing, spot creation/venue pin, QR check-in, GPS verification, drop redemption at venue.
 

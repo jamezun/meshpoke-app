@@ -155,6 +155,8 @@ Rules:
 - Merchant SaaS and per-seat fees are billed on the web only.
 - Verify against Apple's current multiplatform guideline (3.1.3(b)) before launch.
 
+**Web product scope (26 Oct 2026):** the authenticated web is more than a billing page — it is the desk companion. Spots district list (card view, no map) with apply, RSVP and 48h date confirm; a **host console** (application queue review with sketches and decline reasons, date pinning, spot management) because hosts are power users at work; People-you-met and connections; plus public spot share pages (`/s/{id}` OG cards, no member data) for WhatsApp virality and SEO. Map browsing, venue pinning, QR check-in and drop redemption stay mobile-only.
+
 ### 4.4 Free-tier guardrails (the anti-Tinder / anti-CMB stance)
 
 - **We never meter browsing or joining as the path to connection.** Rooms are the primary social loop; free users get 5 rooms + 3 RSVPs + unlimited browsing. Pokes to strangers are metered because they are directed 1:1 outreach; pokes to people you have met are free for 48 hours.
