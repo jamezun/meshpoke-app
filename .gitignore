@@ -11,3 +11,10 @@ dist/
 build/
 .turbo/
 .proof_business_model.json
+coverage/
+*.tsbuildinfo
+.env.*
+!.env.example
+.dart_tool/
+.flutter-plugins*
+.openapi-generator/

@@ -1,0 +1,18 @@
+{
+  "name": "@meshpoke/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'dev server lands in a later milestone'",
+    "build": "echo 'build lands in a later milestone'",
+    "test": "echo 'no tests yet'",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "eslint": "^9.14.0",
+    "typescript": "~5.6.3",
+    "typescript-eslint": "^8.14.0"
+  }
+}

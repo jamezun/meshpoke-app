@@ -83,7 +83,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
-| M0 Foundations | 0 | 6 | 0 | ☐ |
+| M0 Foundations | 0 | 6 | 1 | ◐ |
 | M1 Database & shared package | 0 | 5 | 0 | ☐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
@@ -113,13 +113,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M0 Foundations
 
-### [ ] T0.1 Create the monorepo
+### [x] T0.1 Create the monorepo
 **PRD refs:** §2.2, §16 (monorepo layout) · **Depends:** none
-- [ ] `pnpm init`, `pnpm-workspace.yaml` with `apps/*`, `packages/*`
-- [ ] Turborepo `turbo.json` with pipelines: `build`, `dev`, `test`, `lint`, `typecheck`
-- [ ] Folders: `apps/api`, `apps/web`, `apps/mobile`, `packages/shared`, `packages/api-client`, `infra/`
-- [ ] Root `tsconfig.base.json` (strict), ESLint (typescript-eslint), Prettier, `.editorconfig`, `.gitignore`, `.nvmrc` (20)
-- [ ] `README.md` with the commands from §0.5
+- [x] `pnpm init`, `pnpm-workspace.yaml` with `apps/*`, `packages/*`
+- [x] Turborepo `turbo.json` with pipelines: `build`, `dev`, `test`, `lint`, `typecheck`
+- [x] Folders: `apps/api`, `apps/web`, `apps/mobile`, `packages/shared`, `packages/api-client`, `infra/`
+- [x] Root `tsconfig.base.json` (strict), ESLint (typescript-eslint), Prettier, `.editorconfig`, `.gitignore`, `.nvmrc` (20)
+- [x] `README.md` with the commands from §0.5
 **Acceptance:** `pnpm install` and `pnpm typecheck` succeed on an empty skeleton.
 
 ### [ ] T0.2 Local development stack
@@ -1064,4 +1064,4 @@ Append one line per completed task (newest at the bottom).
 
 | Date | Task | Summary | Deferred / notes |
 | --- | --- | --- | --- |
-| | | | |
+| 2026-10-26 | T0.1 | Monorepo scaffold: pnpm workspace + turbo, ts strict base, eslint9 flat + prettier, README, 5 package skeletons; install+typecheck+lint green | .nvmrc pins 20, local runs Node 22 |
