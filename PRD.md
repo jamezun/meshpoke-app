@@ -234,7 +234,7 @@ A crew is a separate entity (not a spot state) — the attendees who choose to s
 ### 3.8 Application Queues and Poke Inbox (sorted, never hidden)
 
 - Application = sketch + Show-up Score + shared keywords, sent to creator.
-- **Default sort = "Recommended":** weighted blend of tier boost (Pro > Plus > Free) × vibe match × Show-up Score. Boost is **weighted, never absolute** — a strong free application can outrank a weak paid one. (v1 weights: 0.5 tier + 0.3 vibe + 0.2 score — calibration knob, flag-controlled.)
+- **Default sort = "Recommended":** additive `0.2·tier + 0.5·vibe + 0.3·score`. Tier component: Free 0, Plus 0.6, Pro 1.0 → paid adds at most **+0.2** — a real boost that a strong free applicant still beats (0.5·vibe + 0.3·score can out-earn it). Vibe ∈ [0,1] = keyword overlap (with the spot's required keywords for application queues; with the recipient's keywords for the poke inbox). Score = Show-up Score normalized [0,1]; **unproven = 0.5 neutral, never 0** — new users don't sink to the bottom. Ties → oldest first (FIFO). **The same weighted sort powers both the application queue and the poke inbox** — one algorithm, one principle; no absolute tier ordering anywhere. Boost is weighted, never absolute. (Weights are a calibration knob, flag-controlled; guard = launch gate "free acceptance within 10% of paid".)
 - Switchable sorts: vibe match / Show-up Score / newest.
 - Express badges and total counts always visible; free applications can be below the fold, never off it.
 - Creator **accepts/declines with reason** (one-tap presets + free text).
@@ -318,7 +318,7 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 
 **Host a spot (creator-admin):**
 1. "+" on Map or Spots → template (Dinner · Drinks · Coffee · Hike · Run · Tennis · Pickleball · Badminton · Board games · Industry mingle · Open sport) → name, ≤3 required keywords, min Show-up Score, price range (informational), min/max headcount, district anchor (forming) → publish.
-2. Review applications: Recommended sort (tier boost × vibe match × score, switchable to score/newest/nearest), accept/decline with reason presets, overbook buffer toggle.
+2. Review applications: Recommended sort (`0.2·tier + 0.5·vibe + 0.3·score`, switchable to score/newest/nearest), accept/decline with reason presets, overbook buffer toggle.
 3. Min headcount reached → **date-on-fill**: pin a date → members confirm within 48h or the spot auto-dissolves → confirmed state requires venue pin (search Google Places within district or pick from map).
 4. Event day: room pinned → QR check-in opens (host displays rotating QR; or merchant tablet if at a venue) → check-ins verified → spot live → done.
 
@@ -511,7 +511,7 @@ Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48/98); 7-day keywo
 | **User/Profile** | Sketch CRUD, keywords + levels (max 10, max 3 at 8+), prompts, photos (R2 signed), photo-ladder visibility resolution, socials (revealed at connection) |
 | **Map/Places** | POI seed (one-time Google Places import, `place_id` binding + minimal snapshot), venue search proxy, district resolution (PostGIS point-in-polygon), viewport-scoped spot queries (never global) |
 | **Spots** | State machine forming→confirmed→live→done (+cancelled/dissolved), date-on-fill timer (48h confirm window), headcount + overbook buffer, waitlist backfill, hosting-capacity checks (trust ladder 1/3/5), templates |
-| **Applications** | Queue per spot, Recommended sort (weights v1: 0.5 tier-boost × 0.3 vibe-match × 0.2 score), accept/decline+reason, express badges, counts |
+| **Applications** | Queue per spot, Recommended sort (v1: `0.2·tier + 0.5·vibe + 0.3·score`; tier Free 0/Plus 0.6/Pro 1.0; unproven score = 0.5 neutral; ties FIFO), accept/decline+reason, express badges, counts |
 | **Check-in** | GPS geofence (~100m server-verified) + rotating QR validation, 1/user/spot/day, verified-check-in events → room face unlock, score feed, People-you-met (48h), merchant seat ledger |
 | **Score** | Show-up Score computation (no-show/late-cancel rate, check-in streak, verification rate), 90-day decay, unproven state, flake-forgiveness flow (48h explain → host accepts → void, private log), host-cancellation symmetry + auto-apology, enforcement ladder |
 | **Poke/Connection** | Weekly regen allocation (5/20/50 + packs), 7-day expiry, notes (200/500), post-spot free pokes (48h), connection = mutual → chat + profile unlock, socials reveal |
@@ -845,7 +845,7 @@ Mirrors Business Model §11 (pricing actions) with build order:
 
 1. **Gender composition** — COLLECT self-declared gender at registration (never displayed). Hosts control composition per spot: open (default), women-only, gender-balanced, or explicit male/female caps (max_men/max_women). Enforced in application queue + direct join.
 2. **Standing spots on map** — smaller neutral pin clustered into the venue marker; venue marker size driven by verified check-ins only ("earned check-ins" = real verified foot traffic, never member count or merchant tier).
-3. **Recommended sort weights** — PENDING final confirmation; v1 stands until then: 0.5 tier-boost × 0.3 vibe-match × 0.2 score (application queue), inbox Pro→Plus→Free.
+3. **Recommended sort weights** — CONFIRMED by founder (26 Oct): additive `0.2·tier + 0.5·vibe + 0.3·score` (tier Free 0/Plus 0.6/Pro 1.0; unproven Show-up Score = 0.5 neutral, never 0; ties FIFO; **same weighted sort for application queue AND poke inbox** — no absolute Pro→Plus→Free ordering). Calibration stays flag-controlled; guard: free acceptance rate within 10% of paid.
 4. **1:1 chat naming** — "Chat" / "Messages" (never "match").
 5. **7-day pass** — both tiers: Plus HK$58/68, Pro HK$98/108 (web/IAP).
 6. **Photo reveal** — faces (primary photo only) on room join; galleries + socials only after mutual poke.

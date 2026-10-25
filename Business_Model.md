@@ -203,7 +203,7 @@ No separate connect or follow feature — everything runs on pokes.
 ### 5.5 Application queues and poke inbox (sorted, never hidden)
 
 - Application = sketch + Show-up Score + shared keywords, sent to the creator.
-- **Default sort = "Recommended"**: a weighted blend of tier boost (Pro > Plus > Free), vibe match and Show-up Score. The boost is weighted, never absolute — a strong free application can outrank a weak paid one.
+- **Default sort = "Recommended"**: additive `0.2·tier + 0.5·vibe + 0.3·score` — tier values Free 0, Plus 0.6, Pro 1.0, so paid adds at most +0.2; unproven Show-up Score counts as neutral 0.5, never 0. The boost is weighted, never absolute — a strong free application can outrank a weak paid one. The same weighted sort orders the poke inbox and every application queue (ties → oldest first); no absolute tier ordering anywhere.
 - Creators (and inbox owners) can switch to **vibe match, Show-up Score, or newest**.
 - Express badges and total counts always visible; a free application can be below the fold, never off it.
 - Creators **accept/decline with reason** (one-tap presets + free text).
