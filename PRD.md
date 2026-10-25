@@ -46,7 +46,7 @@ We are networking-first. Romance isn't banned; it just isn't the frame. The App 
 | Product | Platform | Purpose |
 | --- | --- | --- |
 | MeshPoke app | Flutter (iOS, Android) | The product: map, spots, pokes, crews, drops, memberships, check-in |
-| Marketing site + authenticated web | React (Vercel) | Acquisition, pricing, support; lightweight account access (profile, pokes, chat, billing) |
+| Marketing site + authenticated web | React (self-hosted, served by Dokploy) | Acquisition, pricing, support; lightweight account access (profile, pokes, chat, billing) |
 | Merchant portal | React (web) | Venue claim, standing spots, drops, membership CRM, per-seat billing, QR tablet mode |
 | Admin dashboard | React (web, RBAC) | Moderation, users, merchants, disputes, metrics |
 | Backend API | Node.js (Fastify) + PostgreSQL 15 + PostGIS + Redis | All business logic, one API for all clients |
@@ -107,7 +107,7 @@ PostgreSQL   Redis         R2 (media)    External:
 | Mobile | Flutter 3 (Dart) | Single codebase iOS + Android; `google_maps_flutter` for the map |
 | Web | React 18 + TypeScript + Vite + Tailwind 3 | Marketing, authenticated, merchant portal, admin |
 | API | Node.js + Fastify (TypeScript) | REST + WebSocket (Socket.io over Redis adapter) |
-| DB | PostgreSQL 15 + PostGIS | Districts (18 HK polygons), spot geo queries, geofence checks |
+| DB | PostgreSQL 16 + PostGIS 3.5 (self-hosted in Dokploy) | Districts (18 HK polygons), spot geo queries, geofence checks; same image as `docker-compose.dev.yml` (`postgis/postgis:16-3.5-alpine`) — no Supabase (own auth/storage/realtime already in stack; plain Postgres keeps dev–prod parity and cloud-migration trivial) |
 | Cache | Redis 7 | Sessions, presence TTL, pub/sub, rate-limit counters |
 | Media | Cloudflare R2 | Profile photos (private, signed URLs), venue images |
 | Auth | JWT (15 min) + refresh; OAuth (Apple/Google); email+password fallback | Phone verification via Twilio SMS (+852) gates actions, not login |
@@ -117,10 +117,29 @@ PostgreSQL   Redis         R2 (media)    External:
 | Email | Resend | Receipts, verification, digests |
 | SMS | Twilio | +852 phone verification |
 | Analytics | PostHog | Funnel, retention, feature flags |
-| CI/CD | Codemagic (mobile, incl. iOS builds — no Mac needed), Vercel (web), GitHub Actions (API) | |
-| Hosting | Vercel (web), Neon/managed PG (or self-host on Hetzner), Cloudflare CDN | |
+| CI/CD | Codemagic (mobile, incl. iOS builds — no Mac needed) + GitHub Actions (API + web images) | Dokploy pulls from GitHub on push (GitHub App webhook) |
+| Hosting | **Dokploy on Hetzner VPS** — all services (web, api, admin, PG, Redis) as Docker Compose apps behind Dokploy's Traefik (auto Let's Encrypt) | Cloudflare for DNS + CDN; no Vercel/Neon |
 
 **Hybrid web policy:** marketing pages public; authenticated web covers profile editing, poke inbox (view + poke back), chat read/reply, spots district list + apply + RSVP/date confirm, host console (queue review, date pinning), People-you-met + connections, subscription management with **web checkout prices**; public spot share pages (`/s/{id}`) for WhatsApp sharing and SEO; anything requiring GPS/map/swipe-grade UI (map browsing, spot creation with venue pin, QR check-in, drops redemption) is mobile-only with a clear "open in app" deep link.
+
+### 2.3 Infrastructure and Deployment (Dokploy on Hetzner)
+
+Same hosting pattern as the SupremaNode project: **local-first, deploy last.** Build and test everything against `docker-compose.dev.yml` (PostGIS 16 + Redis 7); the Hetzner VPS + domain + DNS + TLS are final-step launch tasks, not day-1 concerns.
+
+| Concern | Decision |
+| --- | --- |
+| VPS | Single Hetzner box (4 GB min, 8 GB recommended; Dokploy + all MeshPoke containers), reachable over Tailscale (`hetzner-vps` in tailnet) for SSH/admin. No second VPS until scale demands it. |
+| Orchestration | **Dokploy** (Docker Swarm). Every product = one Dokploy **Docker Compose application**: `meshpoke-api` (Fastify + WS), `meshpoke-web` (React, static via nginx), `meshpoke-db` (PostGIS 16), `meshpoke-redis` (Redis 7). No second reverse proxy beside Dokploy — only one process owns 80/443; all TLS is Dokploy's Traefik with automatic Let's Encrypt. |
+| Networking | Apps share one Dokploy Docker network; API reaches DB/Redis by service name (`db`, `redis`), never public ports. Postgres and Redis expose **no** public ports. |
+| Deploys | GitHub integration (GitHub App webhook → Dokploy) on push to `main`; Codemagic builds the Flutter apps and ships to TestFlight/Play internal. Build args/secrets per app set in Dokploy's build config. |
+| Domains | `meshpoke.com` (register at Cloudflare — at-cost registrar, DNS + CDN + email routing in one). `www.meshpoke.com` → web app; `api.meshpoke.com` → API; admin + merchant portal on `www.meshpoke.com/admin`, `/merchant`. TLS via Traefik automatically. |
+| Email | Inbound: Cloudflare Email Routing (free) — `info@` (general), `legal@` (legal/ToS/privacy requests), `privacy@` (PDPO data-access/rectification), `support@` (user support + bug reports) → forwarded to founder inbox. Outbound: Resend with a verified sender identity on `meshpoke.com` (receipts, verification codes, digests) — separate sending domain auth (SPF/DKIM) configured in DNS. |
+| Backups | Nightly `pg_dump` to R2 (encrypted), 30-day retention; R2 also holds user media. Restore drill once before public launch. Dokploy volumes for PG/Redis data. |
+| Secrets | One `.env` per Dokploy app, mirroring `.env.example`; PII field-encryption key (32-byte hex) for sensitive columns; never committed. |
+| Admin access | Dokploy dashboard proxied through Tailscale HTTPS (`tailscale serve --bg --https 8443 --set-path / http://127.0.0.1:3000` on the VPS) — never exposed on the public internet. |
+
+**Local-first principle:** `docker-compose.dev.yml` + Vite/Flutter dev servers cover all of Phases 0–1. The VPS is provisioned when the waitlist opens (landing page can sit on the same box). Budget impact: ~HK$100–150/mo for a 4 GB Hetzner box — well inside the HK$10k budget.
+
 
 
 ---
@@ -632,7 +651,7 @@ safety_ratings(id, spot_id, rater_id, rated_user_id, rating, created_at)  -- pri
 
 ## 12. API Specification (REST + WS)
 
-Base: `https://api.meshpoke.hk/v1` · Auth: `Authorization: Bearer <JWT>` · Errors: RFC 7807 problem+json
+Base: `https://api.meshpoke.com/v1` · Auth: `Authorization: Bearer <JWT>` · Errors: RFC 7807 problem+json
 
 ### 12.1 Authentication
 ```
@@ -755,6 +774,7 @@ GET /admin/metrics          GET /admin/finance/*
 - **Merchant prices:** 開台價 conventions (388/888; founding 288/688 year 1).
 - **Emergency resources:** safety pages link HK Police Scameter + 999 guidance.
 - **Map data:** Google Places/Maps ToS respected — place_id binding + minimal snapshot, refresh policy documented.
+- **Domain & email:** `meshpoke.com` registered at Cloudflare; inbound mail via Cloudflare Email Routing (`info@`, `legal@`, `privacy@`, `support@`) → founder inbox; outbound via Resend (SPF/DKIM on the domain). `privacy@` must be reachable for PDPO data-access requests.
 
 ## 15. Non-Functional Requirements
 
@@ -778,6 +798,12 @@ Mirrors Business Model §11 (pricing actions) with build order:
 | Phase | Timeline | Build scope (this PRD) |
 | --- | --- | --- |
 | **0. Seed** | Month 0–2 | Landing + waitlist, map home (Google SDK + POI seed import for 1 cluster), sketch profiles + phone verification, founding merchants claimed (free Growth), standing spots + QR tablet mode, basic rooms. Manual everything (founder-led ops). |
+
+**Phase 0 build notes (repo + seed data):**
+
+- **Repo layout (monorepo):** `apps/api` (Fastify + TS), `apps/web` (React + Vite + Tailwind), `apps/admin` (admin routes within web), `mobile/` (Flutter), `packages/shared` (types, keyword lists, district data, entitlement definitions shared across API/web/mobile), `infra/` (docker-compose.dev.yml, Dokploy compose files, seed SQL, CI workflows).
+- **Seed data (shipped in `infra/seed/`, applied on first boot):** the 18 HK district polygons (GeoJSON → `districts` table), first POI cluster import for the launch district (bound to `google_place_id`), spot templates (Dinner · Drinks · Coffee · Hike · Run · Tennis · Pickleball · Badminton · Board games · Industry mingle · Open sport), membership ladder steps, plan entitlement matrix (Free/Plus/Pro + packs + pass), hosting-capacity tiers, founding-500 + founding-merchant counters, admin bootstrap from `ADMIN_EMAIL` (same pattern as SupremaNode `.env.example`).
+- **Env contract:** every service reads from one `.env` schema documented in `.env.example` (DB/Redis URLs, JWT secrets, Twilio/Resend/Stripe/RevenueCat keys, Google Maps key, R2 credentials, PII encryption key, PostHog token). Local dev = docker-compose + `.env.local`; production = same keys pasted into Dokploy per-app environment settings.
 | **1. Validate** | Month 2–5 | Spot lifecycle + date-on-fill + queues, check-in (GPS+QR), Show-up Score telemetry, pokes + People-you-met + connections + DMs, crews + rebook, safety kit (reports, link lock, women-only), consumer billing (Plus + 7-day pass; web Stripe + IAP via RevenueCat), PostHog funnels. |
 | **2. Monetise merchants** | Month 5–8 | Membership ladder + caps + 60d release, drops + claims + per-seat ledger + shadow-invoice promo, Growth conversions, admin: claim approvals, band-audit workspace, dispute flow. |
 | **3. Scale** | Month 8–12 | Second district, Pro consumer tier, poke packs + filter pass, host-reward days, sponsored amplification (budget caps, district/day send caps), admin: finance + metrics dashboards. |
@@ -799,6 +825,8 @@ Mirrors Business Model §11 (pricing actions) with build order:
 ## 18. Launch Readiness Checklist
 
 **Legal/compliance:** ToS + Privacy Policy live (PDPO), 18+ enforcement, venue-safety disclaimer, Scameter links, data-request tooling, Stripe/RevenueCat accounts verified, Business Registration checks for merchants (claim flow).
+
+**Infrastructure:** `meshpoke.com` registered + DNS on Cloudflare; `www` + `api` subdomains live with Traefik TLS; the four mailboxes routing (info/legal/privacy/support) and Resend sending verified; nightly PG backups to R2 with a tested restore; Dokploy GitHub deploys green for api + web; PostHog + error tracking (Sentry) wired.
 
 **App stores:** screenshots (map, spot, crew), description (networking-first; no dating keywords), 17+ questionnaire, IAP products configured (148/228, packs 48/98, pass 68), Data Safety / privacy manifests (location in-use, camera, notifications).
 
