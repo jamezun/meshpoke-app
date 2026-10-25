@@ -137,12 +137,12 @@ These mechanics are implemented once in the backend and surfaced in both apps. S
 | Role one-liner | 40 chars free text ("FX trader by day, board-game shark by night") |
 | Keywords | One set of 10 per user, each self-declared level 1–10; **max 3 at level 8+** |
 | Vibe prompts | 3 short answers: "Perfect Friday night…", "Table topic I'll hijack…", "Ask me about…" |
-| Gender (v1) | Self-declared, not displayed on sketch; used only for women-only / gender-balanced spot eligibility |
+| Gender (v1) | Self-declared, not displayed on sketch; used only for spot gender-rule eligibility (women-only, gender-balanced, host-set male/female caps) |
 | Verification badges | HK phone-verified (required for poke/apply/host/DM); optional work-email or LinkedIn industry badge; liveness badge later (§7.4) |
 
 **Photo ladder (unchanged from v1.1, restated):**
 1. Map and sketch cards: **faceless** — avatar/initials + sketch fields only. Photos never appear on the map or in application queues.
-2. Spot room members: **faces visible after joining** a spot (co-presence context).
+2. Spot room members: **faces visible after joining** a spot (co-presence context; primary photo only — galleries stay behind mutual poke).
 3. Full profile + photos + socials (Instagram/LinkedIn handles): **after mutual poke (connection)** or after a verified mutual check-in at the same spot.
 4. Photos are never purchasable, never browseable outside these states, stored privately in R2 with signed URLs.
 
@@ -178,7 +178,7 @@ States: **`forming → confirmed → live → done`**. On `done`, the spot can s
 **Templates:** Dinner · Drinks · Coffee · Hike · Run · Tennis · Pickleball · Badminton · Board games · Industry mingle · Open sport.
 
 **Creator-admin settings** (creator = any user with hosting rights; hosting capacity earned via Show-up Score: 1 new → 3 proven → 5 top; never purchasable):
-- Name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (**district anchor while forming; venue pin required on confirm** — QR check-in needs a real place), min/max headcount, date range, optional women-only or gender-balanced setting.
+- Name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (**district anchor while forming; venue pin required on confirm** — QR check-in needs a real place), min/max headcount, date range, gender composition: open (default), women-only, gender-balanced, or explicit male/female caps (max_men/max_women).
 - Reviews applications as **sketches only** (photo ladder intact: no photo browsing in queues).
 - Removals logged and reportable; creator abuse → hosting rights revoked.
 - Creator may attach a booking/payment link to their own spot — displayed only, never processed.
@@ -295,7 +295,7 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 1. Map → tap marker or Spots tab → spot card (name, template, host sketch, required keywords, headcount state, price range, Show-up minimum).
 2. Apply (if application required) → optional 200-char note → status "pending" (queue position + counts visible).
 3. Or direct-join (open spots within capacity).
-4. Accepted → room unlocked (sketch-only view of members until QR check-in) → add to calendar (system calendar intent).
+4. Accepted → room unlocked (member faces visible — the room is the community; joining is the reveal) → add to calendar (system calendar intent).
 
 **Host a spot (creator-admin):**
 1. "+" on Map or Spots → template (Dinner · Drinks · Coffee · Hike · Run · Tennis · Pickleball · Badminton · Board games · Industry mingle · Open sport) → name, ≤3 required keywords, min Show-up Score, price range (informational), min/max headcount, district anchor (forming) → publish.
@@ -309,7 +309,7 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 3. Both pass → verified check-in: face photo unlocks in room, Show-up Score accrues, "People you met" list opens for 48h of free pokes, merchant gets a verified seat (if a drop/membership claim).
 
 **Poke → connection:**
-1. See someone in a room (post-check-in), on a spot card, or via People-you-met → view sketch → Poke with optional note (200/500 chars).
+1. See someone in a room, on a spot card, or via People-you-met → view sketch → Poke with optional note (200/500 chars).
 2. Recipient sees poke in Inbox with sender's trust signals (member since, verified check-ins, Show-up Score). Accept (free, always) → **connection**: 1:1 DM opens, full profiles + photos + socials revealed. Decline/expire silently (7-day expiry, no notification of expiry).
 
 **Crew & rebook:**
@@ -326,15 +326,15 @@ Global: QR check-in scanner (modal from any tab), notification center, "People y
 | Screen | Key elements |
 | --- | --- |
 | Map home | Google map, clustered markers (size = verified check-ins, never member count/tier), district banner (e.g. "Central & Western"), filter chips, "this week" toggle, FAB "+ create spot", QR scanner icon |
-| Spot detail | Header (template icon + name), host sketch + trust, members (sketch cards, filled = verified), date state (forming: "needs 2 more" / confirmed: date + venue), required keywords, price range, Apply/Join CTA, women-only / gender-balanced badges |
+| Spot detail | Header (template icon + name), host sketch + trust, members (face cards; verified badge on check-in), date state (forming: "needs 2 more" / confirmed: date + venue), required keywords, price range, Apply/Join CTA, gender-rule badges (women-only / gender-balanced / M-F caps) |
 | Spot creation | Stepper: template → basics (name, keywords, score min, price, headcount) → district anchor → (post-confirm) venue pin + date |
 | Application queue (host view) | Applicant cards sorted Recommended (switchable), accept/decline (+reason presets), counts summary, waitlist section |
-| Room (spot chat) | Messages, member rail (sketch→faces post-check-in), host-admin tools (remove member — logged, reason; pin message; close room), room decays ~2 weeks after spot done |
+| Room (spot chat) | Messages, member rail (faces — revealed on join; verified badge after QR check-in), host-admin tools (remove member — logged, reason; pin message; close room), room decays ~2 weeks after spot done |
 | 1:1 chat (connection) | Text-first (photos/links after first verified meet — link lock), report/block inline, disconnect (silent) |
 | Inbox | Pokes (note preview + trust signals), application status cards, drop notifications |
 | People you met | Post-spot 48h list of co-checked-in members → free poke CTAs |
 | Profile (mine) | Sketch, keywords with levels + verified ticks, prompts, Show-up Score + factors, photo ladder state, memberships & coupons, plan/billing |
-| Profile (other) | Pre-connection: sketch only. Post-connection: full — photos, socials (IG/LinkedIn), history (check-in count, crews in common) |
+| Profile (other) | Pre-connection: sketch (+ primary photo if co-members of a room). Post-connection: full — photos, socials (IG/LinkedIn), history (check-in count, crews in common) |
 | Venue profile | Merchant page: rich pin content (menu/hours/photos on Growth+), membership offer, ladder, active drops, verified check-in stats, claimed badge |
 | Drop feed | District-scoped active drops (claimed state, capacity), "Sponsored" label where amplified |
 | Crew view | Members, chat, Rebook CTA + date poll, "invite to next spot" |
@@ -407,7 +407,8 @@ Excluded (mobile-only, with "open in app" deep-link cards): map browsing, spot c
 | --- | --- | --- |
 | Browse-only | Any signup | Map, spots, sketches, join/read rooms, post (no links) |
 | Phone-verified | +852 SMS code (Twilio), one account per number | Poke, apply/join spots, host, DM, post links (after first verified meet for link lock lift) |
-| Check-in verified | GPS ~100m + rotating QR | Faces in room, score accrual, People-you-met, drops redemption |
+| Joined a spot | Room membership (co-presence context) | Primary photo (face) visible to room members |
+| Check-in verified | GPS ~100m + rotating QR | Verified badge, score accrual, People-you-met, drops redemption |
 | Connected | Mutual poke | Full profile, photos, socials, 1:1 DM |
 | Liveness (later) | Vendor selfie-video (HK$4–8/check) | Only when triggers hit: rising scam reports OR signups > few hundred/mo (Business Model §6.3) |
 
@@ -418,7 +419,7 @@ Optional badges: work-email / LinkedIn industry badge (networking credibility, n
 - **Trust signals on every profile:** member-since, verified check-in count, Show-up Score (or "unproven") — identical on all plans, never purchasable.
 - **Scam interstitials:** crypto/investment/"download this app"/move-to-Telegram patterns in DMs trigger warning screen.
 - **Link lock:** no links or contact handles in DMs before a first verified meet.
-- **Women-only / gender-balanced spots:** host settings.
+- **Gender-composition spots:** women-only, gender-balanced, or host-set male/female caps.
 - **Share-my-spot:** venue, time, attendee count to a trusted contact (live 2h window).
 - **Private post-spot safety rating:** feeds score enforcement, never public.
 - **One-tap report/block** everywhere; HK Police Scameter link in scam-report flow.
@@ -428,10 +429,10 @@ Optional badges: work-email / LinkedIn industry badge (networking credibility, n
 | Layer | Mechanism |
 | --- | --- |
 | Preventive | Phone verification (identity cost), trust-gated permissions (unproven: no links/images/handles), rate limits, scam pattern filters |
-| Interactive | Host-admin powers in rooms (logged + reportable), member removal with reason, women-only spots, sketch-only until check-in, ~2-week room decay |
+| Interactive | Host-admin powers in rooms (logged + reportable), member removal with reason, gender-composition spots, ~2-week room decay |
 | Reactive | 3 reports → auto-mute pending review; warn → mute → suspend ladder wired to Show-up Score; full audit log; PDPO-compliant data requests |
 
-**Women-only enforcement v1:** self-declared gender at registration (no document check at launch; enforcement improves with liveness stage). Gender is not displayed on profiles; used only for women-only/gender-balanced spot eligibility. See Open Question 3.
+**Gender-rule enforcement v1:** self-declared gender at registration (no document check at launch; enforcement improves with liveness stage). Gender is never displayed on profiles; used only for spot gender-rule eligibility.
 
 ---
 
@@ -442,7 +443,7 @@ Optional badges: work-email / LinkedIn industry badge (networking credibility, n
 | | Free | Plus | Pro |
 | --- | --- | --- | --- |
 | Web monthly / IAP monthly | HK$0 | 128 / 148 | 198 / 228 |
-| 7-day pass (web/IAP) | — | 58 / 68 | — |
+| 7-day pass (web/IAP) | — | 58 / 68 | 98 / 108 |
 | 3-mo, 6-mo (web) | — | 288, 488 | 488, 788 |
 | Founding (first 500, locked while continuously subscribed) | — | 88 | 148 |
 | Rooms | 5 | 10 | 20 |
@@ -541,7 +542,7 @@ spots(id, host_id, template enum(11), name, required_keywords text[<=3],
       state enum(forming,confirmed,live,done,cancelled,dissolved),
       min_headcount, max_headcount, overbook_buffer,
       event_date, confirm_deadline,                -- date-on-fill
-      women_only bool, gender_balanced bool, created_at)
+      gender_rule enum(open, women_only, balanced, capped), max_men smallint NULL, max_women smallint NULL, created_at)
 spot_members(id, spot_id, user_id, role enum(host,member,waitlist), joined_at, state,
              confirm_state enum(pending,confirmed,bailed), bail_at)
 applications(id, spot_id, user_id, note varchar(500), status enum(pending,accepted,waitlisted,declined),
@@ -655,7 +656,7 @@ GET /venues/{id}                      POST /venues/{id}/claim   (merchant flow)
 ### 12.4 Spots & Applications
 ```
 POST /spots                 (template, name, keywords<=3, min_score, price_range, district,
-                             headcounts, women_only|gender_balanced; capacity check → 402/403)
+                             headcounts, gender_rule + caps; capacity check → 402/403)
 GET  /spots/{id}            GET /spots/{id}/members  (sketches; faces post-check-in)
 POST /spots/{id}/apply      {note}   → queue (Recommended sort server-side)
 POST /spots/{id}/join       (open spots)
@@ -798,15 +799,15 @@ Mirrors Business Model §11 (pricing actions) with build order:
 
 ---
 
-## Open Questions (crucial, for founder decision)
+## Founder Decisions (26 Oct 2026 — resolves v2.0 open questions)
 
-1. **Gender field** — women-only + gender-balanced spots need `gender_self` at registration (self-declared v1, never displayed). OK to collect? (Alternative: hosts flag spots but eligibility unenforced v1 — weaker safety story.)
-2. **Standing spots on the map** — merchant standing rooms: always-on markers (could crowd the map at 3/10/∞ per venue) vs. listed-but-smaller pins vs. only-visible-in-venue-profile? Proposal: smaller neutral pin, cluster into the venue marker, never sized above earned check-ins.
-3. **Recommended sort weights** — v1 = 0.5 tier-boost × 0.3 vibe-match × 0.2 score. This is the "paid = faster" core mechanic; weights are business-sensitive. Confirm or adjust.
-4. **DM naming** — internally "DMs" (post-connection 1:1 chat). User-facing copy must avoid "match"; is "Chat" / "Messages" fine?
-5. **7-day pass** — currently Plus-only (58/68). Should Pro get a pass SKU later, or keep it as the single cheap trial door?
-6. **Photo reveal at join** — v5 photo ladder: faces reveal in room after joining, full photos only after mutual poke. Confirm: room faces = all members' primary photo only (no photo galleries pre-connection).
-7. **Liveness vendor** — deferred (trigger-gated). If triggers hit before Phase 4, acceptable to fast-track, or hard-defer to Phase 4?
+1. **Gender composition** — COLLECT self-declared gender at registration (never displayed). Hosts control composition per spot: open (default), women-only, gender-balanced, or explicit male/female caps (max_men/max_women). Enforced in application queue + direct join.
+2. **Standing spots on map** — smaller neutral pin clustered into the venue marker; venue marker size driven by verified check-ins only ("earned check-ins" = real verified foot traffic, never member count or merchant tier).
+3. **Recommended sort weights** — PENDING final confirmation; v1 stands until then: 0.5 tier-boost × 0.3 vibe-match × 0.2 score (application queue), inbox Pro→Plus→Free.
+4. **1:1 chat naming** — "Chat" / "Messages" (never "match").
+5. **7-day pass** — both tiers: Plus HK$58/68, Pro HK$98/108 (web/IAP).
+6. **Photo reveal** — faces (primary photo only) on room join; galleries + socials only after mutual poke.
+7. **Liveness** — trigger-gated and deferred; revisit when scam-report or signup-volume triggers hit.
 
 ---
 

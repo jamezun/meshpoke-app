@@ -10,3 +10,4 @@ __pycache__/
 dist/
 build/
 .turbo/
+.proof_business_model.json

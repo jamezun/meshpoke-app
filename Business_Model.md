@@ -99,7 +99,7 @@ List prices start high (HK$128 Plus, HK$198 Pro) because lowering later reads as
 | | **Free** | **Plus** | **Pro** |
 | --- | --- | --- | --- |
 | **Monthly** | HK$0 | **HK$128** | **HK$198** |
-| **7-day pass** | — | **HK$58** | — |
+| **7-day pass** | — | **HK$58** | **HK$98** |
 | **3-month** | — | HK$288 (≈96/mo) | HK$488 (≈163/mo) |
 | **6-month** | — | HK$488 (≈81/mo) | HK$788 (≈131/mo) |
 | **Founding** (first 500, locked while continuously subscribed) | — | **HK$88/mo** | **HK$148/mo** |
@@ -117,7 +117,7 @@ List prices start high (HK$128 Plus, HK$198 Pro) because lowering later reads as
 | Hosting event spots | 1 → 3 → 5, earned via Show-up Score, never by tier | Same | Same |
 | Profile, prompts, photo ladder, socials reveal, verification, safety tools | Identical for all tiers — never purchasable | Same | Same |
 
-The 7-day pass gives full Plus for 7 days and is priced at ~45% of monthly (the same ratio as Bumble's weekly plans), capturing bursty intent — new job, new to HK, a free weekend — and nudging regulars to monthly.
+The 7-day pass gives full Plus for 7 days and is priced at ~45% of monthly (the same ratio as Bumble's weekly plans), capturing bursty intent — new job, new to HK, a free weekend — and nudging regulars to monthly. A **Pro 7-day pass (HK$98)** mirrors it for bursty high-intent weeks (queue priority + 50 pokes).
 
 Founding pricing applies from each tier's own launch: Plus from Phase 1, Pro from Phase 3 (§11).
 
@@ -140,6 +140,7 @@ Follows the TradingView model: plans can be bought on the MeshPoke website or in
 | Plus monthly | HK$128 | HK$148 |
 | Pro monthly | HK$198 | HK$228 |
 | Plus 7-day pass | HK$58 | HK$68 |
+| Pro 7-day pass | HK$98 | HK$108 |
 | Plus 3-month / 6-month | HK$288 / 488 | HK$328 / 558 |
 | Pro 3-month / 6-month | HK$488 / 788 | HK$558 / 898 |
 | Founding Plus / Pro | HK$88 / 148 | HK$98 / 168 |
@@ -166,7 +167,7 @@ Rules:
 Spot states: `forming → confirmed → live → done`. On `done`, the spot can spawn a **crew** (a separate entity, §5.6). Spots span dinners, drinks, coffees, hikes, runs, racket sports, board games and industry minglers — **the spot is a tool for meeting people; dinner is not the product**.
 
 Creator-admin (democratised Timeleft ops):
-- Sets name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (district anchor while forming; **venue pin required on confirm**), min/max headcount, date range, and optional women-only or gender-balanced setting.
+- Sets name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (district anchor while forming; **venue pin required on confirm**), min/max headcount, date range, and gender composition: open (default), women-only, gender-balanced, or explicit male/female caps (e.g. 4 men / 4 women).
 - Reviews applications as **sketches only** (photo ladder intact).
 - Removals are logged and reportable; creator abuse → hosting rights revoked (capacity is trust-based: 1 new → 3 proven → 5 top).
 
@@ -248,7 +249,7 @@ Hong Kong loses tens of millions of HKD a month to romance and investment scams 
 | Work-email / LinkedIn industry badge | Optional networking credibility without a résumé feed |
 | Scam interstitials | Flag crypto, investment, "download this app" and move-to-Telegram patterns in DMs with a warning screen |
 | Link lock | No off-platform links or contact handles in DMs before a first verified meet |
-| Women-only / gender-balanced spots | Host settings for safer, balanced groups |
+| Gender-composition spots | Women-only, gender-balanced, or host-set male/female caps (max_men/max_women); gender self-declared at registration, never displayed |
 | Share-my-spot | Send venue, time and attendee count to a trusted friend |
 | Private post-spot safety rating | Feeds trust signals and Show-up Score enforcement; never shown publicly |
 | Report flow | One-tap report/block; links to HK Police Scameter for scam checks |
