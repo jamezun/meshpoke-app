@@ -1,8 +1,8 @@
-# MeshPoke Business Model v4
+# MeshPoke Business Model v5
 
 25 Oct 2026 · James
 
-HKD pricing · group formation · Show-up Score · per-seat merchant drops. Supersedes v3; incorporates decisions from the 25 Oct 2026 review.
+HKD pricing · group formation · Show-up Score · per-seat merchant drops · verification ladder. Supersedes v4; incorporates the v4 review (25 Oct 2026).
 
 ## 1. Pitch line and positioning
 
@@ -51,7 +51,7 @@ Five lanes; MeshPoke never holds or processes event money.
 | **B. Consumer passes and credits** | Casual and bursty users | 7-day pass, poke packs, filter pass | Low-friction upsell |
 | **C. Merchant SaaS** | Restaurants, venues | Membership CRM, QR check-in, loyalty ladder, drops, coupons | Stable core revenue |
 | **D. Per-seat drop fees** | Merchants | Verified guests who check in through a drop, priced by venue price band | Foot-traffic revenue; the stage-1 merchant value |
-| **E. Sponsored placements** | Merchants, brands | Labelled drop amplification, branded pins | Secondary; always labelled |
+| **E. Sponsored placements** | Merchants, brands | Labelled drop amplification (paid per verified seat at 1.5× band rate, no flat fee), branded pins | Secondary; always labelled |
 
 **Rule:** logo size and map prominence come **only from verified member activity** — never from payment. Per-seat fees and sponsored placements buy labelled distribution, never marker size or ranking.
 
@@ -65,7 +65,7 @@ Five lanes; MeshPoke never holds or processes event money.
 | Role one-liner | 40 chars, free text ("FX trader by day, board-game shark by night") |
 | Keywords | One set of 10 per user, each with a self-declared level 1–10; max 3 at level 8+ |
 | Vibe prompts | 3 short answers ("Perfect Friday night…", "Table topic I'll hijack…", "Ask me about…") |
-| Verification badges | Liveness-verified selfie (required to apply or poke); optional work-email / LinkedIn industry badge |
+| Verification badges | HK phone-verified (required to poke, join spots, DM or host); optional work-email / LinkedIn industry badge; liveness badge added at a later stage |
 
 - Brand line: **"poke by vibe, not looks."**
 - Keywords may become **peer-verified** (2+ endorsements, weighted by the endorser's own level). Verified vs self-declared is shown to viewers.
@@ -81,6 +81,7 @@ Five lanes; MeshPoke never holds or processes event money.
 
 ### 3.3 Trust layer
 
+- **Trust signals on every profile (free, never paywalled):** member since (e.g. "Joined Oct 2026"), verified check-ins (e.g. "12 spots attended"), and Show-up Score (or "unproven"). A scammer can fake a profile, but not months of account age plus in-person check-ins.
 - "Friend of friend" badge (degree 2) on profiles and room members — a lightweight signal, not a browsable graph.
 - No degree-based search, no paywall on degree depth at launch.
 
@@ -117,6 +118,8 @@ List prices start high (HK$128 Plus, HK$198 Pro) because lowering later reads as
 | Profile, prompts, photo ladder, socials reveal, verification, safety tools | Identical for all tiers — never purchasable | Same | Same |
 
 The 7-day pass gives full Plus for 7 days and is priced at ~45% of monthly (the same ratio as Bumble's weekly plans), capturing bursty intent — new job, new to HK, a free weekend — and nudging regulars to monthly.
+
+Founding pricing applies from each tier's own launch: Plus from Phase 1, Pro from Phase 3 (§11).
 
 ### 4.2 À-la-carte packs (no subscription needed)
 
@@ -160,7 +163,7 @@ Rules:
 
 ### 5.1 Spot states and creator-admin
 
-Spot states: `forming → confirmed → live → done → crew`. Spots span dinners, drinks, coffees, hikes, runs, racket sports, board games and industry minglers — **the spot is a tool for meeting people; dinner is not the product**.
+Spot states: `forming → confirmed → live → done`. On `done`, the spot can spawn a **crew** (a separate entity, §5.6). Spots span dinners, drinks, coffees, hikes, runs, racket sports, board games and industry minglers — **the spot is a tool for meeting people; dinner is not the product**.
 
 Creator-admin (democratised Timeleft ops):
 - Sets name, required keywords (≤3), min Show-up Score, price range (**informational only — MeshPoke never handles event payments**), location (district anchor while forming; **venue pin required on confirm**), min/max headcount, date range, and optional women-only or gender-balanced setting.
@@ -203,6 +206,8 @@ No separate connect or follow feature — everything runs on pokes.
 
 ### 5.6 Crews and rebook
 
+A **crew** is the group of attendees who choose to stay together after a spot — a saved "regulars" group (e.g. the Thursday board-game table) that can rebook in one tap. It is the main retention loop: people come back for *their* group, not for strangers. In the data model a crew is its own entity, created when a spot ends; it is not a spot state.
+
 1. After a spot, every attendee sees **"Do it again?" → Keep crew / Leave**. Leaving is silent.
 2. Those who keep become a **crew** with a small persistent chat.
 3. Any crew member with hosting rights can tap **Rebook**: same venue and template, with a date poll for the crew.
@@ -219,11 +224,27 @@ Crews can link a WhatsApp group, but date polls, venue perks, check-in streaks, 
 
 ## 6. Trust and safety (v1, all tiers, never paywalled)
 
-Hong Kong loses tens of millions of HKD a month to romance and investment scams that start on dating apps, so safety ships in v1 rather than later.
+Hong Kong loses tens of millions of HKD a month to romance and investment scams that start on dating apps, so safety ships in v1 — built from low-cost checks at launch, with paid liveness verification added later.
+
+### 6.1 Sign-up and verification
+
+- **Sign up with email, Sign in with Apple, or Sign in with Google.** These are for login and account recovery only, not trust. (If Google sign-in is offered on iOS, Sign in with Apple is offered too — confirm against current App Store guidelines.)
+- **HK phone verification (SMS code) is the identity anchor.** HK SIM cards require real-name registration, so a local number is tied to a real identity held by the carrier.
+- **HK (+852) numbers only at launch**; other countries later, once liveness checks are added.
+- **One account per verified number**, so banned users can't simply re-register.
+
+| Without phone verification, users can | Phone verification required before they can |
+| --- | --- |
+| Browse the map, spots and sketches | Poke anyone |
+| Join and read chatrooms | Apply to or join a spot |
+| Post in chatrooms (no links) | Send DMs or post links |
+| | Host a spot |
+
+### 6.2 Safety features
 
 | Feature | What it does |
 | --- | --- |
-| Liveness-verified selfie badge | Required before applying to any spot or sending pokes; photos stay hidden per the photo ladder |
+| Trust signals | Member since, verified check-ins and Show-up Score on every profile (§3.3) |
 | Work-email / LinkedIn industry badge | Optional networking credibility without a résumé feed |
 | Scam interstitials | Flag crypto, investment, "download this app" and move-to-Telegram patterns in DMs with a warning screen |
 | Link lock | No off-platform links or contact handles in DMs before a first verified meet |
@@ -232,6 +253,10 @@ Hong Kong loses tens of millions of HKD a month to romance and investment scams 
 | Private post-spot safety rating | Feeds trust signals and Show-up Score enforcement; never shown publicly |
 | Report flow | One-tap report/block; links to HK Police Scameter for scam checks |
 | Rate limits | Poke caps, 7-day expiry, trust-gated permissions for new accounts |
+
+### 6.3 Liveness verification (later stage)
+
+A vendor selfie-video check (with deepfake detection) confirming a real, live person — roughly HK$4–8 per first-time check. Not used at launch to keep costs low; manual pose-selfies are skipped because AI tools can fake them. **Add it when either trigger is hit:** scam reports start rising, or new signups grow past a few hundred a month. It then becomes a badge and the gate for poking, joining spots and DMs, and allows non-HK numbers.
 
 ## 7. Merchant pricing (HKD)
 
@@ -250,9 +275,9 @@ Merchants come first for foot traffic and stay for retention tools: per-seat dro
 | Membership cap | 25 | 100 | Unlimited |
 | Discount ladder | Yes | Yes | Yes |
 | Discount drops | 1 active | Yes | Yes, priority |
-| Per-seat drop fees (§7.3) | Standard rate | Standard rate | Standard rate |
+| Per-seat drop fees (§7.3) | Standard band rate | Standard band rate | Standard band rate |
+| Sponsored amplification | — | Per seat at 1.5× band rate | Per seat at 1.5× band rate, priority placement |
 | Check-in CRM | Aggregate only | Full history | Full + export |
-| Sponsored drop amplification | — | Per drop | Per drop, priority placement |
 | Map pin | Standard (activity-ranked) | Rich (menu/hours/photos) | Rich + branded |
 | Multi-location / POS API | — | — | Yes |
 | Support | Community | Email | Priority |
@@ -288,10 +313,12 @@ Merchants pay a fixed fee per verified seat that checks in through a drop or spo
 
 Rules:
 - **Only MeshPoke-driven seats are charged** — guests who claimed a drop or sponsored placement, then checked in. Organic regulars and members are covered by SaaS and never charged per seat.
-- **Verified seat** = drop claimed first + GPS + rotating QR on the merchant's tablet + liveness-verified account older than 7 days. One charge per user per drop.
-- **Band selection:** merchant picks a band at venue claim. MeshPoke cross-checks against OpenRice / Google Maps price ranges and an optional post-check-in question ("Roughly how much did you spend per person?"). If the median guest answer sits in another band for 30 days, the venue moves band with notice and a dispute window.
+- **Verified seat** = drop claimed first + GPS + rotating QR on the merchant's tablet + phone-verified account older than 7 days. One charge per user per drop.
+- **Band selection:** merchant declares a band at venue claim. Phase 2 v1: a manual quarterly audit against OpenRice / Google Maps price ranges, with band changes on notice. Automated cross-checks (a post-check-in spend question and 30-day median reassignment) come later, once volume justifies them.
 - **Monthly budget cap** set by the merchant; drops pause when the cap is reached.
 - **Disputes:** merchant can dispute a seat within 7 days.
+- **Sponsored seats:** seats that come from sponsored amplification are charged at **1.5× the band rate**, with no flat fee — merchants pay only for verified guests. Sponsored sends are capped per district per day so users aren't spammed.
+- **Launch promo (shadow invoices):** for the first month of drops, merchants receive a full statement — e.g. *"20 verified guests · HK$240 · waived during launch promo (until [date])"* — so the price is known from day one and every statement shows what MeshPoke delivered. Fees go live after a fixed end date.
 
 ### 7.4 Billing and money flows
 
@@ -303,7 +330,12 @@ Rules:
 
 ### 7.5 Founding merchant programme (cold start)
 
-- First 10–15 venues per neighbourhood: **free Growth for 6 months** (QR adoption, feedback, case-study rights). Target ≥60% conversion at month 7.
+- First 10–15 venues per neighbourhood: **free Growth for 3 months** (QR adoption, feedback, case-study rights). Target ≥60% conversion at month 4.
+- **Performance guarantee:** if a venue gets fewer than 30 verified guests by the end of month 3, its free period extends by one month.
+- **Timeline:**
+  - **Month 1:** per-seat fees shadow-invoiced only (shown, waived), so merchants learn how billing works.
+  - **From month 2:** per-seat fees charged — merchants pay only when guests actually arrive.
+  - **From month 4:** Growth at the founding rate of HK$288 for the rest of year 1, then list HK$388.
 - Venue claims verified with a Business Registration certificate.
 - Founding consumer + merchant pricing follows the HK 開台價 convention — early supporters keep their rate while subscribed.
 
@@ -311,7 +343,7 @@ Rules:
 
 | Stream | Mechanic | Guardrail |
 | --- | --- | --- |
-| Sponsored drop amplification | Merchant pays to feature a drop (district feed / push) | Labelled "Sponsored"; never affects marker size; seats from it billed per §7.3 |
+| Sponsored drop amplification | Merchant features a drop (district feed / push) and pays **per verified seat at 1.5× band rate** — no flat fee | Labelled "Sponsored"; never affects marker size; sends capped per district per day |
 | Branded / rich pins | Pro-tier presentation richness | Richness only — same ranking rules for everyone |
 | Event payments | **None, ever** — creators and merchants handle booking and payment off-platform | MeshPoke never holds funds; avoids SVF, escrow and payments licensing |
 
@@ -319,7 +351,7 @@ Rules:
 
 ## 9. Unit economics (HKD, planning estimates)
 
-At 20,000 MAU the model nets about HK$138,600/month at ~76% contribution margin, with merchants supplying roughly half of revenue; break-even on a HK$10k/month budget is ~118 consumer payers or ~27 Growth merchants.
+At 20,000 MAU the model nets about HK$138,600/month at ~73% contribution margin, with merchants supplying roughly half of revenue; break-even on a HK$10k/month budget is ~118 consumer payers or ~27 Growth merchants.
 
 Assumptions: 2.5% paid conversion (4% = upside case); 80/20 Plus/Pro; effective ARPU after founding and term discounts ≈ HK$105 Plus, HK$165 Pro; 50% of consumer revenue billed on web (~3% card fees) and 50% in-app (15% store commission) → ~9% blended; merchant revenue billed on web (~3%).
 
@@ -334,7 +366,9 @@ Assumptions: 2.5% paid conversion (4% = upside case); 80/20 Plus/Pro; effective 
 | Sponsored amplification | 5,000 | 4,850 |
 | **Total** | **≈147,000** | **≈138,650** |
 
-Operating costs ≈ HK$27,000/month (infra 6k · trust & safety 12k · support 6k · liveness verification 3k; payment and store fees already deducted). **Contribution ≈ HK$111,600/month (~76% of gross).**
+Operating costs at steady state ≈ HK$31,000/month: infra 6k · trust & safety 12k · support 6k · liveness verification ~6.5k (≈1,000 new verified users × HK$4–8, assuming liveness has been switched on by this scale) · SMS phone verification ~0.5k. Payment and store fees are already deducted above. **Contribution ≈ HK$107,650/month (~73% of gross).**
+
+At launch, liveness is off and phone verification is the only per-user verification cost (a few hundred HKD a month), keeping the bootstrap cost base minimal.
 
 Upside case (4% conversion, 800 payers): consumer gross rises to ≈HK$104,800 and total gross to ≈HK$186,000.
 
@@ -362,11 +396,11 @@ Merchant revenue is the floor: ~30 paying venues in one district covers the whol
 
 | Phase | Timeline | Focus | Pricing action |
 | --- | --- | --- | --- |
-| **0. Seed** | Month 0–2 | One walkable cluster (e.g. Central–Sheung Wan–SoHo); 10–15 founding merchants (free Growth) running recurring standing spots; 20–30 founding hosts; keyword profiles + liveness verification at onboarding | Free everything |
+| **0. Seed** | Month 0–2 | One walkable cluster (e.g. Central–Sheung Wan–SoHo); 10–15 founding merchants (free Growth) running recurring standing spots; 20–30 founding hosts; keyword profiles + HK phone verification | Free everything |
 | **1. Validate** | Month 2–5 | QR check-in, spot formation, queues, post-spot pokes, crews + rebook, Show-up Score telemetry, safety kit | **Plus HK$128 (founding 500 @ 88) + 7-day pass HK$58**; web + in-app billing live |
-| **2. Monetise merchants** | Month 5–8 | Convert founding merchants; drops with per-seat fees; spot tags; member coupons | **Growth HK$388 (founding 288)** + per-seat band fees |
+| **2. Monetise merchants** | Month 5–8 | Convert founding merchants; drops with per-seat fees (1-month shadow-invoice promo, then live); manual quarterly band audits; spot tags; member coupons | **Growth HK$388 (founding 288)** + per-seat band fees |
 | **3. Scale** | Month 8–12 | Second district; Pro tier; packs; host rewards; sponsored amplification | **Pro HK$198 (founding 148) + poke packs + HK$18 filter pass** |
-| **4. Expand** | Year 2 | Multi-city; annual plans at density (Plus 788/yr, Pro 1,288/yr); price review from free-user and conversion data | **Pro merchant HK$888** |
+| **4. Expand** | Year 2 | Multi-city; annual plans at density (Plus 788/yr, Pro 1,288/yr); price review from free-user and conversion data; vendor liveness checks once triggers are hit (§6.3); automated price-band cross-checks | **Pro merchant HK$888** |
 
 **Key metrics**
 
@@ -387,10 +421,10 @@ Merchant revenue is the floor: ~30 paying venues in one district covers the whol
 | No-shows shrink events (Timeleft 6→2) | Date-on-fill + 48h confirm + overbook buffer + Show-up Score |
 | Paid ordering alienates free users and hosts | Weighted (not absolute) boost, user-switchable sort, visible counts, free acceptance-rate monitoring |
 | Crews leak to WhatsApp | Allow WhatsApp links; keep polls, perks, streaks, backfill and rebook in-app |
-| Romance / investment scams | Liveness badge, scam interstitials, link lock before first meet, Scameter in report flow |
+| Romance / investment scams | HK phone verification (one account per number), trust signals, scam interstitials, link lock before first meet, Scameter in report flow; vendor liveness when triggers are hit |
 | Women's safety and gender skew | Women-only / gender-balanced spots, share-my-spot, private safety ratings; seed women-led hosts |
 | Host burnout or churn | Capped Pro-day rewards, merchant-funded host perks, host churn tracked |
-| Merchants game check-ins or price bands | GPS + rotating QR + 1/day; band cross-checks and guest spend survey; 7-day disputes |
+| Merchants game check-ins or price bands | GPS + rotating QR + 1/day; manual quarterly band audit (automated cross-checks later); 7-day disputes |
 | Merchant payment default | Card on file, monthly charge, drops pause on failure; no prepaid balances |
 | App Store compliance on web pricing | In-app purchase always offered; no in-app mention of web price; verify guideline 3.1.3(b) |
 | Payments regulation | MeshPoke never holds guest funds — no ticketing, deposits, escrow or SVF |
