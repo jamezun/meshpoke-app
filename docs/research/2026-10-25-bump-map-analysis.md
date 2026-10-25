@@ -85,3 +85,11 @@ Evidence:
 8. **Battery:** no custom location pipeline — native geofencing + significant-location-change APIs; adaptive ping rate unnecessary at our scale.
 
 **One-line summary for PRD:** *We buy the base map (Google), own the semantic layer (spots/venues/check-ins on PostGIS), borrow Bump's delegation patterns, and reject its ambient-intimacy location model — presence is earned at venues, never broadcast.*
+
+## 7. Decision (25 Oct 2026): Google Maps SDK — own the layer, rent the picture
+
+**Chosen:** Google Maps SDK (`google_maps_flutter`) + PostGIS semantic layer. **Rejected:** Zenly-style custom engine (their map was the product; ours is the mesh layer on top — 405 MB engine = wrong spend at solo scale) and Mapbox/MapLibre at launch (weaker HK/TC POI, +1 month build, no user-visible gain).
+
+**Architecture:** base map renders Google's streets + TC labels ($0 mobile loads); our spots render as custom clustered markers sized by verified check-in activity; POI seed = one-time Google Places import bound to `place_id` (store id + minimal snapshot, refresh per ToS); PostGIS holds districts (18 polygons, viewport + district scoping — never global), spot geo queries, geofence verification (~100 m) + QR = verified check-in; presence is venue-granular with TTL, never raw coordinates; routing delegated via deep links; battery = native geofencing APIs only.
+
+**Exit path (documented, not planned):** all social meaning lives in our PostGIS, so the base map is a swappable viewport — MapLibre + self-hosted OSM tiles on R2 if brand styling measurably moves retention, Google pricing shifts, or mainland China expansion becomes real.
