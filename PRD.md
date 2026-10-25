@@ -49,7 +49,7 @@ We are networking-first. Romance isn't banned; it just isn't the frame. The App 
 | Marketing site + authenticated web | React (self-hosted, served by Dokploy) | Acquisition, pricing, support; lightweight account access (profile, pokes, chat, billing) |
 | Merchant portal | React (web) | Venue claim, standing spots, drops, membership CRM, per-seat billing, QR tablet mode |
 | Admin dashboard | React (web, RBAC) | Moderation, users, merchants, disputes, metrics |
-| Backend API | Node.js (Fastify) + PostgreSQL 15 + PostGIS + Redis | All business logic, one API for all clients |
+| Backend API | Node.js (Fastify) + PostgreSQL 16 + PostGIS + Redis | All business logic, one API for all clients |
 
 ### 1.3 Target Users
 
@@ -537,7 +537,7 @@ Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48/98); 7-day keywo
 
 ---
 
-## 11. Database Schema (PostgreSQL 15 + PostGIS)
+## 11. Database Schema (PostgreSQL 16 + PostGIS)
 
 ### 11.1 Core Tables
 
