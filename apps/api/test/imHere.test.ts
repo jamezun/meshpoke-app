@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import * as schema from '../src/db/schema/index.js';
 import { seedDistricts } from '../src/db/seed.js';
 import { buildApp } from '../src/app.js';
-import { useInfra } from './db.js';
+import { useInfra, stopInfra } from './db.js';
 
 const JWT = 'test-jwt-secret-at-least-32-characters-long';
 const infra = useInfra();
@@ -70,7 +70,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await app.close();
   await pool.end();
+  await stopInfra();
 });
 
 test('im-here: inside → verified_gps; outside → 422; non-live → 422; non-member → 403', async () => {
