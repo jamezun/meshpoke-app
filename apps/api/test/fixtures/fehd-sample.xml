@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLLicenceMOE_MFE>
+  <XMLLicenceMOE_MFE>
+    <LIC_NO>2211000123</LIC_NO>
+    <WI_ACTVTY_REST>General Restaurant</WI_ACTVTY_REST>
+    <DISTRICT_C>CENTRAL AND WESTERN</DISTRICT_C>
+    <TA>
+      <TA_EN>SHEUNG WAN</TA_EN>
+      <TA_ZH>上環</TA_ZH>
+      <TA_AD>
+        <AD_ST>QUEEN'S ROAD WEST</AD_ST>
+        <AD_BULD>WESTERN PLAZA</AD_BULD>
+        <AD_BUFLR>SHOP 12, G/F</AD_BUFLR>
+        <AD_ST_ZH>皇后大道西</AD_ST_ZH>
+        <AD_BULD_ZH>西寶城</AD_BULD_ZH>
+        <AD_BUFLR_ZH>地下12號舖</AD_BUFLR_ZH>
+      </TA_AD>
+    </TA>
+    <FLD_NME_E>TEST CAFE CENTRAL</FLD_NME_E>
+    <FLD_NME_T>測試茶餐廳</FLD_NME_T>
+  </XMLLicenceMOE_MFE>
+  <XMLLicenceMOE_MFE>
+    <LIC_NO>2211000456</LIC_NO>
+    <WI_ACTVTY_REST>Light Refreshment Restaurant</WI_ACTVTY_REST>
+    <DISTRICT_C>CENTRAL AND WESTERN</DISTRICT_C>
+    <TA>
+      <TA_EN>CENTRAL</TA_EN>
+      <TA_ZH>中環</TA_ZH>
+      <TA_AD>
+        <AD_ST>HOLLYWOOD ROAD</AD_ST>
+        <AD_BULD>PARK VIEW COURT</AD_BULD>
+        <AD_BUFLR>UNIT 3</AD_BUFLR>
+        <AD_ST_ZH>荷李活道</AD_ST_ZH>
+        <AD_BULD_ZH>柏苑</AD_BULD_ZH>
+        <AD_BUFLR_ZH>3室</AD_BUFLR_ZH>
+      </TA_AD>
+    </TA>
+    <FLD_NME_E>TEST NOODLE HOUSE</FLD_NME_E>
+    <FLD_NME_T>測試麵家</FLD_NME_T>
+  </XMLLicenceMOE_MFE>
+  <XMLLicenceMOE_MFE>
+    <LIC_NO>2211000789</LIC_NO>
+    <WI_ACTVTY_REST>General Restaurant</WI_ACTVTY_REST>
+    <DISTRICT_C>KOWLOON CITY</DISTRICT_C>
+    <TA>
+      <TA_EN>HUNG HOM</TA_EN>
+      <TA_ZH>紅磡</TA_ZH>
+      <TA_AD>
+        <AD_ST>MA TAU WAI ROAD</AD_ST>
+        <AD_BULD>GRAND HOUSE</AD_BULD>
+        <AD_BUFLR>G/F</AD_BUFLR>
+        <AD_ST_ZH>馬頭圍道</AD_ST_ZH>
+        <AD_BULD_ZH>大宅</AD_BULD_ZH>
+        <AD_BUFLR_ZH>地下</AD_BUFLR_ZH>
+      </TA_AD>
+    </TA>
+    <FLD_NME_E>TEST KOWLOON EATS</FLD_NME_E>
+    <FLD_NME_T>測試九龍食堂</FLD_NME_T>
+  </XMLLicenceMOE_MFE>
+</XMLLicenceMOE_MFE>

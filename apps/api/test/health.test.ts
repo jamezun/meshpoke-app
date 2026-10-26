@@ -29,7 +29,7 @@ beforeAll(async () => {
       QR_HMAC_SECRET: 'test-qr-hmac-secret-32-chars-minimum!!!',
       ADMIN_BOOTSTRAP_PASSWORD: 'test-admin-bootstrap-pw',
       SENTRY_DSN: undefined,
-      ENABLE_SWAGGER: false,
+      ENABLE_JOBS: false, ENABLE_SWAGGER: false,
     },
     db: providedDb,
     redis: providedRedis,
@@ -68,7 +68,7 @@ describe('GET /v1/health', () => {
         QR_HMAC_SECRET: 'test-qr-hmac-secret-32-chars-minimum!!!',
         ADMIN_BOOTSTRAP_PASSWORD: 'test-admin-bootstrap-pw',
         SENTRY_DSN: undefined,
-        ENABLE_SWAGGER: false,
+        ENABLE_JOBS: false, ENABLE_SWAGGER: false,
       },
     });
     const res = await brokenApp.inject({ method: 'GET', url: '/v1/health' });

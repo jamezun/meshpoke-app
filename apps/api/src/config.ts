@@ -23,6 +23,10 @@ export const configSchema = z.object({
   ADMIN_BOOTSTRAP_PASSWORD: z.string().min(12),
   ENABLE_SWAGGER: bool.default('true'),
 
+  FEHD_URL: z.string().url().optional(), // data.gov.hk FEHD licensed restaurants XML
+  FEHD_DISTRICTS: z.string().optional(), // comma filter e.g. 'CENTRAL AND WESTERN'
+  ENABLE_JOBS: bool.default('false'), // pg-boss schedulers (off in dev/test)
+
   R2_ENDPOINT: z.string().optional(), // absent → photos routes 503 (dev stub)
   R2_BUCKET: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
