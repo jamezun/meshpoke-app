@@ -584,12 +584,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Recompute job `POST /internal/score-recompute` (all users or single; cron wiring at M14)
 **Tests:** score monotonicity cases; decay; capacity transitions.
 
-### [ ] T10.4 Mobile: live & after-event UX
+### [x] T10.4 Mobile: live & after-event UX
 **PRD refs:** §5.2 (Attend), §5.3 (Roll-call) · **Depends:** T10.2
-- [ ] "I'm here" button on live spot (with location permission flow)
-- [ ] Host roll-call screen (all ticked by default)
-- [ ] After-event screen: report absent, forgiveness prompt when marked absent
-- [ ] Photo reveal after done per resolver (`event_done` context)
+- [x] "I'm here" button on live spot (permission_handler + geolocator, accuracy sent, not-close-enough surfaced)
+- [x] Host roll-call screen (all attended by default, untick to mark absent)
+- [x] After-event: report absent (member sketch picker via detail API), forgiveness note sheet to host
+- [x] Photo reveal after done: resolver contexts already wired (T3.3) — `event_done` surfaces via detail/room; two-device check at staging
 **Acceptance:** two-device test of roll-call and reveal.
 
 ### [ ] T10.5 Trust signals everywhere
@@ -1121,3 +1121,4 @@ Append one line per completed task (newest at the bottom).
 - T10.1 (✓): im-here route + test (inside/outside/accuracy-edge/non-live/non-member; attendance has no lat/lng cols). 147 api tests green.
 - T10.2 (✓): attendance lifecycle built+tested (defaults attended, host mark, 2-report flip, forgiveness round-trip, idempotent finalise). 148 api tests green.
 - T10.3 (✓): score engine + 7 tests (6 unit + 1 integration incl. ladder + capacity transitions). 155 api tests green.
+- T10.4 (✓): LiveSpotScreen + detail members sketches; two-device acceptance deferred to staging per protocol.
