@@ -8,7 +8,6 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import pg from 'pg';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { sql } from 'drizzle-orm';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@meshpoke.hk';
 
