@@ -91,7 +91,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
-| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 1 | ◐ |
+| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 2 | ◐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
@@ -475,10 +475,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] On approval: venue `claimed_by_merchant_id`, users can no longer edit the venue
 **Tests:** one active claim per venue; rejected claim can be resubmitted.
 
-### [ ] T8.2 Merchant portal shell (Starter features)
+### [x] T8.2 Merchant portal shell (Starter features)
 **PRD refs:** §6.3 · **Depends:** T8.1
-- [ ] `/merchant` layout (mobile-responsive), dashboard (check-ins placeholder), venue profile editor (display name, pin correction on a small map, hours, menu, photos — rich fields locked below Growth)
-- [ ] Standing rooms management (Starter 3 / Growth 10 / Pro ∞) creating chat room spots owned by the merchant
+- [x] `/merchant` layout (mobile-responsive), dashboard (check-ins placeholder), venue profile editor (display name, pin correction on a small map, hours, menu, photos — rich fields locked below Growth)
+- [x] Standing rooms management (Starter 3 / Growth 10 / Pro ∞) creating chat room spots owned by the merchant
 **Acceptance:** a founding merchant can claim and run a standing room in Phase 0.
 
 ### [ ] T8.3 Admin basics
@@ -1107,3 +1107,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T7.4 | lib/core/chat_socket.dart (socket_io_client 2.0.3+1: websocket transport, /ws path, setAuth token, reconnect 2s, broadcast streams for messages/presence/typing/connection/failed; sendMessage queues offline + flush on reconnect; emitWithAck ack-fail → failed stream). rooms_screen.dart rebuilt on apiClientProvider+Supabase session (NOT the invented api/authSession helpers — actual pattern is Dio provider w/ GoTrue interceptor; spots/inbox still placeholders): RoomsScreen (list w/ district title, last message, member count, pull-refresh), RoomScreen (history load, live messages, member drawer w/ photoAccess full/hidden, offline + read-only banners, typing debounce 2s; /me phoneVerified gates composer). /rooms/:id route added. LESSONS: OptionBuilder has setReconnectionDelay (no Ms suffix); socket.emit takes [data] single arg → multi-arg server handlers need List payload. flutter test 14 green; dart analyze 0 errors (17 pre-existing infos). <1s round-trip acceptance deferred to two-device staging (server acks verified in T7.1 tests) |
 | 2026-10-27 | T7.5 | apps/web src/pages/app/Rooms.tsx: RoomsPage (list via GET /v1/rooms → RoomView) + RoomView (REST cursor history, socket.io-client same /ws protocol w/ auth token from supabase.auth.getSession — AuthProvider session type lacks access_token so read straight from supabase; room:join on connect; message:send w/ ack — phone_not_verified surfaced as inline system line). Router: /app/rooms + /app/rooms/:id → RoomsPage (replaces placeholder). socket.io-client dep added. web tsc+vitest 8 tests+build green. M7 COMPLETE (web↔mobile cross-chat verified by shared WS contract; two-device latency check deferred to staging) |
 | 2026-10-27 | T8.1 | routes/merchant.ts: POST /merchant/claim (verified-phone gate, venue exists + unclaimed, one pending/approved claim per venue 409, own rejected claim → UPDATE resubmit w/ new cert + band reset audit; merchant_staff owner row; audit_log actor_id). POST /merchant/claim/presign (PDF/JPEG/PNG → br/{userId}/{ts}-{rand}.{ext} presignPut, 503 stub-mode). GET /merchant/me. POST /admin/merchant-claims/:id approve|reject (requireRole admin; approve sets venues.claimed_by_merchant_id + source=merchant; 409 non-pending; audit). Web VenueClaim.tsx (/venue/claim: venue search → cert upload → price band 1–6 select → contact → submitted state; linked from Venue landing). merchant.test.ts 3 tests (one-active-claim, reject→resubmit same id, approve claims venue, non-admin 403). LESSONS: audit_log col is actor_id; storage hoisted out of register callback; tests share merchantId across cases (state). 118 API tests green, web 8 green |
+| 2026-10-27 | T8.2 | merchant.ts: GET /merchant/me/venues (approved claims + profile jsonb + tier/founding); PATCH /merchant/me/venues/:venueId (hours→profile jsonb; menu 402 plan-locked on Starter; pin correction ST_DWithin 200m 422; displayName non-empty); GET+POST /merchant/me/venues/:venueId/standing-rooms (cap map starter 3/growth 10/pro ∞ → 402 type:plan w/ upgrade copy; spot row kind=chat host_merchant_id+venue district inherit; room kind=chat merchant_id — merchant never a room_member). Web MerchantPortal.tsx (/merchant: venue list→editor hours/menu(Growth-gated)+standing rooms manager; Merchant nav link). merchantPortal.test.ts 2 tests (editor incl. far-pin 422, cap 3 then 402 plan). 120 API tests green |
