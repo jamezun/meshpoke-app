@@ -2,9 +2,9 @@
   "name": "@meshpoke/shared",
   "version": "0.0.1",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "echo 'build lands in a later milestone'",
+    "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -19,9 +19,14 @@
     "tsx": "^4.19.2"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./time": "./src/time.ts",
-    "./constants": "./src/constants.ts",
-    "./keywords": "./src/keywords.ts"
-  }
+    ".": "./dist/index.js",
+    "./constants": "./dist/constants.js",
+    "./keywords": "./dist/keywords.js",
+    "./time": "./dist/time.js",
+    "./vibe": "./dist/vibe.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ]
 }

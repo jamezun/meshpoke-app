@@ -58,7 +58,7 @@ export function registerAdmin(app: FastifyInstance, dbUrl: string, storage: Stor
   );
 
   // ── merchant claims (view BR cert via signed URL) ───────────────
-  app.get('/admin/merchant-claims', { preHandler: [app.authenticate, app.requireAdminRole('support')] }, async (req) => {
+  app.get('/admin/merchant-claims', { preHandler: [app.authenticate, app.requireAdminRole('support')] }, async () => {
     const rows = asRows<{ id: string; venue_id: string; venue: string; owner: string; cert_key: string; price_band: number; claim_status: string; created_at: Date }>(
       await db.execute(sql`select ma.id, ma.venue_id, v.display_name as venue, u.email as owner, ma.business_reg_cert_key as cert_key,
         ma.price_band, ma.claim_status::text as claim_status, ma.created_at

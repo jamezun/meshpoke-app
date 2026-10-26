@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { io, type Socket } from 'socket.io-client';
 import { supabase } from '../../auth/supabase.js';
 

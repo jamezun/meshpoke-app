@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { AppPage } from './Placeholder';
 
 const INDUSTRIES = ['Finance', 'Tech', 'Design', 'Media', 'Medical', 'Legal', 'Education', 'Hospitality', 'Student', 'Other'];
 

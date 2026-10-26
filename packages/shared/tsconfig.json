@@ -1,11 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "noEmit": false
+  },
   "include": [
     "src"
   ],
-  "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noEmit": true
-  }
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
 }

@@ -1,0 +1,71 @@
+# Dokploy Compose app: paste in Dokploy (Compose type, source = github.com/jamezun/meshpoke-app main).
+# Requires Dokploy network dokploy-network (shared with supabase-db, alias `db`).
+# Env vars from infra/staging/.env.staging — set in Dokploy app env before deploy.
+# Traefik labels assume Dokploy's proxy; HTTPS via Dokploy domains attached to each service.
+
+services:
+  meshpoke-api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://meshpoke-redis:6379
+      - GOTRUE_URL=http://meshpoke-auth:9999
+      - GOTRUE_JWT_SECRET=${GOTRUE_JWT_SECRET}
+      - GOTRUE_SERVICE_ROLE_KEY=${GOTRUE_SERVICE_ROLE_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - RATE_LIMIT_MAX=300
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY}
+      - QR_HMAC_SECRET=${QR_HMAC_SECRET}
+      - ADMIN_BOOTSTRAP_PASSWORD=${ADMIN_BOOTSTRAP_PASSWORD}
+    depends_on: [meshpoke-redis]
+    networks: [dokploy-network]
+    deploy:
+      resources:
+        limits: { memory: 512M }
+
+  meshpoke-web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    networks: [dokploy-network]
+    deploy:
+      resources:
+        limits: { memory: 128M }
+
+  meshpoke-auth:
+    image: supabase/gotrue:v2.171.0
+    environment:
+      - GOTRUE_API_HOST=0.0.0.0
+      - GOTRUE_API_PORT=9999
+      - GOTRUE_SITE_URL=${GOTRUE_SITE_URL}
+      - GOTRUE_URI_ALLOW_LIST=${GOTRUE_URI_ALLOW_LIST}
+      - GOTRUE_DB_DRIVER=postgres
+      - GOTRUE_DB_DATABASE_URL=${GOTRUE_DB_DATABASE_URL}
+      - GOTRUE_JWT_SECRET=${GOTRUE_JWT_SECRET}
+      - GOTRUE_JWT_EXP=3600
+      - GOTRUE_DISABLE_SIGNUP=false
+      - GOTRUE_EXTERNAL_EMAIL_ENABLED=true
+      - GOTRUE_MAILER_AUTOCONFIRM=true
+      - GOTRUE_SMS_AUTOCONFIRM=false
+      - GOTRUE_LOG_LEVEL=info
+    networks: [dokploy-network]
+    deploy:
+      resources:
+        limits: { memory: 192M }
+
+  meshpoke-redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 96mb --maxmemory-policy allkeys-lru --appendonly no
+    networks: [dokploy-network]
+    deploy:
+      resources:
+        limits: { memory: 128M }
+
+networks:
+  dokploy-network:
+    external: true

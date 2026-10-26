@@ -3,7 +3,6 @@
  * flagged otherwise), per-user message rate limit 20/min (Redis),
  * applied on WS message:send and mirrored for REST posting.
  */
-import type { FastifyInstance } from 'fastify';
 import type { Redis } from 'ioredis';
 
 export const MSG_RATE_LIMIT_PER_MIN = 20;

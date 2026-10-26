@@ -19,3 +19,5 @@ coverage/
 .flutter-plugins*
 .openapi-generator/
 apps/api/dist/
+infra/staging/.env.staging
+infra/staging/.db-url
