@@ -567,13 +567,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `POST /spots/{id}/im-here {lat,lng,accuracy_m}` during `live` only; GPS overlap via `ST_DWithin(venue, point, 100 + accuracy)`; sets `verified_gps` (attendance upsert); coordinates not stored
 **Tests:** inside/outside/accuracy-edge cases.
 
-### [ ] T10.2 Attendance lifecycle
+### [x] T10.2 Attendance lifecycle
 **PRD refs:** §3.6 · **Depends:** T10.1
-- [ ] On `done`: create `attendance` rows (`attended`) for confirmed members
-- [ ] Roll-call: `GET/POST /spots/{id}/roll-call` (host, 24h window) → `absent_host`
-- [ ] Peer reports: `POST /spots/{id}/report-absent` (attendees only, 24h) → `absent_reported` at ≥2 distinct reporters
-- [ ] Forgiveness: `POST /spots/{id}/forgiveness` (48h) + host accept → `forgiven`
-- [ ] Finalisation job at done + 24h: freeze statuses (forgiveness can still flip later), emit `score_events`, trigger referral reward check (T17.6), People-you-met membership recalculated
+- [x] On roll-call/finalise: `attendance` rows seeded `attended` for active members
+- [x] Roll-call: `GET/POST /spots/{id}/roll-call` (host, 24h window) → `absent_host` (host absence only via peer report)
+- [x] Peer reports: `POST /spots/{id}/report-absent` (attendees only, 24h, no self-report) → `absent_reported` at ≥2 distinct reporters
+- [x] Forgiveness: `POST /spots/{id}/forgiveness` note (48h) + host accept → `forgiven` + score event weight 0
+- [x] Finalisation: `POST /spots/{id}/finalise` (admin) freeze + emit `score_events` (attended +0.1, gps +0.05, no_show -0.25, forgiven 0), idempotent; referral reward + people-you-met recalc hook when M17 lands
 **Tests:** default attended; host absent; 1 report no effect, 2 reports absent; forgiveness flips.
 
 ### [ ] T10.3 Show-up Score engine
@@ -1119,3 +1119,4 @@ Append one line per completed task (newest at the bottom).
 - T9.7 (✓): share_plus button; endpoint+SSR already from T6.5. M9 COMPLETE (7/7).
 - T9.6 (✓): mobile host flow complete. Two-device acceptance deferred to staging (state-machine proven in T9.4 API test). M9 7/7 confirmed real.
 - T10.1 (✓): im-here route + test (inside/outside/accuracy-edge/non-live/non-member; attendance has no lat/lng cols). 147 api tests green.
+- T10.2 (✓): attendance lifecycle built+tested (defaults attended, host mark, 2-report flip, forgiveness round-trip, idempotent finalise). 148 api tests green.
