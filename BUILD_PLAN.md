@@ -576,12 +576,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Finalisation: `POST /spots/{id}/finalise` (admin) freeze + emit `score_events` (attended +0.1, gps +0.05, no_show -0.25, forgiven 0), idempotent; referral reward + people-you-met recalc hook when M17 lands
 **Tests:** default attended; host absent; 1 report no effect, 2 reports absent; forgiveness flips.
 
-### [ ] T10.3 Show-up Score engine
+### [x] T10.3 Show-up Score engine
 **PRD refs:** §3.6 · **Depends:** T10.2
-- [ ] Score computation (0–1) from weighted events with 90-day decay; unproven until 3 finalised outcomes; `proven_state` thresholds (constants)
-- [ ] Hosting capacity updates from score (unproven 1 → proven 3 → top 5)
-- [ ] Enforcement ladder (warning → application cooldown → hosting paused) with notifications
-- [ ] Nightly recompute job
+- [x] Score computation (0–1): baseline 0.5 + decayed weights (positives decay to 0 at 90d, negatives never fully vanish); unproven until 3 events; proven ≥0.6, top ≥0.85 w/ 6+
+- [x] Hosting capacity updates from proven_state (unproven 1 → proven 3 → top 5), applied in recompute
+- [x] Enforcement ladder endpoint (none → warning → application_cooldown → hosting_paused from recent no-shows + score); notifications wired at M14
+- [x] Recompute job `POST /internal/score-recompute` (all users or single; cron wiring at M14)
 **Tests:** score monotonicity cases; decay; capacity transitions.
 
 ### [ ] T10.4 Mobile: live & after-event UX
@@ -1120,3 +1120,4 @@ Append one line per completed task (newest at the bottom).
 - T9.6 (✓): mobile host flow complete. Two-device acceptance deferred to staging (state-machine proven in T9.4 API test). M9 7/7 confirmed real.
 - T10.1 (✓): im-here route + test (inside/outside/accuracy-edge/non-live/non-member; attendance has no lat/lng cols). 147 api tests green.
 - T10.2 (✓): attendance lifecycle built+tested (defaults attended, host mark, 2-report flip, forgiveness round-trip, idempotent finalise). 148 api tests green.
+- T10.3 (✓): score engine + 7 tests (6 unit + 1 integration incl. ladder + capacity transitions). 155 api tests green.
