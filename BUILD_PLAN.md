@@ -83,7 +83,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
-| M0 Foundations | 0 | 6 | 5 | ◐ |
+| M0 Foundations | 0 | 6 | 6 | ✓ |
 | M1 Database & shared package | 0 | 5 | 0 | ☐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
@@ -156,21 +156,21 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Cache pnpm store and Flutter pub cache
 **Acceptance:** a PR shows green checks.
 
-### [ ] T0.6 Shared constants package
+### [x] T0.6 Shared constants package
 **PRD refs:** BM §4, §7.3; PRD §3.8, §3.10, §8 · **Depends:** T0.1
-- [ ] `packages/shared/src/constants.ts` containing **every** business number:
-  - [ ] Caps: event 3/5/10, chat 5/10/20, merchant 10/30/∞, crews 3/10/∞
-  - [ ] Pokes: weekly 5/20/50, expiry 7 days, reset Monday 00:00 HKT, note length 200/200/500, post-spot window 48h, referral 5+5, referral cap 10/month
-  - [ ] Recommended sort: weights 0.2/0.5/0.3, tier values 0/0.6/1.0, unproven score 0.5, neutral vibe 0.5
-  - [ ] Spots: confirm window 48h, bail grace 24h, roll-call window 24h, peer report threshold 2, forgiveness window 48h, hosting capacity 1/3/5, crew dormancy 60d, room decay 14d
-  - [ ] Score: unproven threshold 3 events, decay 90 days
-  - [ ] Merchant: bands `[{max:50,fee:3},{max:100,fee:6},{max:200,fee:12},{max:500,fee:25},{max:1000,fee:50},{max:null,fee:80}]` (HKD), sponsored multiplier 1.5, attribution visits 3 within 60 days, membership release 60d, inactivity options 30/60/90, venue member caps 25/100/∞, standing rooms 3/10/∞, ladder max levels 3/5/5, discount info threshold 20%, founding free months 3, guarantee 30 seats, shadow months 1
-  - [ ] Prices (web + IAP) for every product in PRD §8.1 and merchant products in §8.3
-  - [ ] Notification: proximity max 1/day, quiet hours 23:00–08:00
-  - [ ] Geo: GPS overlap base radius 100 m, duplicate venue radius 50 m
-  - [ ] QR: window 30 s, tolerance ±1, replay TTL 120 s
-- [ ] `packages/shared/src/time.ts`: HKT helpers incl. `mostRecentMondayMidnightHKT(now)`
-- [ ] Script `pnpm shared:dart` generating `apps/mobile/lib/core/constants.g.dart` from `constants.ts`
+- [x] `packages/shared/src/constants.ts` containing **every** business number:
+  - [x] Caps: event 3/5/10, chat 5/10/20, merchant 10/30/∞, crews 3/10/∞
+  - [x] Pokes: weekly 5/20/50, expiry 7 days, reset Monday 00:00 HKT, note length 200/200/500, post-spot window 48h, referral 5+5, referral cap 10/month
+  - [x] Recommended sort: weights 0.2/0.5/0.3, tier values 0/0.6/1.0, unproven score 0.5, neutral vibe 0.5
+  - [x] Spots: confirm window 48h, bail grace 24h, roll-call window 24h, peer report threshold 2, forgiveness window 48h, hosting capacity 1/3/5, crew dormancy 60d, room decay 14d
+  - [x] Score: unproven threshold 3 events, decay 90 days
+  - [x] Merchant: bands `[{max:50,fee:3},{max:100,fee:6},{max:200,fee:12},{max:500,fee:25},{max:1000,fee:50},{max:null,fee:80}]` (HKD), sponsored multiplier 1.5, attribution visits 3 within 60 days, membership release 60d, inactivity options 30/60/90, venue member caps 25/100/∞, standing rooms 3/10/∞, ladder max levels 3/5/5, discount info threshold 20%, founding free months 3, guarantee 30 seats, shadow months 1
+  - [x] Prices (web + IAP) for every product in PRD §8.1 and merchant products in §8.3
+  - [x] Notification: proximity max 1/day, quiet hours 23:00–08:00
+  - [x] Geo: GPS overlap base radius 100 m, duplicate venue radius 50 m
+  - [x] QR: window 30 s, tolerance ±1, replay TTL 120 s
+- [x] `packages/shared/src/time.ts`: HKT helpers incl. `mostRecentMondayMidnightHKT(now)`
+- [x] Script `pnpm shared:dart` generating `apps/mobile/lib/core/constants.g.dart` from `constants.ts`
 **Tests:** snapshot test of constants; unit tests for `time.ts` (DST-free HKT, Monday boundary cases).
 **Acceptance:** API, web and mobile import constants from one source.
 
@@ -1069,3 +1069,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T0.3 | API skeleton: Fastify 5 factory (app.ts/server.ts split), CORS allowlist + helmet + rate-limit (Redis store, health exempt) + sensible + Zod type provider + problem+json errors w/ request ids, swagger /docs dev-only + openapi.json export script, /v1/health (db+redis checks), pino + dotenv, Vitest + Testcontainers (PostGIS+Redis per run) — 3 integration tests green | WSL: testcontainers needs DOCKER_CONFIG shim (infra/test-docker-config) b/c Docker Desktop credsStore; pnpm override cookie@^1.0.2 (ESM-only cookie@2 breaks light-my-request require); dev env via dotenv not NODE_OPTIONS (--env-file blocked) |
 | 2026-10-26 | T0.4 | Generated clients: packages/api-client (openapi-typescript + openapi-fetch wrapper w/ bearer hook); Dart dart-dio SDK at apps/mobile/meshpoke_api (pubName=meshpoke_api) via openapi-generator Docker image (no local Java); single pnpm api:openapi chains spec + TS + Dart | Dart SDK consumed as path dep when apps/mobile pubspec lands (T5.1); regenerate needs docker |
 | 2026-10-26 | T0.5 | GitHub Actions CI (.github/workflows/ci.yml): node job (pnpm cache, typecheck/lint/test w/ Testcontainers/build) + flutter placeholder job; green on main run 40282383354 | hashFiles() is step-level only (job-level if broke workflow); CI caught ioredis default-import vs NodeNext — named import; ubuntu-latest→26 migration notice |
+| 2026-10-26 | T0.6 | packages/shared: constants.ts (all business numbers — tiers/caps, web+IAP prices, poke rules, sort weights 0.2/0.5/0.3, spot windows, score, merchant bands/prices/rules, notify, geo, QR), time.ts (HKT fixed UTC+8, mostRecentMondayMidnightHKT, quiet hours), gen-dart.ts → apps/mobile/lib/core/constants.g.dart; 14 vitest green | Infinity encodes unlimited in TS; Dart gets double.infinity; gen script root = ../../.. from scripts dir |
