@@ -33,6 +33,7 @@ import { registerAttendance } from './routes/attendance.js';
 import { registerScore } from './routes/score.js';
 import { registerPokeLedger } from './routes/pokeLedger.js';
 import { registerPokes } from './routes/pokes.js';
+import { registerSafety } from './routes/safety.js';
 import { registerCrews } from './routes/crews.js';
 import { registerRebook } from './routes/rebook.js';
 import { registerMerchant } from './routes/merchant.js';
@@ -159,6 +160,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(async (r) => registerScore(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerPokeLedger(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerPokes(r, config.DATABASE_URL), { prefix: '/v1' });
+  await app.register(async (r) => registerSafety(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerCrews(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerRebook(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMerchant(r, config.DATABASE_URL, storage), { prefix: '/v1' });

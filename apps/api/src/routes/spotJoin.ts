@@ -139,7 +139,10 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     const members = rows(await db.execute(sql`
       select m.user_id as "userId", u.display_name as "displayName", m.role, ${trustExpr(userId)}
         from spot_members m join users u on u.id = m.user_id
-       where m.spot_id = ${req.params.id}::uuid and m.state = 'active' and m.role in ('host','member')`));
+       where m.spot_id = ${req.params.id}::uuid and m.state = 'active' and m.role in ('host','member')
+         and not exists (select 1 from blocks b
+             where (b.blocker_id = ${userId}::uuid and b.blocked_id = m.user_id)
+                or (b.blocker_id = m.user_id and b.blocked_id = ${userId}::uuid))`));
     return { ...spot[0], members };
   });
 

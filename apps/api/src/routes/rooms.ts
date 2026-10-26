@@ -91,6 +91,9 @@ export function registerRooms(app: FastifyInstance, dbUrl: string) {
         join users u on u.id = rm.user_id and u.deleted_at is null
         left join profiles p on p.user_id = u.id
        where rm.room_id = ${req.params.id} and rm.left_at is null
+         and not exists (select 1 from blocks b
+             where (b.blocker_id = ${req.user!.id}::uuid and b.blocked_id = rm.user_id)
+                or (b.blocker_id = rm.user_id and b.blocked_id = ${req.user!.id}::uuid))
        order by rm.joined_at limit 200`);
     const rows = (res as unknown as { rows: Record<string, unknown>[] }).rows;
     const members = await Promise.all(rows.map(async (r) => {

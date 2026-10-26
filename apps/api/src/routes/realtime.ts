@@ -81,6 +81,13 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
         const a = await roomAccess(userId, p.roomId);
         if (!a.exists || !a.member) return fail('not_a_member');
         if (!a.verified) return fail('phone_not_verified'); // server-enforced posting gate (T7.2)
+        // T13.1: latest moderation action mute/suspend → posting disabled pending review
+        const mod = (await db.execute(sql`
+          select action from moderation_actions where target_user = ${userId}::uuid
+           order by created_at desc limit 1`)) as unknown as { rows: { action: string }[] };
+        if (mod.rows[0] && (mod.rows[0].action === 'mute' || mod.rows[0].action === 'suspend')) {
+          return fail('muted_pending_review');
+        }
         if (!(await checkMsgRate(redis, userId))) return fail('rate_limited'); // T7.3: 20/min
         const guard = messageGuard(a.verified, p.body); // T7.3: link/handle flags
         if (!guard.ok) return fail(guard.error);

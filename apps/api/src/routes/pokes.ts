@@ -125,6 +125,9 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
         left join entitlements e on e.user_id = p.from_user and (e.expires_at is null or e.expires_at > now())
         left join keywords k on k.user_id = p.from_user
        where p.to_user = ${me}::uuid and p.status = 'pending' and p.expires_at > now()
+         and not exists (select 1 from blocks b
+             where (b.blocker_id = ${me}::uuid and b.blocked_id = p.from_user)
+                or (b.blocker_id = p.from_user and b.blocked_id = ${me}::uuid))
        group by p.id, e.plan, u.id`));
     const myKw = rows(await db.execute(sql`select keyword, level from keywords where user_id = ${me}::uuid`))
       .map((k) => ({ keyword: String(k.keyword).toLowerCase(), level: k.level as number }));
