@@ -134,3 +134,12 @@ describe('T4.4 user venues', () => {
     expect(none.json().venues).toHaveLength(0);
   });
 });
+
+describe('T4.6 attributions', () => {
+  it('GET /meta/attributions is public and includes DATA.GOV.HK wording', async () => {
+    const res = await app!.inject({ method: 'GET', url: '/v1/meta/attributions' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().attributions.data_gov_hk).toContain('DATA.GOV.HK');
+    expect(res.json().attributions.als).toContain('Lands Department');
+  });
+});
