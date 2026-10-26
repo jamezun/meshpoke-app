@@ -85,7 +85,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
 | M1 Database & shared package | 0 | 5 | 5 | ✔ |
-| M2 Auth & accounts | 0 | 5 | 3 | ◐ |
+| M2 Auth & accounts | 0 | 5 | 4 | ◐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
 | M5 Mobile foundation | 0 | 6 | 0 | ☐ |
@@ -242,10 +242,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Rate limit OTP requests 3/hour per user and per IP
 **Tests:** happy path; duplicate phone; non-852 rejected.
 
-### [ ] T2.4 Account deletion & data export
+### [x] T2.4 Account deletion & data export
 **PRD refs:** §5.3 (Settings), §14, §15 (Retention) · **Depends:** T2.2
-- [ ] `DELETE /me`: soft delete (`deleted_at`), revoke sessions (GoTrue admin), hide from all queries; anonymisation job after 30 days
-- [ ] `GET /me/export`: JSON of the user's own data (profile, keywords, pokes sent, messages authored, memberships, subscriptions)
+- [x] `DELETE /me`: soft delete (`deleted_at`), revoke sessions (GoTrue admin), hide from all queries; anonymisation job after 30 days
+- [x] `GET /me/export`: JSON of the user's own data (profile, keywords, pokes sent, messages authored, memberships, subscriptions)
 **Tests:** deleted user disappears from viewport/member lists; export contains only own data.
 
 ### [ ] T2.5 Caps & entitlements read model (stub)
@@ -1078,3 +1078,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T2.1 | src/auth.ts: authenticate decorator (jose jwtVerify HS256, sub→users row, Redis auth:user:<id> 60s cache w/ graceful fallback), requirePhoneVerified→403, requireRole(admin)→403; users.is_admin bool (0005, seed admin updated); wired in app.ts after routes. Tests: 3 (401 no/expired/forged token, 200 valid+claims; phone+admin guards; ghost sub 401). Mini Fastify instance in test (cannot add routes to listening app). jose exports jwtVerify NOT verify | 29 api tests green |
 | 2026-10-26 | T2.2 | routes/me.ts: POST /me/onboard (calendar-date HKT 18+ gate — no Duration math; referral resolve w/ self-ref block; referral_code MP+6 CJO-free alphabet w/ collision retry; users+profiles row in tx; idempotent + race-safe), GET /me (join profiles), PATCH /me (display_name/industry enum 10/role_oneliner 40/hide_photo). AuthUser.onboarded flag — authenticate no longer 401s pre-onboard users (chicken-and-egg fix; cached 60s). shared package exports ./time ./constants. Tests: 5 (17y364d→422/18y0d→201 — dobFor offset +1 = 18th birthday tomorrow, first sign was backwards; idempotent onboard; referral link + self-ignore; PATCH validation) | 34 tests green |
 | 2026-10-26 | T2.3 | gotrue.ts client (sendOtp/adminGetUser/adminSignOutAll, raw fetch); routes/phone.ts: POST /me/phone/otp (validate ^\+852\d{8}$, Redis INCR 3/h per user + 10/h per IP — IP looser for HK NAT, proxy to GoTrue), POST /me/phone/confirm (GoTrue phone_confirmed_at check 409, 852 re-validate, piiHash dup 409, encryptPii store + phone_verified_at, auth cache DEL). auth cache invalidation on onboard + phone-confirm. Tests: 4 (happy, unconfirmed/foreign 409/422, dup phone 409, 429). LESSONS: pii.ts reads process.env directly — test/setup.ts seeds PII key; per-IP 3/h blocks NAT offices | 38 tests green |
+| 2026-10-26 | T2.4 | routes/dataOwner.ts: DELETE /me (deleted_at soft + GoTrue adminSignOutAll + auth cache DEL), GET /me/export (account w/o PII ciphertext, profile, keywords, pokes SENT only — received excluded, messages authored, memberships, subs). jobs/anonymize-deleted.ts (30d scrub: name→Deleted user, email→deleted+id@meshpoke.invalid, phone cols NULL, referral_code→DEL+id8 — NOT NULL so not NULL; idempotent via anonymized_at; `pnpm anonymize` cron entrypoint; tests pass dbUrl). migration 0006 anonymized_at. Tests: 4. LESSON: drizzle renders eq(undefined-col, v) as bare `where = $1` at RUNTIME while tsc catches typos — always typecheck before test-debug | 42 tests green |
