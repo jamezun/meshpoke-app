@@ -84,7 +84,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
-| M1 Database & shared package | 0 | 5 | 3 | ◐ |
+| M1 Database & shared package | 0 | 5 | 4 | ◐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
@@ -201,11 +201,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `drop_claims (drop_id, user_id)` unique
 **Acceptance:** full schema migrates from zero in < 30 s.
 
-### [ ] T1.4 Seed data
+### [x] T1.4 Seed data
 **PRD refs:** §4.3, §16 · **Depends:** T1.3
-- [ ] `infra/seed/districts.geojson` — 18 HK district boundaries (source: HK government open data; record source + licence in `infra/seed/SOURCES.md`)
-- [ ] Seed script: districts, `founding_counters` (`consumer_500`, `merchant_50`), city chat room per district, admin user from `ADMIN_EMAIL`
-- [ ] Spot templates list + default durations in `constants.ts` (no table needed)
+- [x] `infra/seed/districts.geojson` — 18 HK district boundaries (source: HK government open data; record source + licence in `infra/seed/SOURCES.md`)
+- [x] Seed script: districts, `founding_counters` (`consumer_500`, `merchant_50`), city chat room per district, admin user from `ADMIN_EMAIL`
+- [x] Spot templates list + default durations in `constants.ts` (no table needed)
 **Tests:** after seed, a point in Central resolves to "Central and Western" via `ST_Contains`.
 **Acceptance:** `pnpm db:seed` is idempotent.
 
@@ -1073,3 +1073,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T1.1 | Drizzle schema core.ts (users, profiles, keywords w/ citext, districts, venues, venue_reports, saved_venues) + geo.ts customTypes + migration 0000 (postgis+citext extensions, keyword caps trigger 10/3-level-8); schema-core.test.ts 4 tests; db:generate strips quoted geography typmods (drizzle-kit bug workaround) | drizzle-kit quotes customType dataType names — "geography(Point,4326)" broken, sed fix in scripts/db-generate.sh; users.id has NO FK to auth.users (tests run without auth schema) |
 | 2026-10-26 | T1.2 | schema/spots.ts: 18 tables (spots..rebooks) + 20 enums; migration 0001 + hand-appended connections_pair_idx functional unique index (drizzle-kit cannot express), GIST on venues.location + districts.boundary into 0000; schema-spots.test.ts 5 tests (tables, §11.2 indexes, partial index def, pair dedupe, headcount check) | messages_room_idx uses DESC in index expr — drizzle sql` in .on() worked; dateRange stored as text (API constructs bounds) |
 | 2026-10-26 | T1.3 | schema/merchant.ts (16 tables incl seat_charges unique checkin_id, drop_claims unique, founding_counters, invoices) + schema/platform.ts (10 tables: activity, prefs, mutes, proximity_log 1/day pk, push tokens, blocks, reports, moderation, safety_ratings private, audit_log); migration 0002; schema-merchant.test.ts 4 tests (full migrate <30s, 26 tables, uniqueness) | subscriptions.channel/product as varchar w/ app-level enum validation (drizzle enum churn not worth it) |
+| 2026-10-26 | T1.4 | infra/seed/districts.geojson (18 HK districts w/ zh names, normalized MultiPolygon, source+licence in SOURCES.md — swap to CSDI official before launch); db/seed.ts idempotent (districts upsert, city room per district, founding_counters consumer_500/merchant_50, admin user); SPOT_TEMPLATES (11 + default hours) in constants.ts + Dart; migration 0003 users_email unique; seed.test.ts 3 tests | github southparkstan123/hong-kong-geojson had Polygon+GeometryCollection+MultiPolygon mixed — normalized; zh names standard public |
