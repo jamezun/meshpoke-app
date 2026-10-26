@@ -8,6 +8,7 @@ import * as schema from '../src/db/schema/index.js';
 import { buildApp } from '../src/app.js';
 import { seedDistricts } from '../src/db/seed.js';
 import { useInfra, stopInfra } from './db.js';
+import { sql } from 'drizzle-orm';
 import { dmShareAttendedSpot } from '../src/safety.js';
 import { getDb } from '../src/db/client.js';
 
@@ -75,6 +76,52 @@ test('dm link lock: shared attended spot unlocks; otherwise stays locked; room f
   expect(await dmShareAttendedSpot(db, users.a.id, users.b.id)).toBe(true);
 
 
+});
+
+test('T13.2 scam interstitial: unconfirmed scam/contact send fails confirm_required; confirmed send stores flags', async () => {
+  const db = getDb(dbUrl);
+  await app.listen({ port: 0, host: '127.0.0.1' }); // real listener for WS upgrade
+  // use the shared done spot room from test above? safer: create fresh chat room via /v1/spots (chat kind)
+  const room = await app.inject({ method: 'POST', url: '/v1/spots', headers: tok('a'), payload: {
+    name: `scam test room ${crypto.randomUUID().slice(0, 6)}`, districtId,
+  }});
+  expect([200, 201]).toContain(room.statusCode);
+  const spotId = room.json().spotId;
+  const roomRow = (await db.execute(sql`select id from rooms where spot_id = ${spotId}::uuid`)) as unknown as { rows: { id: string }[] };
+  const roomId = roomRow.rows[0].id;
+  await db.execute(sql`insert into room_members (room_id, user_id) values (${roomId}::uuid, ${users.a.id}::uuid) on conflict do nothing`);
+
+  const { io } = await import('socket.io-client');
+  const addr = app.server.address() as { port: number };
+  const wsUrl = `http://127.0.0.1:${addr.port}`;
+  const ws = await new Promise<ReturnType<typeof io>>((resolve, reject) => {
+    const s = io(wsUrl, { path: '/ws', auth: { token: users.a.tok }, reconnection: false, timeout: 2000 });
+    s.once('connect', () => resolve(s));
+    s.once('connect_error', (e) => reject(e));
+  });
+
+  const send = (body: string, confirmed?: boolean) => new Promise<{ ok: boolean; error?: string; flags?: Record<string, boolean> }>((res) => {
+    ws.emit('message:send', { roomId, body, ...(confirmed === undefined ? {} : { confirmed }) }, (r: { ok: boolean; error?: string; flags?: Record<string, boolean> }) => res(r));
+  });
+
+  // scam content without confirm → rejected with flags for interstitial
+  const r1 = await send('join my crypto pool, guaranteed 50% return');
+  expect(r1.ok).toBe(false);
+  expect(r1.error).toBe('confirm_required');
+  expect(r1.flags?.['scam-crypto']).toBe(true);
+
+  // benign message passes
+  const r2 = await send('see you all at 7');
+  expect(r2.ok).toBe(true);
+
+  // confirmed send goes through, flags stored
+  const r3 = await send('join my crypto pool, guaranteed 50% return', true);
+  expect(r3.ok).toBe(true);
+  const stored = (await db.execute(sql`select flags from messages where room_id = ${roomId}::uuid and flags ? 'scam-crypto'`)) as unknown as { rows: { flags: Record<string, boolean> }[] };
+  expect(stored.rows.length).toBe(1);
+  expect(stored.rows[0].flags['scam-investment']).toBe(true);
+
+  ws.close();
 });
 
 test('poke→connection creates dm; disconnect closes dm for both (regression of T11.2 within T11.3 flow)', async () => {

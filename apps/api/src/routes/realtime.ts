@@ -74,7 +74,7 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
       socket.to(roomId).emit('typing', { roomId, userId, isTyping });
     });
 
-    socket.on('message:send', async (p: { roomId: string; body: string; clientMsgId?: string }, ack?: (r: unknown) => void) => {
+    socket.on('message:send', async (p: { roomId: string; body: string; clientMsgId?: string; confirmed?: boolean }, ack?: (r: unknown) => void) => {
       const fail = (error: string) => ack?.({ ok: false, error });
       try {
         if (typeof p?.body !== 'string' || p.body.length === 0 || p.body.length > 2000) return fail('bad_body');
@@ -89,8 +89,11 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
           return fail('muted_pending_review');
         }
         if (!(await checkMsgRate(redis, userId))) return fail('rate_limited'); // T7.3: 20/min
-        const guard = messageGuard(a.verified, p.body); // T7.3: link/handle flags
-        if (!guard.ok) return fail(guard.error);
+        const guard = messageGuard(a.verified, p.body, p.confirmed === true); // T7.3 + T13.2 scam interstitial
+        if (!guard.ok) {
+          // confirm_required carries flags so the client can render the interstitial
+          return ack?.({ ok: false, error: guard.error, ...(guard.error === 'confirm_required' ? { flags: guard.flags } : {}) });
+        }
         // T11.3 DM link lock: links/handles only between users who shared a spot
         if (a.room_kind === 'dm' && (guard.flags['link-detected'] || guard.flags['handle-detected'])) {
           const other = (await db.execute(sql`

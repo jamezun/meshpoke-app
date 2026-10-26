@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm';
  * applied on WS message:send and mirrored for REST posting.
  */
 import type { Redis } from 'ioredis';
+import { scanOutgoing } from '@meshpoke/shared/scam-patterns';
 
 export const MSG_RATE_LIMIT_PER_MIN = 20;
 
@@ -19,11 +20,18 @@ export function detectFlags(body: string): { hasLink: boolean; hasHandle: boolea
 export function messageGuard(
   verified: boolean,
   body: string,
-): { ok: true; flags: Record<string, boolean> } | { ok: false; error: string } {
+  confirmed = false,
+): { ok: true; flags: Record<string, boolean> } | { ok: false; error: string; flags?: Record<string, boolean> } {
   const { hasLink, hasHandle } = detectFlags(body);
   if (hasLink && !verified) return { ok: false, error: 'link_not_allowed' };
-  const flags: Record<string, boolean> = { 'link-detected': hasLink, 'handle-detected': hasHandle };
-  return { ok: true, flags: Object.fromEntries(Object.entries(flags).filter(([, v]) => v)) };
+  const scan = scanOutgoing(body); // T13.2 scam/contact patterns (shared lib)
+  const flags: Record<string, boolean> = {
+    'handle-detected': hasHandle, ...scan.flags, 'link-detected': hasLink,
+  };
+  const clean = Object.fromEntries(Object.entries(flags).filter(([, v]) => v));
+  // T13.2: scam/contact content requires an explicit interstitial confirm from the client
+  if (scan.requireConfirm && !confirmed) return { ok: false, error: 'confirm_required', flags: clean };
+  return { ok: true, flags: clean };
 }
 
 /** Sliding-window-ish fixed window in Redis: key per user per minute. */
