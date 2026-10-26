@@ -9,7 +9,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { jwtVerify } from 'jose';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
-import { messageGuard, checkMsgRate } from '../safety.js';
+import { messageGuard, checkMsgRate, dmShareAttendedSpot } from '../safety.js';
 
 
 export async function registerRealtime(app: FastifyInstance, dbUrl: string, redisUrl: string, goTrueSecret: string) {
@@ -38,7 +38,7 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
     const row = (res as unknown as { rows: Record<string, unknown>[] }).rows[0];
     if (!row) return { exists: false } as const;
     const verified = row.liveness === 'verified';
-    return { exists: true, member: row.member === true, verified } as const;
+    return { exists: true, member: row.member === true, verified, room_kind: String(row.room_kind ?? '') } as const;
   }
 
   io.use(async (socket, next) => {
@@ -84,6 +84,16 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
         if (!(await checkMsgRate(redis, userId))) return fail('rate_limited'); // T7.3: 20/min
         const guard = messageGuard(a.verified, p.body); // T7.3: link/handle flags
         if (!guard.ok) return fail(guard.error);
+        // T11.3 DM link lock: links/handles only between users who shared a spot
+        if (a.room_kind === 'dm' && (guard.flags['link-detected'] || guard.flags['handle-detected'])) {
+          const other = (await db.execute(sql`
+            select rm.user_id from room_members rm
+             where rm.room_id = ${p.roomId}::uuid and rm.user_id <> ${userId}::uuid and rm.left_at is null
+             limit 1`)) as unknown as { rows: { user_id: string }[] };
+          if (other.rows.length === 0 || !(await dmShareAttendedSpot(db, userId, other.rows[0].user_id))) {
+            return fail('dm_link_locked');
+          }
+        }
         const res = await db.execute(sql`
           insert into messages (room_id, user_id, body, flags)
           values (${p.roomId}, ${userId}, ${p.body}, ${JSON.stringify(guard.flags)}::jsonb)
