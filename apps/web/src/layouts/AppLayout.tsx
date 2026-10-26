@@ -4,7 +4,7 @@ import { supabase } from '../auth/supabase';
 
 const nav = [
   ['Inbox', '/app/inbox'], ['Spots', '/app/spots'], ['Rooms', '/app/rooms'],
-  ['Connections', '/app/connections'], ['Wallet', '/app/wallet'], ['Billing', '/app/billing'], ['Settings', '/app/settings'],
+  ['Connections', '/app/connections'], ['Wallet', '/app/wallet'], ['Billing', '/app/billing'], ['Settings', '/app/settings'], ['Merchant', '/merchant'],
 ] as const;
 
 export function AppLayout() {

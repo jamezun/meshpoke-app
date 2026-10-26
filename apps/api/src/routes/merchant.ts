@@ -89,6 +89,107 @@ export function registerMerchant(app: FastifyInstance, dbUrl: string, storage: S
     return { accounts: (res as unknown as { rows: unknown[] }).rows };
   });
 
+
+// ── T8.2 portal: venue editor + standing rooms (Starter) ────────
+
+const STANDING_ROOMS_CAP: Record<string, number> = { starter: 3, growth: 10, pro: Infinity };
+
+async function approvedVenue(db: ReturnType<typeof getDb>, userId: string, venueId: string) {
+  const res = await db.execute(sql`
+    select ma.id as merchant_id, ma.tier::text as tier
+      from merchant_accounts ma
+     where ma.owner_user_id = ${userId} and ma.venue_id = ${venueId}::uuid and ma.claim_status = 'approved'`);
+  return (res as unknown as { rows: { merchant_id: string; tier: string }[] }).rows[0] ?? null;
+}
+
+app.get('/merchant/me/venues', { preHandler: [app.authenticate] }, async (req) => {
+  const res = await db.execute(sql`
+    select v.id, v.display_name, v.category::text as category, v.profile, v.location::text as location,
+           ma.tier::text as tier, ma.founding, v.district_id
+      from merchant_accounts ma join venues v on v.id = ma.venue_id
+     where ma.owner_user_id = ${req.user!.id} and ma.claim_status = 'approved'`);
+  return { venues: (res as unknown as { rows: unknown[] }).rows };
+});
+
+app.patch<{ Params: { venueId: string }; Body: { displayName?: string; hours?: string; menu?: string; pinLat?: number; pinLng?: number } }>(
+  '/merchant/me/venues/:venueId',
+  { preHandler: [app.authenticate] },
+  async (req, reply) => {
+    const m = await approvedVenue(db, req.user!.id, req.params.venueId);
+    if (!m) return reply.code(404).send({ problem: { title: 'No approved claim for this venue', status: 404 } });
+    const b = req.body ?? {};
+    if (b.displayName !== undefined && !b.displayName?.trim()) {
+      return reply.code(422).send({ problem: { title: 'displayName cannot be empty', status: 422 } });
+    }
+    // menu = rich field, locked below Growth
+    if (b.menu !== undefined && m.tier === 'starter') {
+      return reply.code(402).send({ problem: { title: 'Menu is a Growth feature', status: 402, detail: 'Upgrade to Growth to add a menu.', type: 'plan' } });
+    }
+    const cur = await db.execute(sql`select profile, location from venues where id = ${req.params.venueId}::uuid`);
+    const row = (cur as unknown as { rows: { profile: Record<string, unknown> | null; location: string }[] }).rows[0];
+    const profile = { ...(row.profile ?? {}), ...(b.hours !== undefined ? { hours: b.hours } : {}), ...(b.menu !== undefined ? { menu: b.menu } : {}) };
+
+    let locSql = sql``;
+    if (b.pinLat !== undefined && b.pinLng !== undefined) {
+      if (typeof b.pinLat !== 'number' || typeof b.pinLng !== 'number' || Math.abs(b.pinLat) > 90 || Math.abs(b.pinLng) > 180) {
+        return reply.code(422).send({ problem: { title: 'Invalid pin coordinates', status: 422 } });
+      }
+      // pin correction only: within 200m of the existing pin (anti-abuse)
+      const moved = await db.execute(sql`
+        select st_distance(location, st_setsrid(st_makepoint(${b.pinLng}, ${b.pinLat}), 4326)::geography) as d
+          from venues where id = ${req.params.venueId}::uuid`);
+      const d = (moved as unknown as { rows: { d: string | number }[] }).rows[0].d;
+      if (Number(d) > 200) {
+        return reply.code(422).send({ problem: { title: 'Pin can only be corrected within 200m', status: 422 } });
+      }
+      locSql = sql`, location = st_setsrid(st_makepoint(${b.pinLng}, ${b.pinLat}), 4326)`;
+    }
+    await db.execute(sql`
+      update venues set display_name = coalesce(${b.displayName ?? null}, display_name),
+             profile = ${JSON.stringify(profile)}::jsonb${locSql}
+       where id = ${req.params.venueId}::uuid`);
+    return { ok: true };
+  },
+);
+
+app.get<{ Params: { venueId: string } }>('/merchant/me/venues/:venueId/standing-rooms', { preHandler: [app.authenticate] }, async (req, reply) => {
+  const m = await approvedVenue(db, req.user!.id, req.params.venueId);
+  if (!m) return reply.code(404).send({ problem: { title: 'No approved claim for this venue', status: 404 } });
+  const res = await db.execute(sql`
+    select s.id, s.name, r.id as room_id,
+           (select count(*)::int from room_members rm where rm.room_id = r.id and rm.left_at is null) as members
+      from spots s left join rooms r on r.spot_id = s.id
+     where s.host_merchant_id = ${m.merchant_id}::uuid
+     order by s.created_at desc`);
+  return { standingRooms: (res as unknown as { rows: unknown[] }).rows };
+});
+
+app.post<{ Params: { venueId: string }; Body: { name: string } }>(
+  '/merchant/me/venues/:venueId/standing-rooms',
+  { preHandler: [app.authenticate] },
+  async (req, reply) => {
+    const m = await approvedVenue(db, req.user!.id, req.params.venueId);
+    if (!m) return reply.code(404).send({ problem: { title: 'No approved claim for this venue', status: 404 } });
+    const name = req.body?.name?.trim();
+    if (!name || name.length > 60) return reply.code(422).send({ problem: { title: 'Name required (≤60 chars)', status: 422 } });
+
+    const cap = STANDING_ROOMS_CAP[m.tier] ?? 3;
+    const active = await db.execute(sql`
+      select count(*)::int as n from spots where host_merchant_id = ${m.merchant_id}::uuid`);
+    const n = (active as unknown as { rows: { n: number }[] }).rows[0].n;
+    if (n >= cap) {
+      return reply.code(402).send({ problem: { title: `Standing room cap reached (${cap})`, status: 402, detail: m.tier === 'starter' ? 'Growth tier unlocks 10 standing rooms.' : 'Pro tier unlocks unlimited standing rooms.', type: 'plan' } });
+    }
+    const res = await db.execute(sql`
+      with s as (insert into spots (kind, name, join_mode, min_headcount, max_headcount, venue_id, district_id, host_merchant_id)
+                 select 'chat', ${name}, 'open', 2, 500, id, district_id, ${m.merchant_id}::uuid from venues where id = ${req.params.venueId}::uuid returning id, district_id),
+           r as (insert into rooms (kind, spot_id, merchant_id, district_id)
+                 select 'chat', id, ${m.merchant_id}::uuid, district_id from s returning id)
+      select id from s`);
+    return { spotId: (res as unknown as { rows: { id: string }[] }).rows[0].id };
+  },
+);
+
   // admin approve/reject (RBAC enforced; also backs T8.3 review queue)
   app.post<{ Params: { id: string }; Body: { action: 'approve' | 'reject'; reason?: string } }>(
     '/admin/merchant-claims/:id',
