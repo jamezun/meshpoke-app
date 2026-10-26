@@ -316,12 +316,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Throttle (e.g. 2 req/s), retry with backoff; unresolved → `geocode_failed` queue for manual pin in admin
 **Tests:** conversion fixture (known landmark within 20 m); low-score handling.
 
-### [ ] T4.4 User-added venues, dedupe, reports, saves
+### [x] T4.4 User-added venues, dedupe, reports, saves
 **PRD refs:** §4.2, §12.2 · **Depends:** T4.1, T2.3
-- [ ] `POST /venues` (phone-verified): name, category, lat/lng; dedupe check (normalised name within 50 m → return `{duplicates:[...]}` and require `force=true`)
-- [ ] `POST /venues/{id}/report` (3 reports → admin queue)
-- [ ] `POST/DELETE /venues/{id}/save`
-- [ ] `GET /venues/search?q=&district=` (trigram index on display/legal names, EN + ZH)
+- [x] `POST /venues` (phone-verified): name, category, lat/lng; dedupe check (normalised name within 50 m → return `{duplicates:[...]}` and require `force=true`)
+- [x] `POST /venues/{id}/report` (3 reports → admin queue)
+- [x] `POST/DELETE /venues/{id}/save`
+- [x] `GET /venues/search?q=&district=` (trigram index on display/legal names, EN + ZH)
 **Tests:** dedupe; report threshold; search ranking.
 
 ### [ ] T4.5 Venue activity counts (marker size)
@@ -1087,3 +1087,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T4.1 | migration 0007: assign_district() plpgsql — venues BEFORE INSERT/UPDATE OF location sets district_id via ST_Contains(boundary::geometry, location::geometry); spots follows venue pin. routes/map.ts: GET /districts (18 w/ zh + outline), GET /districts/:id/spots (scoped, unknown → 404, today/week/all filter), GET /map/viewport?bbox (4-number validation, 0.5° max span = no world queries, venues ST_Within envelope + spots via district ST_Intersects, ≤400/200). seedDistricts() exported from seed.ts (script-guard via process.argv[1].endsWith(seed.ts)); map test reuses it. LESSONS: geography columns need ::geometry casts for ST_Contains/ST_Within/ST_Boundary/ST_Intersects; venues col = display_name not name | 86 tests green |
 | 2026-10-26 | T4.2 | +pg-boss +fast-xml-parser. src/venues/fehd.ts: parseFehdXml (isArray+parseTagValue:false → licence nos keep leading zeros; tolerant wrapper), applyFehdImport (upsert ON CONFLICT fehd_licence_no w/ xmax=0 inserted-detect; address changed → geocode_status pending; closure = active FEHD venue w/ licence not in today file → status closed + closed_at; reopen if reappears; districtFilter for launch C&W), fetchFehdXml. migration 0008: venues.closed_at + geocode_status + fehd_district. src/jobs/index.ts: PgBoss named import (no default export!), fehd-import worker + cron 0 2 * * * (10:00 HKT), server.ts starts when ENABLE_JOBS && FEHD_URL. LESSONS: INSERT column list must match VALUES count exactly (misaligned params surfaced as PostGIS parse error); pg-boss v12 exports { PgBoss } named; sed-editing SQL placeholders is error-prone — edit tool instead. Import-run log: job logs JSON result (admin UI later) | 91 tests green |
 | 2026-10-26 | T4.3 | +proj4. src/venues/als.ts: hk1980ToWgs84 (EPSG:2326 towgs84 params), lookupAddress (POST als.gov.hk/lookup form-encoded, Accept json, best score ≥70 else null), geocodePendingVenues (batch w/ 500ms throttle = 2req/s, network error → stays pending, no-match → failed for manual admin pin; writes ST_MakePoint). jobs: als-geocode worker + cron 02:30 UTC. Fixture: Central MTR HK1980 834282,815892 → 114.1576,22.2819 within 20m (LESSON: derive fixture by inverse proj4, not memory) | 94 tests green |
+| 2026-10-26 | T4.4 | routes/venues.ts: POST /venues (phone-verified 403 gate; 12-category zod; dedupe = lower(trim(name)) within ST_DWithin 50m → 409 duplicates list; force=true bypass), POST /venues/:id/report (enum wrong_pin/closed/duplicate/other; unique (venue,reporter) idx 0009; 3 distinct → status escalated + admin queue), POST/DELETE /venues/:id/save, GET /venues/search?q=&district= (pg_trgm similarity + ILIKE fallback, district scope optional, rank by score). migrations 0009 (pg_trgm + gin trgm idx + venue_reports_once_idx), 0010 (venue_report_status + escalated). LESSON: enum mismatch between route SQL and pgEnum → 500s — always cross-check schema enums | 100 tests green |
