@@ -102,9 +102,11 @@ describe('T2.1 auth middleware', () => {
     expect((await probe.inject({ method: 'GET', url: '/admin-probe', headers: { authorization: `Bearer ${admin.token}` } })).statusCode).toBe(200);
   });
 
-  it('user not onboarded (GoTrue exists, users row missing) → 401', async () => {
+  it('user not onboarded (GoTrue exists, users row missing) → authenticated, onboarded:false', async () => {
     probe = probe ?? buildProbe();
     const ghostToken = await mkToken(crypto.randomUUID());
-    expect((await probe.inject({ method: 'GET', url: '/auth-probe', headers: { authorization: `Bearer ${ghostToken}` } })).statusCode).toBe(401);
+    const res = await probe.inject({ method: 'GET', url: '/auth-probe', headers: { authorization: `Bearer ${ghostToken}` } });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().phoneVerified).toBe(false);
   });
 });

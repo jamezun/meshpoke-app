@@ -12,6 +12,8 @@ export type AuthUser = {
   id: string;
   role: 'user' | 'admin';
   phoneVerified: boolean;
+  /** false until /me/onboard creates the users row; routes that need a row check this. */
+  onboarded: boolean;
 };
 
 declare module 'fastify' {
@@ -32,6 +34,7 @@ function toAuthUser(row: UserRow): AuthUser {
     id: row.id,
     role: row.is_admin ? 'admin' : 'user',
     phoneVerified: row.phone_verified_at !== null,
+    onboarded: true,
   };
 }
 
@@ -77,7 +80,14 @@ export function registerAuth(app: FastifyInstance, dbUrl: string, redis: Redis, 
       [sub],
     );
     if (rows.length === 0) {
-      return reply.code(401).send({ type: 'about:blank', title: 'Unauthorized', status: 401, detail: 'user not onboarded' });
+      // valid GoTrue token, no users row yet → onboarding candidate (not an error)
+      req.user = { id: sub, role: 'user', phoneVerified: false, onboarded: false };
+      try {
+        await redis.set(cacheKey, JSON.stringify(req.user), 'EX', 60);
+      } catch {
+        // cache down → auth still succeeded
+      }
+      return;
     }
     req.user = toAuthUser(rows[0]);
     try {

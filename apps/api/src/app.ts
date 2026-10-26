@@ -11,6 +11,7 @@ import pg from 'pg';
 import { corsOrigins, type Config } from './config.js';
 import { healthRoutes } from './routes/health.js';
 import { registerAuth } from './auth.js';
+import { registerMe } from './routes/me.js';
 import { initSentry } from './observability.js';
 
 declare module 'fastify' {
@@ -119,5 +120,9 @@ export async function buildApp(opts: BuildAppOptions) {
 
   await app.register(healthRoutes, { prefix: '/v1' });
   registerAuth(app, config.DATABASE_URL, app.redis, config.GOTRUE_JWT_SECRET);
+  await app.register(
+    (instance) => { registerMe(instance, config.DATABASE_URL); },
+    { prefix: '/v1' },
+  );
   return app;
 }
