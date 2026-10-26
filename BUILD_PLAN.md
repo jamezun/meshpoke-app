@@ -92,7 +92,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
-| M9 Event spots & queues | 1 | 7 | 1 | ☐ |
+| M9 Event spots & queues | 1 | 7 | 2 | ◐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
@@ -519,11 +519,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Spot room created (kind `event`)
 **Tests:** capacity exceeded → 403 with reason; validation errors.
 
-### [ ] T9.2 Join & apply
+### [x] T9.2 Join & apply
 **PRD refs:** §3.5, §3.10 · **Depends:** T9.1
-- [ ] `POST /spots/{id}/join` (open mode, capacity check, phone-verified, event cap)
-- [ ] `POST /spots/{id}/apply {note}` (application mode): hard filters (min score, required keywords) evaluated at apply time → 422 with reason if not eligible
-- [ ] Waitlist when full; leave endpoint
+- [x] `POST /spots/:id/join` (open mode, capacity incl. host, phone-verified, join cap free 3/plus 5/pro 10)
+- [x] `POST /spots/:id/apply {note}` (application mode): hard filters at apply time → 422 with reason (unproven score = 0.5 neutral)
+- [x] Waitlist when full; leave endpoint (closes pending application)
 **Tests:** hard-filter rejections; event cap 402 at 4th spot for free.
 
 ### [ ] T9.3 Recommended sort service
@@ -1112,3 +1112,4 @@ Append one line per completed task (newest at the bottom).
 - T8.4 (partial ◐): Dockerfiles (api+web, both smoke-tested), Dokploy compose, meshpoke DB+role+postgis on Hetzner, nightly pg_dump cron, staging secrets + RUNBOOK. CI green again (web lint globals, shared dist build + exports map, flutter analyze infos, turbo typecheck ^build, flutter SDK cache off). Remaining: user DNS + Dokploy paste per RUNBOOK.
 - T8.5 (◐): real FEHD LP XML parser (was wrong format — legend in-file, alias YTM/C&W), fehd:import script (C&W 1,788 rows to dev DB), waitlist_signups 0013 + POST /v1/waitlist (idempotent, 5/h/IP) + admin list + Home form, codemagic.yaml, PHASE0_SMOKE.md. 127 api tests green.
 - T9.1 (✓): POST /v1/spots/events + 7 tests (validation, liveness 403, hosting cap, plan event caps). 134 api tests green. Lesson: drizzle sql`` raw JS array → SQL tuple (); use sql.param() for text[].
+- T9.2 (✓): spotJoin.ts (join/apply/leave) + 6 tests. Note: max_headcount includes host. 140 api tests green.
