@@ -90,7 +90,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
-| M7 Chat rooms & realtime | 0 | 5 | 1 | ◐ |
+| M7 Chat rooms & realtime | 0 | 5 | 2 | ◐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
@@ -439,12 +439,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Message persistence (`messages`), delivery ack, offline catch-up via `GET /rooms/{id}/messages?cursor`
 **Tests:** two clients exchange messages; unauthorised join rejected.
 
-### [ ] T7.2 Chat room spots & city rooms
+### [x] T7.2 Chat room spots & city rooms
 **PRD refs:** §3.5 (chat room spot), §3.10 · **Depends:** T7.1, T2.5
-- [ ] `POST /spots {kind:"chat"}` (hosting rights) creates spot + room; city rooms seeded per district
-- [ ] `POST /rooms/{id}/join` with chat cap check; unverified users may join **read-only**
-- [ ] Posting requires phone verification (server-enforced on WS and REST)
-- [ ] Member list uses photo resolver (`chat_room` context)
+- [x] `POST /spots {kind:"chat"}` (hosting rights) creates spot + room; city rooms seeded per district
+- [x] `POST /rooms/{id}/join` with chat cap check; unverified users may join **read-only**
+- [x] Posting requires phone verification (server-enforced on WS and REST)
+- [x] Member list uses photo resolver (`chat_room` context)
 **Tests:** unverified can read but not post; cap 402 at 6th room for free.
 
 ### [ ] T7.3 Message safety hooks (basic)
@@ -1102,3 +1102,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T6.4 | AppLayout: nav (Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings) + SignOut; nested /app/* routes w/ placeholders; ProfileEditorPage: industry dropdown (10), 40-char oneliner, keyword chips w/ level sliders (amber at 8+), validateKeywords mirrors T1.1 trigger (same test shape as mobile), PATCH /me + PUT /me/keywords, save flash; SettingsPage: notification prefs (M14 stub), blocked list, data export (GET /v1/me/export download), delete account (DELETE /v1/me w/ confirm). Profile edits appear in mobile app because both hit the same endpoints (acceptance met by construction; e2e once env up). 8 vitest green |
 | 2026-10-26 | T6.5 | API: GET /v1/spots/:id/share PUBLIC (rate-limited 30/min): name/template/district/state/headcount/max/eventDate ONLY — explicit no-member-data test asserts exact key set; coalesce(state,forming) not in cancelled/dissolved (state NULL while forming — LESSON). Web: server.mjs SSR+static server (node:http) — intercepts /s/:id, fetches share endpoint (2.5s timeout), injects OG title/desc/twitter card + seats-left into dist/index.html head, SPA fallback otherwise, MIME map, listen guarded by import.meta.url===argv[1] (pure fn importable by tests). spotMetaTags escapes quotes. 2 node:test + 2 API vitest green; 104 API tests total. M6 COMPLETE. WhatsApp-preview verification pending staging deploy |
 | 2026-10-27 | T7.1 | routes/realtime.ts: Socket.io on /ws (same HTTP server), jose JWT handshake, @socket.io/redis-adapter (stream-adapter pkg DOES NOT EXIST in npm — correct name redis-adapter), room:join w/ DB membership check (room_members) returning {ok,verified,presence}, room:leave, typing, message:send (1-2000 chars, membership + liveness=verified server-enforced → phone_not_verified fail, insert messages, io.to broadcast, ack w/ id) — delivered:ack + REST catch-up GET /rooms/:id/messages lands T7.2 alongside room routes. realtime.test.ts: REAL WS clients against listening server (app.listen 0) — handshake reject, two-client exchange + outsider join denied + unverified blocked from posting, persistence. LESSONS: io.to(room) reaches only joined sockets (join s2 BEFORE sending); users insert needs email/auth_provider/display_name/date_of_birth/referral_code; enum none not unverified; room_members insert needs param pairs not $1,$1 reuse. 107 API tests green |
+| 2026-10-27 | T7.2 | routes/rooms.ts: GET /rooms (list w/ last message + member count), POST /rooms/:id/join (chat+event active count vs TIER_CAPS.chatRooms → 402 problem; DM join 403; upsert sets left_at null), leave, GET /rooms/:id/messages (member-only, cursor pagination reverse→asc), GET /rooms/:id/members (member-only, resolveProfileView chat_room → photoAccess level, photos only when full), POST /spots kind:chat (liveness verified gate 403, hosting_capacity 1/3/5 earned → 402 problem, CTE creates spot+room+host member). City rooms seeded since T1.4. rooms.test.ts 3 tests (unverified join-read-only + hosting 403, chat spot creation host role, free cap 402 at 6th join — actual detail "5 rooms"). LESSONS: app.authenticate must be decorated BEFORE registering routes that reference it (app.ts order fixed); spots.max_headcount NOT NULL w/ CHECK (chat spots use 500); room_members has left_at not state. 110 API tests green |
