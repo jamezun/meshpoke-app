@@ -83,7 +83,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
-| M0 Foundations | 0 | 6 | 3 | ◐ |
+| M0 Foundations | 0 | 6 | 4 | ◐ |
 | M1 Database & shared package | 0 | 5 | 0 | ☐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
@@ -142,11 +142,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 **Tests:** health endpoint integration test.
 **Acceptance:** `pnpm --filter api dev` serves `/v1/health`; `pnpm test` runs the integration test green.
 
-### [~] T0.4 Generated API clients
+### [x] T0.4 Generated API clients
 **PRD refs:** §2.2 · **Depends:** T0.3
-- [ ] `packages/api-client`: `openapi-typescript` + `openapi-fetch` wrapper exporting a typed client
-- [ ] Dart client generation script (`openapi-generator-cli generate -g dart-dio`) into `apps/mobile/lib/api/generated/`
-- [ ] Single command `pnpm api:openapi` regenerates both
+- [x] `packages/api-client`: `openapi-typescript` + `openapi-fetch` wrapper exporting a typed client
+- [x] Dart client generation script (`openapi-generator-cli generate -g dart-dio`) into `apps/mobile/lib/api/generated/`
+- [x] Single command `pnpm api:openapi` regenerates both
 **Acceptance:** after adding the health route, both clients contain a typed `health` call.
 
 ### [ ] T0.5 CI pipeline
@@ -1067,3 +1067,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T0.1 | Monorepo scaffold: pnpm workspace + turbo, ts strict base, eslint9 flat + prettier, README, 5 package skeletons; install+typecheck+lint green | .nvmrc pins 20, local runs Node 22 |
 | 2026-10-26 | T0.2 | Dev stack: postgis 15-3.4 + redis 7 + mailpit + standalone GoTrue (v2.132.3) + db-init (auth schema, postgis ext, supabase_auth_admin role w/ search_path); .env.example; Zod config loader; acceptance verified (health/postgis/signup+token) | GoTrue v2.158+ broken standalone (mixed env prefixes, half-applied migrations) — pinned v2.132.3; autoconfirm spelling to verify at T2.1 |
 | 2026-10-26 | T0.3 | API skeleton: Fastify 5 factory (app.ts/server.ts split), CORS allowlist + helmet + rate-limit (Redis store, health exempt) + sensible + Zod type provider + problem+json errors w/ request ids, swagger /docs dev-only + openapi.json export script, /v1/health (db+redis checks), pino + dotenv, Vitest + Testcontainers (PostGIS+Redis per run) — 3 integration tests green | WSL: testcontainers needs DOCKER_CONFIG shim (infra/test-docker-config) b/c Docker Desktop credsStore; pnpm override cookie@^1.0.2 (ESM-only cookie@2 breaks light-my-request require); dev env via dotenv not NODE_OPTIONS (--env-file blocked) |
+| 2026-10-26 | T0.4 | Generated clients: packages/api-client (openapi-typescript + openapi-fetch wrapper w/ bearer hook); Dart dart-dio SDK at apps/mobile/meshpoke_api (pubName=meshpoke_api) via openapi-generator Docker image (no local Java); single pnpm api:openapi chains spec + TS + Dart | Dart SDK consumed as path dep when apps/mobile pubspec lands (T5.1); regenerate needs docker |
