@@ -15,6 +15,7 @@ import { registerMe } from './routes/me.js';
 import { registerPhone } from './routes/phone.js';
 import { registerDataOwner } from './routes/dataOwner.js';
 import { registerCaps } from './routes/caps.js';
+import { registerKeywords } from './routes/keywords.js';
 import { GoTrueClient } from './gotrue.js';
 import { initSentry } from './observability.js';
 
@@ -131,6 +132,7 @@ export async function buildApp(opts: BuildAppOptions) {
       registerPhone(instance, config.DATABASE_URL, app.redis, gotrue);
       registerDataOwner(instance, config.DATABASE_URL, app.redis, gotrue);
       registerCaps(instance, config.DATABASE_URL);
+      registerKeywords(instance, config.DATABASE_URL);
     },
     { prefix: '/v1' },
   );

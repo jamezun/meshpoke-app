@@ -21,6 +21,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./time": "./src/time.ts",
-    "./constants": "./src/constants.ts"
+    "./constants": "./src/constants.ts",
+    "./keywords": "./src/keywords.ts"
   }
 }
