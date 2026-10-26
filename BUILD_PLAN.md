@@ -84,7 +84,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
-| M1 Database & shared package | 0 | 5 | 1 | ◐ |
+| M1 Database & shared package | 0 | 5 | 2 | ◐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
@@ -187,11 +187,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 **Tests:** migration applies on a fresh container; keyword trigger rejects the 11th keyword and the 4th level-8.
 **Acceptance:** `pnpm db:migrate` is idempotent.
 
-### [ ] T1.2 Schema: spots, attendance, trust, pokes, chat, crews
+### [x] T1.2 Schema: spots, attendance, trust, pokes, chat, crews
 **PRD refs:** §11.1 · **Depends:** T1.1
-- [ ] Tables: `spots`, `spot_members`, `applications`, `attendance`, `absence_reports`, `score_events`, `showup_scores`, `hosting_capacity`, `pokes`, `connections`, `poke_balances`, `referrals`, `rooms`, `room_members`, `messages`, `crews`, `crew_members`, `rebooks`
-- [ ] Unique index for connections on `(least(user_a,user_b), greatest(user_a,user_b))`
-- [ ] Indexes from §11.2
+- [x] Tables: `spots`, `spot_members`, `applications`, `attendance`, `absence_reports`, `score_events`, `showup_scores`, `hosting_capacity`, `pokes`, `connections`, `poke_balances`, `referrals`, `rooms`, `room_members`, `messages`, `crews`, `crew_members`, `rebooks`
+- [x] Unique index for connections on `(least(user_a,user_b), greatest(user_a,user_b))`
+- [x] Indexes from §11.2
 **Acceptance:** migration applies; `\d` shows all indexes.
 
 ### [ ] T1.3 Schema: merchants, billing, notifications, safety
@@ -1071,3 +1071,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T0.5 | GitHub Actions CI (.github/workflows/ci.yml): node job (pnpm cache, typecheck/lint/test w/ Testcontainers/build) + flutter placeholder job; green on main run 40282383354 | hashFiles() is step-level only (job-level if broke workflow); CI caught ioredis default-import vs NodeNext — named import; ubuntu-latest→26 migration notice |
 | 2026-10-26 | T0.6 | packages/shared: constants.ts (all business numbers — tiers/caps, web+IAP prices, poke rules, sort weights 0.2/0.5/0.3, spot windows, score, merchant bands/prices/rules, notify, geo, QR), time.ts (HKT fixed UTC+8, mostRecentMondayMidnightHKT, quiet hours), gen-dart.ts → apps/mobile/lib/core/constants.g.dart; 14 vitest green | Infinity encodes unlimited in TS; Dart gets double.infinity; gen script root = ../../.. from scripts dir |
 | 2026-10-26 | T1.1 | Drizzle schema core.ts (users, profiles, keywords w/ citext, districts, venues, venue_reports, saved_venues) + geo.ts customTypes + migration 0000 (postgis+citext extensions, keyword caps trigger 10/3-level-8); schema-core.test.ts 4 tests; db:generate strips quoted geography typmods (drizzle-kit bug workaround) | drizzle-kit quotes customType dataType names — "geography(Point,4326)" broken, sed fix in scripts/db-generate.sh; users.id has NO FK to auth.users (tests run without auth schema) |
+| 2026-10-26 | T1.2 | schema/spots.ts: 18 tables (spots..rebooks) + 20 enums; migration 0001 + hand-appended connections_pair_idx functional unique index (drizzle-kit cannot express), GIST on venues.location + districts.boundary into 0000; schema-spots.test.ts 5 tests (tables, §11.2 indexes, partial index def, pair dedupe, headcount check) | messages_room_idx uses DESC in index expr — drizzle sql` in .on() worked; dateRange stored as text (API constructs bounds) |
