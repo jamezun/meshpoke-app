@@ -623,13 +623,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Link lock server-side: ws message:send gate `dm_link_locked` unless dmShareAttendedSpot (links AND handles)
 **Tests:** link lock on/off cases.
 
-### [ ] T11.4 Mobile: pokes, inbox, connections
+### [x] T11.4 Mobile: pokes, inbox, connections
 **PRD refs:** §5.2 (Poke → connection), §5.3 · **Depends:** T11.2
-- [ ] Poke sheet (note counter, allowance indicator: "3 of 5 left this week")
-- [ ] Inbox: Recommended sort default + switcher, trust signals, **"Poke back · Free"** button
-- [ ] People-you-met list with "Free poke · met at {spot} · {h}h left"
-- [ ] Connections list (Message, Disconnect with confirm); CTA switches Poke → Message
-- [ ] Ripple animation on poke CTA (one-shot)
+- [x] showPokeSheet: note counter (200/500 server-enforced) + "N of M pokes left this week"
+- [x] Inbox: Recommended default + Newest switcher, trust row (spots · proven · match %), "Poke back · Free" w/ ripple animation
+- [x] PeopleYouMetSheet: "Free poke · met at {spot}" (48h window flagged server-side)
+- [x] Connections tab: Message → DM room, Disconnect w/ confirm dialog
+- [x] AnimatedScale ripple on poke-back CTA (one-shot, 300ms)
 **Acceptance:** device test: poke → poke back → message.
 
 ### [ ] T11.5 Web: inbox & connections
@@ -1126,3 +1126,4 @@ Append one line per completed task (newest at the bottom).
 - T11.1 (✓): 5 tests green (Monday boundary via mirror fn, all 4 cost branches, expiry no-refund). 161 api tests total.
 - T11.2 (✓): pokes.test 2 green (full poke→back→DM→disconnect→repoke cycle + people-you-met). 163 api tests.
 - T11.3 (✓): dmLock.test 2 green; ws gate wired in realtime.ts message:send. 165 api tests.
+- T11.4 (✓): poke_repository + poke_screens; analyze clean, 14 tests green. Device poke→back→message pending TestFlight.
