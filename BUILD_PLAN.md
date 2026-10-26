@@ -92,7 +92,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
-| M9 Event spots & queues | 1 | 7 | 5 | ◐ |
+| M9 Event spots & queues | 1 | 7 | 7 | ✔ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
@@ -553,9 +553,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [ ] Create-spot stepper; queue screen with sort switcher, accept/decline + reasons; schedule screen (date picker + venue search + optional group drop list); confirm/bail UI for members
 **Acceptance:** two-device test: host creates → member applies → accept → schedule → confirm.
 
-### [ ] T9.7 Spot share links
+### [x] T9.7 Spot share links
 **PRD refs:** §6.1 (`/s/{id}`) · **Depends:** T9.1, T6.5
-- [ ] `GET /s/{id}/share` public endpoint; share button in mobile (WhatsApp-first share sheet)
+- [x] GET /v1/spots/:id/share public (T6.5) + share_plus button in mobile detail (WhatsApp-first)
 **Acceptance:** shared link renders OG card and deep-links into the app.
 
 ---
@@ -1116,3 +1116,4 @@ Append one line per completed task (newest at the bottom).
 - T9.3 (✓): src/sort.ts + queue endpoint in spotJoin.ts + 5 unit tests (worked example 0.61/0.57/0.37, paid-never-buys-top, flag override). 145 api tests green.
 - T9.4 (✓): spotLifecycle.ts + 1 full state-machine test (146 api green). Lessons: decision enum is declined (not decline); inline SQL string w/ apostrophe must be a param; schedule headcount counts host.
 - T9.5 (✓): GET /spots/:id detail + mobile spots tab/detail/apply. Flutter analyze clean, 14 widget tests green.
+- T9.7 (✓): share_plus button; endpoint+SSR already from T6.5. M9 COMPLETE (7/7).
