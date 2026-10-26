@@ -89,7 +89,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
-| M6 Web foundation | 0 | 5 | 0 | ☐ |
+| M6 Web foundation | 0 | 5 | 1 | ◐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
@@ -391,12 +391,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M6 Web foundation
 
-### [ ] T6.1 Web app setup
+### [x] T6.1 Web app setup
 **PRD refs:** §6.1, §13 · **Depends:** T0.4, T0.6
-- [ ] Vite + React + TS + Tailwind + TanStack Router/Query; design tokens from §13 (light + dark)
-- [ ] Route groups: public (`/`), `app/*`, `merchant/*`, `admin/*`
-- [ ] Serve `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json`
-- [ ] Sentry + PostHog (consent-aware)
+- [x] Vite + React + TS + Tailwind + TanStack Router/Query; design tokens from §13 (light + dark)
+- [x] Route groups: public (`/`), `app/*`, `merchant/*`, `admin/*`
+- [x] Serve `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json`
+- [x] Sentry + PostHog (consent-aware)
 **Acceptance:** `pnpm --filter web dev` renders the landing route.
 
 ### [ ] T6.2 Marketing pages
@@ -1096,3 +1096,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T5.4 | profile_screen (trust-signal row: member since/spots/unproven, editor card, photos card, hide-photo switch stub, settings) + profile_edit_screen (industry dropdown 10, one-liner 40, keyword chips w/ 1-10 slider, LIVE validation mirroring T1.1 trigger: max 10 + max 3 at 8+, Save disabled on violation). Backend: PUT /me/keywords now accepts string|{keyword,level} union (levels preserved, later-wins dedupe). Photo manager (pick/crop/upload/reorder) needs image_picker + R2 keys — deferred to env-setup milestone, card is the entry point. 9 flutter tests green (keyword add via .last TextField, 4×8+ block, arithmetic mirror incl. 9/3 ok) |
 | 2026-10-26 | T5.5 | map_screen: GoogleMap dark style, when-in-use permission request w/ Enable-location button, camera-idle → 400ms debounce → bbox → viewportProvider (autoDispose family, dio GET /map/viewport), venue markers w/ activity7d info windows, date filter chips (Today/This week default/All), list fallback (mapFailed || useListInTests static flag — native view untestable). map_repository: ViewportData/MapVenue/MapSpot parse + bboxOf. Clustering + marker SIZING by activity7d needs live Maps SDK (dev-machine Android SDK) — deferred to device pass; venue lat/lng parse from geography point lands with real API shape check. 11 flutter tests green |
 | 2026-10-26 | T5.6 | venue_screens.dart: VenuePageScreen (claimed badge, category/address, activity card, save/report), AddPlaceScreen (pin drop → name → 12-category dropdown → POST /venues, 409 duplicates list + "It's different — add anyway" force CTA), AboutScreen w/ DATA.GOV.HK + ALS + HK1980 attributions (T4.6 wiring). Routes /venue/:id (real page replacing map placeholder), /venue/add, /about. 14 flutter tests green — M5 COMPLETE (M0–M5 all ✔). LESSON: dart-format reformats widget trees between edits — always re-read block before next string replace; const-list with non-const loop var needs per-node const |
+| 2026-10-26 | T6.1 | apps/web: Vite 5 + React 18 + TS strict + Tailwind 4 (@tailwindcss/vite) + react-router-dom 7 (memory router for tests) + TanStack Query provider. index.css design tokens (§13 mesh dark + light via prefers-color-scheme CSS vars). Routes: / (Home: hero pitch + how-it-works + waitlist form + DATA.GOV.HK/ALS attribution footer), /pricing (renders FROM @meshpoke/shared/constants — consumer tiers + founding-500 banner + merchant Growth/Pro), /app/* AppLayout (nav Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings). public/.well-known/apple-app-site-association (/s,/venue,/r) + assetlinks.json (SHA256 placeholder until signing) + robots.txt (Disallow /app/). SEO meta+OG in index.html. 2 vitest green (landing hero+attributions, pricing memory-route), typecheck clean, build 274KB/88KB gzip, dev renders landing ✓. LESSONS: jsdom 27 breaks vitest 2 (ERR_REQUIRE_ESM html-encoding-sniffer) → pin jsdom@25; PRICES shape is PRICES.plus.web.* not PRICES.web.plus.* |
