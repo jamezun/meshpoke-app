@@ -11,6 +11,7 @@ import 'package:meshpoke/features/map/venue_screens.dart';
 import 'package:meshpoke/features/spots/spots_screen.dart';
 import 'package:meshpoke/features/rooms/rooms_screen.dart';
 import 'package:meshpoke/features/pokes/poke_screens.dart' show InboxScreen;
+import 'package:meshpoke/features/crews/crew_screens.dart';
 import 'package:meshpoke/features/profile/profile_screen.dart';
 import 'package:meshpoke/features/profile/profile_edit_screen.dart';
 
@@ -38,6 +39,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/rooms/:id',
         builder: (_, s) => RoomScreen(roomId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/crews',
+        builder: (_, _) => const CrewsScreen(),
+      ),
+      GoRoute(
+        path: '/crews/:id',
+        builder: (_, s) => CrewDetailScreen(crewId: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/inbox',
