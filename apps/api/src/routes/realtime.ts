@@ -9,13 +9,17 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { jwtVerify } from 'jose';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { messageGuard, checkMsgRate } from '../safety.js';
+
 
 export async function registerRealtime(app: FastifyInstance, dbUrl: string, redisUrl: string, goTrueSecret: string) {
+  // reuse app-level redis for rate limiting
   const db = getDb(dbUrl);
   const io = new Server(app.server, { path: '/ws', cors: { origin: true, credentials: true } });
   const { Redis } = await import('ioredis');
   const sub = new Redis(redisUrl, { maxRetriesPerRequest: 3 });
   const pub = new Redis(redisUrl, { maxRetriesPerRequest: 3 });
+  const redis = pub; // rate-limit client
   io.adapter(createAdapter(pub, sub));
   app.decorate('io', io);
 
@@ -77,9 +81,12 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
         const a = await roomAccess(userId, p.roomId);
         if (!a.exists || !a.member) return fail('not_a_member');
         if (!a.verified) return fail('phone_not_verified'); // server-enforced posting gate (T7.2)
+        if (!(await checkMsgRate(redis, userId))) return fail('rate_limited'); // T7.3: 20/min
+        const guard = messageGuard(a.verified, p.body); // T7.3: link/handle flags
+        if (!guard.ok) return fail(guard.error);
         const res = await db.execute(sql`
-          insert into messages (room_id, user_id, body)
-          values (${p.roomId}, ${userId}, ${p.body})
+          insert into messages (room_id, user_id, body, flags)
+          values (${p.roomId}, ${userId}, ${p.body}, ${JSON.stringify(guard.flags)}::jsonb)
           returning id, created_at`);
         const row = (res as unknown as { rows: Record<string, unknown>[] }).rows[0];
         const msg = { id: row.id, roomId: p.roomId, senderId: userId, body: p.body, createdAt: row.created_at };
