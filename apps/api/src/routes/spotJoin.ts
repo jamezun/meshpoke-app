@@ -6,6 +6,7 @@ import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
+import { trustExpr } from '../trust.js';
 
 const Apply = z.object({ note: z.string().trim().max(500).optional() });
 
@@ -136,7 +137,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     if (spot.length === 0) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
     // members as sketches (name only — photo ladder intact; T10.4 roll-call/report-absent)
     const members = rows(await db.execute(sql`
-      select m.user_id as userId, u.display_name as displayName, m.role
+      select m.user_id as "userId", u.display_name as "displayName", m.role, ${trustExpr(userId)}
         from spot_members m join users u on u.id = m.user_id
        where m.spot_id = ${req.params.id}::uuid and m.state = 'active' and m.role in ('host','member')`));
     return { ...spot[0], members };
@@ -153,13 +154,15 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
       select a.id, a.user_id, a.status, a.note, a.created_at,
              coalesce(e.plan, 'free') as plan,
              sc.score as score, coalesce(sc.proven_state, 'unproven') as proven_state,
+             ${trustExpr(userId)},
              coalesce(json_agg(json_build_object('keyword', k.keyword, 'level', k.level)) filter (where k.keyword is not null), '[]') as keywords
         from applications a
         left join entitlements e on e.user_id = a.user_id and (e.expires_at is null or e.expires_at > now())
         left join showup_scores sc on sc.user_id = a.user_id
+        join users u on u.id = a.user_id
         left join keywords k on k.user_id = a.user_id
        where a.spot_id = ${req.params.id}::uuid and a.status in ('pending','waitlisted','accepted','declined')
-       group by a.id, e.plan, sc.score, sc.proven_state`));
+       group by a.id, e.plan, sc.score, sc.proven_state, u.created_at, u.id`));
     const { recommendedScore, currentSortWeights } = await import('../sort.js');
     const { vibe } = await import('@meshpoke/shared/vibe');
     const weights = await currentSortWeights();
@@ -178,7 +181,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
       counts,
       queue: scored.map((a) => ({
         applicationId: a.id, userId: a.user_id, status: a.status, note: a.note, createdAt: a.created_at,
-        score: a.score, provenState: a.proven_state, plan: a.plan, express: a.plan !== 'free',
+        score: a.score, provenState: a.proven_state, plan: a.plan, express: a.plan !== 'free', trust: a.trust,
       })),
     };
   });
