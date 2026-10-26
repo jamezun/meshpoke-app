@@ -11,14 +11,7 @@ import { join } from 'node:path';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@meshpoke.hk';
 
-async function main() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_URL not set');
-  const pool = new pg.Pool({ connectionString: url, max: 1 });
-  const db = drizzle(pool);
-  await migrate(db, { migrationsFolder: join(import.meta.dirname, '../../drizzle') });
-
-  // ── districts ──
+export async function seedDistricts(pool: pg.Pool) {
   const geo = JSON.parse(readFileSync(join(import.meta.dirname, '../../../../infra/seed/districts.geojson'), 'utf8')) as {
     features: { properties: { name_en: string; name_zh: string }; geometry: { type: string; coordinates: number[][][][] } }[];
   };
@@ -30,7 +23,6 @@ async function main() {
        ON CONFLICT (name_en) DO UPDATE SET name_zh = EXCLUDED.name_zh, boundary = EXCLUDED.boundary`,
       [name_en, name_zh, JSON.stringify(f.geometry)],
     );
-    // city room per district (no name column — room identity = kind+district)
     await pool.query(
       `INSERT INTO rooms (kind, district_id)
        SELECT 'city', d.id FROM districts d WHERE d.name_en = $1
@@ -38,7 +30,18 @@ async function main() {
       [name_en],
     );
   }
-  console.log(`districts: ${geo.features.length} ensured (with city rooms)`);
+}
+
+async function main() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL not set');
+  const pool = new pg.Pool({ connectionString: url, max: 1 });
+  const db = drizzle(pool);
+  await migrate(db, { migrationsFolder: join(import.meta.dirname, '../../drizzle') });
+
+  // ── districts ──
+  await seedDistricts(pool);
+  console.log(`districts: ensured (with city rooms)`);
 
   // ── founding counters ──
   await pool.query(
@@ -64,7 +67,10 @@ async function main() {
   await pool.end();
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// only auto-run when invoked as a script (tsx src/db/seed.ts), not on import
+if (process.argv[1] && process.argv[1].endsWith('seed.ts')) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
