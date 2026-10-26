@@ -308,12 +308,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Import run log (counts, errors) for admin
 **Tests:** parser against a saved fixture; idempotent re-run; closure detection.
 
-### [ ] T4.3 ALS geocoder
+### [x] T4.3 ALS geocoder
 **PRD refs:** §4.2 · **Depends:** T4.2
-- [ ] Call Address Lookup Service (`https://www.als.gov.hk/lookup`, `Accept: application/json`) with the address
-- [ ] Pick best match by score; read HK1980 grid easting/northing
-- [ ] Convert HK1980 grid → WGS84 using `proj4` (EPSG:2326 → EPSG:4326)
-- [ ] Throttle (e.g. 2 req/s), retry with backoff; unresolved → `geocode_failed` queue for manual pin in admin
+- [x] Call Address Lookup Service (`https://www.als.gov.hk/lookup`, `Accept: application/json`) with the address
+- [x] Pick best match by score; read HK1980 grid easting/northing
+- [x] Convert HK1980 grid → WGS84 using `proj4` (EPSG:2326 → EPSG:4326)
+- [x] Throttle (e.g. 2 req/s), retry with backoff; unresolved → `geocode_failed` queue for manual pin in admin
 **Tests:** conversion fixture (known landmark within 20 m); low-score handling.
 
 ### [ ] T4.4 User-added venues, dedupe, reports, saves
@@ -1086,3 +1086,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T3.4 | packages/shared/src/vibe.ts: vibe() per PRD §3.2 (sum min(levelA,levelB)/10 over shared ÷ max(1,|reference|), clamp [0,1], either side empty → 0.5), vibePercent() cap 99. Exported from shared index. Tests: 8 (empty-sides, worked example 0.4, min-level cap, clamp, disjoint, percent cap) | M3 done: 20 shared + 79 api tests green |
 | 2026-10-26 | T4.1 | migration 0007: assign_district() plpgsql — venues BEFORE INSERT/UPDATE OF location sets district_id via ST_Contains(boundary::geometry, location::geometry); spots follows venue pin. routes/map.ts: GET /districts (18 w/ zh + outline), GET /districts/:id/spots (scoped, unknown → 404, today/week/all filter), GET /map/viewport?bbox (4-number validation, 0.5° max span = no world queries, venues ST_Within envelope + spots via district ST_Intersects, ≤400/200). seedDistricts() exported from seed.ts (script-guard via process.argv[1].endsWith(seed.ts)); map test reuses it. LESSONS: geography columns need ::geometry casts for ST_Contains/ST_Within/ST_Boundary/ST_Intersects; venues col = display_name not name | 86 tests green |
 | 2026-10-26 | T4.2 | +pg-boss +fast-xml-parser. src/venues/fehd.ts: parseFehdXml (isArray+parseTagValue:false → licence nos keep leading zeros; tolerant wrapper), applyFehdImport (upsert ON CONFLICT fehd_licence_no w/ xmax=0 inserted-detect; address changed → geocode_status pending; closure = active FEHD venue w/ licence not in today file → status closed + closed_at; reopen if reappears; districtFilter for launch C&W), fetchFehdXml. migration 0008: venues.closed_at + geocode_status + fehd_district. src/jobs/index.ts: PgBoss named import (no default export!), fehd-import worker + cron 0 2 * * * (10:00 HKT), server.ts starts when ENABLE_JOBS && FEHD_URL. LESSONS: INSERT column list must match VALUES count exactly (misaligned params surfaced as PostGIS parse error); pg-boss v12 exports { PgBoss } named; sed-editing SQL placeholders is error-prone — edit tool instead. Import-run log: job logs JSON result (admin UI later) | 91 tests green |
+| 2026-10-26 | T4.3 | +proj4. src/venues/als.ts: hk1980ToWgs84 (EPSG:2326 towgs84 params), lookupAddress (POST als.gov.hk/lookup form-encoded, Accept json, best score ≥70 else null), geocodePendingVenues (batch w/ 500ms throttle = 2req/s, network error → stays pending, no-match → failed for manual admin pin; writes ST_MakePoint). jobs: als-geocode worker + cron 02:30 UTC. Fixture: Central MTR HK1980 834282,815892 → 114.1576,22.2819 within 20m (LESSON: derive fixture by inverse proj4, not memory) | 94 tests green |
