@@ -92,7 +92,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
-| M9 Event spots & queues | 1 | 7 | 0 | ☐ |
+| M9 Event spots & queues | 1 | 7 | 1 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
@@ -511,12 +511,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M9 Event spots & queues
 
-### [ ] T9.1 Event spot creation & hosting capacity
+### [x] T9.1 Event spot creation & hosting capacity
 **PRD refs:** §3.5 · **Depends:** T7.2, T3.4
-- [ ] `POST /spots {kind:"event"}`: template, name, required keywords ≤3, min score, price range, join mode, district anchor, min/max headcount, date range
-- [ ] Hosting capacity check (1/3/5 from `hosting_capacity`, default 1) counting active hosted event spots
-- [ ] Event cap check for host
-- [ ] Spot room created (kind `event`)
+- [x] `POST /spots/events`: template, name, required keywords ≤3, min score, price range, join mode, district anchor, min/max headcount, date range
+- [x] Hosting capacity check (1/3/5 from `hosting_capacity`, default 1) counting active hosted spots (both kinds)
+- [x] Event cap check for host (free 3 / plus 5 / pro 10 from entitlements)
+- [x] Spot room created (kind `event`)
 **Tests:** capacity exceeded → 403 with reason; validation errors.
 
 ### [ ] T9.2 Join & apply
@@ -1111,3 +1111,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T8.3 | migration 0012 users.admin_roles text[] (default {}); auth.ts AuthUser+adminRoles/aal, decorate requireAdminRole(role) — superadmin bypasses, ADMIN_REQUIRE_MFA=true enforces aal2 (GoTrue TOTP); seed admin gets {superadmin}. routes/admin.ts: GET /admin/users?q= search; GET /admin/users/:id (plan via entitlements + reports + moderation history); POST /admin/users/:id/moderate {suspend,reason} → users.deleted_at + moderation_actions(admin_id,target_user,action,reason,audit) + audit_log; GET /admin/merchant-claims pending + presignGet cert 15min; GET /admin/venues/geocode-failed; POST /admin/venues/:id/pin (geocode_status=manual); GET /admin/venue-reports + resolve; POST /admin/venues/merge (moves spots/memberships/venue_reports/saved_venues, closes loser, 409 if claimed). Web /admin page (claims approve/reject + cert link, user search). admin.test.ts 3 tests (RBAC matrix 403s incl. moderator≠support, suspend/restore cycle, pin+merge children move). Fixed old tests for admin_roles. 123 API tests green |
 - T8.4 (partial ◐): Dockerfiles (api+web, both smoke-tested), Dokploy compose, meshpoke DB+role+postgis on Hetzner, nightly pg_dump cron, staging secrets + RUNBOOK. CI green again (web lint globals, shared dist build + exports map, flutter analyze infos, turbo typecheck ^build, flutter SDK cache off). Remaining: user DNS + Dokploy paste per RUNBOOK.
 - T8.5 (◐): real FEHD LP XML parser (was wrong format — legend in-file, alias YTM/C&W), fehd:import script (C&W 1,788 rows to dev DB), waitlist_signups 0013 + POST /v1/waitlist (idempotent, 5/h/IP) + admin list + Home form, codemagic.yaml, PHASE0_SMOKE.md. 127 api tests green.
+- T9.1 (✓): POST /v1/spots/events + 7 tests (validation, liveness 403, hosting cap, plan event caps). 134 api tests green. Lesson: drizzle sql`` raw JS array → SQL tuple (); use sql.param() for text[].
