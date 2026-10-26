@@ -1,4 +1,4 @@
-import { afterAll, beforeAll } from 'vitest';
+import { beforeAll } from 'vitest';
 import { GenericContainer, Wait, type StartedTestContainer } from 'testcontainers';
 
 export interface TestInfra {
