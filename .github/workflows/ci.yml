@@ -46,20 +46,23 @@ jobs:
     name: flutter analyze / test
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Placeholder until apps/mobile exists (M5): skip gracefully
-    if: hashFiles('apps/mobile/pubspec.yaml') != ''
+    # Placeholder until apps/mobile exists (M5): hashFiles() is step-level only,
+    # so every step self-skips while pubspec.yaml is absent.
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
+        if: hashFiles('apps/mobile/pubspec.yaml') != ''
         with:
           channel: stable
           cache: true
 
       - name: Analyze
+        if: hashFiles('apps/mobile/pubspec.yaml') != ''
         working-directory: apps/mobile
         run: flutter analyze
 
       - name: Test
+        if: hashFiles('apps/mobile/pubspec.yaml') != ''
         working-directory: apps/mobile
         run: flutter test
