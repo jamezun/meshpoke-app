@@ -85,7 +85,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
 | M1 Database & shared package | 0 | 5 | 5 | ✔ |
-| M2 Auth & accounts | 0 | 5 | 1 | ◐ |
+| M2 Auth & accounts | 0 | 5 | 2 | ◐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
 | M5 Mobile foundation | 0 | 6 | 0 | ☐ |
@@ -227,11 +227,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Guards: `requireAuth`, `requirePhoneVerified` (→ 403 verify), `requireRole(admin roles)`
 **Tests:** valid/expired/forged tokens; guard responses.
 
-### [ ] T2.2 Onboarding: DOB gate + user row
+### [x] T2.2 Onboarding: DOB gate + user row
 **PRD refs:** §3.1, §7.1, §12.1 · **Depends:** T2.1
-- [ ] `POST /me/onboard {date_of_birth, referral_code?}`: creates `users` + `profiles` rows; rejects age < 18 (HKT date math) with 422 and does not create the row
-- [ ] Generates `referral_code`; links `referred_by` if code valid (reward logic in T17.6)
-- [ ] `GET /me`, `PATCH /me` (display name, sketch fields)
+- [x] `POST /me/onboard {date_of_birth, referral_code?}`: creates `users` + `profiles` rows; rejects age < 18 (HKT date math) with 422 and does not create the row
+- [x] Generates `referral_code`; links `referred_by` if code valid (reward logic in T17.6)
+- [x] `GET /me`, `PATCH /me` (display name, sketch fields)
 **Tests:** age 17y364d rejected, 18y0d accepted; duplicate onboard is idempotent.
 
 ### [ ] T2.3 Phone verification sync
@@ -1076,3 +1076,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T1.4 | infra/seed/districts.geojson (18 HK districts w/ zh names, normalized MultiPolygon, source+licence in SOURCES.md — swap to CSDI official before launch); db/seed.ts idempotent (districts upsert, city room per district, founding_counters consumer_500/merchant_50, admin user); SPOT_TEMPLATES (11 + default hours) in constants.ts + Dart; migration 0003 users_email unique; seed.test.ts 3 tests | github southparkstan123/hong-kong-geojson had Polygon+GeometryCollection+MultiPolygon mixed — normalized; zh names standard public |
 | 2026-10-26 | T1.5 | db/client.ts (getPool/getDb/withTx/lockRow/claimSlot — drizzle sql-template based, raw {sql,params} objects break execute), pagination.ts (keyset cursor base64url ts|id, row-value comparison), db/pii.ts (AES-256-GCM v1 envelope + HMAC piiHash) + users.phone_hash unique (0004); tests: PII roundtrip/tamper/determinism, cursor, 40-concurrent-claimSlot exact-25 no-oversell, withTx rollback | 26 tests green |
 | 2026-10-26 | T2.1 | src/auth.ts: authenticate decorator (jose jwtVerify HS256, sub→users row, Redis auth:user:<id> 60s cache w/ graceful fallback), requirePhoneVerified→403, requireRole(admin)→403; users.is_admin bool (0005, seed admin updated); wired in app.ts after routes. Tests: 3 (401 no/expired/forged token, 200 valid+claims; phone+admin guards; ghost sub 401). Mini Fastify instance in test (cannot add routes to listening app). jose exports jwtVerify NOT verify | 29 api tests green |
+| 2026-10-26 | T2.2 | routes/me.ts: POST /me/onboard (calendar-date HKT 18+ gate — no Duration math; referral resolve w/ self-ref block; referral_code MP+6 CJO-free alphabet w/ collision retry; users+profiles row in tx; idempotent + race-safe), GET /me (join profiles), PATCH /me (display_name/industry enum 10/role_oneliner 40/hide_photo). AuthUser.onboarded flag — authenticate no longer 401s pre-onboard users (chicken-and-egg fix; cached 60s). shared package exports ./time ./constants. Tests: 5 (17y364d→422/18y0d→201 — dobFor offset +1 = 18th birthday tomorrow, first sign was backwards; idempotent onboard; referral link + self-ignore; PATCH validation) | 34 tests green |
