@@ -291,11 +291,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M4 Venues & geo
 
-### [ ] T4.1 District resolution & viewport queries
+### [x] T4.1 District resolution & viewport queries
 **PRD refs:** §4.3, §12.2 · **Depends:** T1.4
-- [ ] Insert hooks/triggers setting `district_id` via `ST_Contains`
-- [ ] `GET /map/viewport?bbox=` (venues + spots, limit 500, scoped to districts intersecting bbox)
-- [ ] `GET /districts`, `GET /districts/{id}/spots`
+- [x] Insert hooks/triggers setting `district_id` via `ST_Contains`
+- [x] `GET /map/viewport?bbox=` (venues + spots, limit 500, scoped to districts intersecting bbox)
+- [x] `GET /districts`, `GET /districts/{id}/spots`
 **Tests:** bbox spanning two districts returns both; no global query path exists.
 
 ### [ ] T4.2 FEHD importer
@@ -1084,3 +1084,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T3.2 | deps +@aws-sdk/client-s3 +s3-request-presigner +sharp. storage.ts (S3Client R2-compatible, presignPut/Get 10min, get/put/del). routes/photos.ts: POST /me/photos (content-type allowlist, 6-max, lowest-slot reuse), POST /me/photos/confirm (download → sharp rotate/auto-orient strips EXIF → 1080 full + 320 thumb jpeg → re-upload → slots in profiles.photos jsonb), GET /me/photos signed URLs, DELETE /me/photos/:n, PUT /me/photos/order (first=primary). Env-gated: no R2_ENDPOINT → routes not registered (dev stub). Tests: 5 (EXIF+resize proof, full flow, 7th 422 + slot reuse, type/size/garbage/409, reorder) | 55 tests green |
 | 2026-10-26 | T3.3 | src/photoAccess.ts resolveProfileView: map→none ALWAYS, spot_card/queue/inbox→sketch, chat_room→primary (sketch if hide_photo_in_rooms; full if connected), event_room→primary (full if connected), event_done→full iff both attended same spot (SQL join attendance), profile→sketch/full by connection, blocks both directions→none (404). routes/users.ts GET /users/:id?context=&contextId= (sketch layer: name/industry/oneliner/keywords/phone_verified; primary photo signed URL; full adds prompts/socials/all photos). TESTS: 24-case full matrix (every context×relationship incl. blocked-overrides-all + hide flag + API shape) — LAUNCH GATE. LESSON: spots col = host_user_id (host_user_id/host_merchant_id, not created_by); least($1::uuid) casts needed | 79 tests green |
 | 2026-10-26 | T3.4 | packages/shared/src/vibe.ts: vibe() per PRD §3.2 (sum min(levelA,levelB)/10 over shared ÷ max(1,|reference|), clamp [0,1], either side empty → 0.5), vibePercent() cap 99. Exported from shared index. Tests: 8 (empty-sides, worked example 0.4, min-level cap, clamp, disjoint, percent cap) | M3 done: 20 shared + 79 api tests green |
+| 2026-10-26 | T4.1 | migration 0007: assign_district() plpgsql — venues BEFORE INSERT/UPDATE OF location sets district_id via ST_Contains(boundary::geometry, location::geometry); spots follows venue pin. routes/map.ts: GET /districts (18 w/ zh + outline), GET /districts/:id/spots (scoped, unknown → 404, today/week/all filter), GET /map/viewport?bbox (4-number validation, 0.5° max span = no world queries, venues ST_Within envelope + spots via district ST_Intersects, ≤400/200). seedDistricts() exported from seed.ts (script-guard via process.argv[1].endsWith(seed.ts)); map test reuses it. LESSONS: geography columns need ::geometry casts for ST_Contains/ST_Within/ST_Boundary/ST_Intersects; venues col = display_name not name | 86 tests green |
