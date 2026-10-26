@@ -4,6 +4,22 @@
  * (via `pnpm shared:dart`). Web + API import from here.
  */
 
+// ── Spot templates (BM §4; enum lives in DB too) ────────────────
+export const SPOT_TEMPLATES = {
+  dinner: { label: 'Dinner', defaultDurationHours: 2 },
+  drinks: { label: 'Drinks', defaultDurationHours: 2 },
+  coffee: { label: 'Coffee', defaultDurationHours: 1 },
+  hike: { label: 'Hike', defaultDurationHours: 4 },
+  run: { label: 'Run', defaultDurationHours: 1 },
+  tennis: { label: 'Tennis', defaultDurationHours: 2 },
+  pickleball: { label: 'Pickleball', defaultDurationHours: 2 },
+  badminton: { label: 'Badminton', defaultDurationHours: 2 },
+  board_games: { label: 'Board games', defaultDurationHours: 3 },
+  industry_mingle: { label: 'Industry mingle', defaultDurationHours: 2 },
+  open_sport: { label: 'Open sport', defaultDurationHours: 2 },
+} as const;
+export type SpotTemplate = keyof typeof SPOT_TEMPLATES;
+
 // ── Consumer tiers ─────────────────────────────────────────────
 export type Tier = 'free' | 'plus' | 'pro';
 

@@ -38,6 +38,7 @@ export const users = pgTable('users', {
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 }, (t) => [
   uniqueIndex('users_referral_code_idx').on(t.referralCode),
+  uniqueIndex('users_email_idx').on(t.email),
 ]);
 
 // ── profile ─────────────────────────────────────────────────────
