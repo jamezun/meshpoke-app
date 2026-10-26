@@ -31,6 +31,7 @@ import { registerSpotLifecycle } from './routes/spotLifecycle.js';
 import { registerImHere } from './routes/imHere.js';
 import { registerAttendance } from './routes/attendance.js';
 import { registerScore } from './routes/score.js';
+import { registerPokeLedger } from './routes/pokeLedger.js';
 import { registerMerchant } from './routes/merchant.js';
 import { registerAdmin } from './routes/admin.js';
 import { storageFromEnv } from './storage.js';
@@ -153,6 +154,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(async (r) => registerImHere(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerAttendance(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerScore(r, config.DATABASE_URL), { prefix: '/v1' });
+  await app.register(async (r) => registerPokeLedger(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMerchant(r, config.DATABASE_URL, storage), { prefix: '/v1' });
   await app.register(async (r) => registerAdmin(r, config.DATABASE_URL, storage), { prefix: '/v1' });
   const gotrue = new GoTrueClient(config);
