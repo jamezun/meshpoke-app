@@ -83,7 +83,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
-| M0 Foundations | 0 | 6 | 2 | ◐ |
+| M0 Foundations | 0 | 6 | 3 | ◐ |
 | M1 Database & shared package | 0 | 5 | 0 | ☐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
@@ -131,14 +131,14 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Fill in §0.5 commands
 **Acceptance:** `docker compose up -d` brings up all services; `psql` connects; `SELECT postgis_version();` works; GoTrue `/health` returns ok.
 
-### [ ] T0.3 API skeleton
+### [x] T0.3 API skeleton
 **PRD refs:** §2.2, §12 (conventions) · **Depends:** T0.2
-- [ ] Fastify app factory `apps/api/src/app.ts` (separate from `server.ts` for testing)
-- [ ] Plugins: CORS (allowlist), helmet, `@fastify/rate-limit` (Redis store), sensible, Zod type provider, problem+json error handler
-- [ ] `@fastify/swagger` + `/docs` (dev only); `pnpm api:openapi` writes `apps/api/openapi.json`
-- [ ] `GET /v1/health` (db + redis checks)
-- [ ] Logger (pino) with request IDs; Sentry init (no-op if DSN missing)
-- [ ] Vitest config + Testcontainers helper (`test/db.ts`) spinning up PostGIS + Redis per test run
+- [x] Fastify app factory `apps/api/src/app.ts` (separate from `server.ts` for testing)
+- [x] Plugins: CORS (allowlist), helmet, `@fastify/rate-limit` (Redis store), sensible, Zod type provider, problem+json error handler
+- [x] `@fastify/swagger` + `/docs` (dev only); `pnpm api:openapi` writes `apps/api/openapi.json`
+- [x] `GET /v1/health` (db + redis checks)
+- [x] Logger (pino) with request IDs; Sentry init (no-op if DSN missing)
+- [x] Vitest config + Testcontainers helper (`test/db.ts`) spinning up PostGIS + Redis per test run
 **Tests:** health endpoint integration test.
 **Acceptance:** `pnpm --filter api dev` serves `/v1/health`; `pnpm test` runs the integration test green.
 
@@ -1066,3 +1066,4 @@ Append one line per completed task (newest at the bottom).
 | --- | --- | --- | --- |
 | 2026-10-26 | T0.1 | Monorepo scaffold: pnpm workspace + turbo, ts strict base, eslint9 flat + prettier, README, 5 package skeletons; install+typecheck+lint green | .nvmrc pins 20, local runs Node 22 |
 | 2026-10-26 | T0.2 | Dev stack: postgis 15-3.4 + redis 7 + mailpit + standalone GoTrue (v2.132.3) + db-init (auth schema, postgis ext, supabase_auth_admin role w/ search_path); .env.example; Zod config loader; acceptance verified (health/postgis/signup+token) | GoTrue v2.158+ broken standalone (mixed env prefixes, half-applied migrations) — pinned v2.132.3; autoconfirm spelling to verify at T2.1 |
+| 2026-10-26 | T0.3 | API skeleton: Fastify 5 factory (app.ts/server.ts split), CORS allowlist + helmet + rate-limit (Redis store, health exempt) + sensible + Zod type provider + problem+json errors w/ request ids, swagger /docs dev-only + openapi.json export script, /v1/health (db+redis checks), pino + dotenv, Vitest + Testcontainers (PostGIS+Redis per run) — 3 integration tests green | WSL: testcontainers needs DOCKER_CONFIG shim (infra/test-docker-config) b/c Docker Desktop credsStore; pnpm override cookie@^1.0.2 (ESM-only cookie@2 breaks light-my-request require); dev env via dotenv not NODE_OPTIONS (--env-file blocked) |
