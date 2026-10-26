@@ -5,6 +5,7 @@
 import pg from 'pg';
 import { PgBoss } from 'pg-boss';
 import { fetchFehdXml, applyFehdImport } from '../venues/fehd.js';
+import { geocodePendingVenues } from '../venues/als.js';
 
 export async function startJobs(databaseUrl: string, fehdUrl: string, districtFilter?: string[]) {
   const boss = new PgBoss({ connectionString: databaseUrl });
@@ -19,8 +20,13 @@ export async function startJobs(databaseUrl: string, fehdUrl: string, districtFi
     const result = await applyFehdImport(pool, parseFehdXml(xml), { districtFilter });
     console.log('[jobs] fehd-import', JSON.stringify(result));
   });
-  // daily 10:00 HKT = 02:00 UTC
+  // daily 10:00 HKT = 02:00 UTC; geocode sweep right after (ALS throttle handles pacing)
   await boss.schedule('fehd-import', '0 2 * * *', { filter: districtFilter });
+  await boss.work('als-geocode', async () => {
+    const r = await geocodePendingVenues(pool);
+    console.log('[jobs] als-geocode', JSON.stringify(r));
+  });
+  await boss.schedule('als-geocode', '30 2 * * *');
 
   return { boss, pool };
 }
