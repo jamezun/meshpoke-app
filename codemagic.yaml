@@ -1,0 +1,61 @@
+# Codemagic CI/CD (BUILD_PLAN T8.5 — Phase 0 internal release)
+# User setup (one-time, in codemagic.io):
+#   1. Add this repo as an app (workflow "meshpoke-phase0").
+#   2. iOS: add an App Store Connect API key (Tests: automatic code signing); Codemagic creates the profile.
+#   3. Android: add a keystore as environment variable group "android_signing"
+#      (CM_KEYSTORE, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS, CM_KEY_ALIAS_PASSWORD).
+#   4. Set GCLOUD_SERVICE_ACCOUNT_CREDENTIALS for Play internal track publishing.
+# Until then both workflows still build + test unsigned artifacts on tag pushes.
+
+workflows:
+  meshpoke-phase0:
+    name: MeshPoke Phase 0
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    triggering:
+      events:
+        - tag
+      branch_patterns:
+        - pattern: "v*"
+    environment:
+      flutter: stable
+      groups:
+        - android_signing   # optional until keystore uploaded
+    scripts:
+      - name: Pub get
+        working_directory: apps/mobile
+        script: flutter pub get
+      - name: Analyze
+        working_directory: apps/mobile
+        script: flutter analyze --no-fatal-infos
+      - name: Test
+        working_directory: apps/mobile
+        script: flutter test
+      - name: Build Android (internal)
+        working_directory: apps/mobile
+        script: |
+          if [ -n "$CM_KEYSTORE" ]; then
+            flutter build appbundle --release
+          else
+            echo "no signing group — unsigned debug build"
+            flutter build apk --debug
+          fi
+      - name: Build iOS (TestFlight)
+        working_directory: apps/mobile
+        script: |
+          if [ -n "$APP_STORE_CONNECT_PRIVATE_KEY" ]; then
+            flutter build ipa --release --export-options-plist=/dev/null
+          else
+            echo "no ASC key — unsigned build"
+            flutter build ios --debug --no-codesign
+          fi
+    artifacts:
+      - apps/mobile/build/**/outputs/**/*.aab
+      - apps/mobile/build/**/outputs/**/*.apk
+      - apps/mobile/build/ios/ipa/*.ipa
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_review: false
+      # TestFlight publishing uses the ASC API key automatically when present

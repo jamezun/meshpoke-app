@@ -22,6 +22,7 @@ import { registerMap } from './routes/map.js';
 import { registerVenues } from './routes/venues.js';
 import { registerMeta } from './routes/meta.js';
 import { registerShare } from './routes/share.js';
+import { registerWaitlist } from './routes/waitlist.js';
 import { registerRealtime } from './routes/realtime.js';
 import { registerRooms } from './routes/rooms.js';
 import { registerMerchant } from './routes/merchant.js';
@@ -154,6 +155,7 @@ export async function buildApp(opts: BuildAppOptions) {
       registerVenues(instance, config.DATABASE_URL);
       registerMeta(instance);
       registerShare(instance, config.DATABASE_URL);
+      registerWaitlist(instance, config.DATABASE_URL);
       if (storage) {
         registerPhotos(instance, config.DATABASE_URL, storage);
         registerUsers(instance, config.DATABASE_URL, storage);

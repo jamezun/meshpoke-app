@@ -92,6 +92,13 @@
       "when": 1793020000000,
       "tag": "0012_admin_roles",
       "sql": "-- placeholder\nALTER TABLE \"users\" ADD COLUMN \"admin_roles\" text[] NOT NULL DEFAULT '{}';"
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793026800000,
+      "tag": "0013_waitlist",
+      "breakpoints": true
     }
   ]
 }

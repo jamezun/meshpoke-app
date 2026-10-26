@@ -1,4 +1,7 @@
+import { useState } from 'react';
+
 export function HomePage() {
+  const [waitlistState, setWaitlistState] = useState<'idle' | 'sending' | 'done' | 'already' | 'error'>('idle');
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="text-4xl font-bold tracking-tight">Poke the mesh.<br />Watch your network ripple.</h1>
@@ -21,11 +24,37 @@ export function HomePage() {
       </section>
       <section id="waitlist" className="mt-16 rounded-xl border border-zinc-800 p-6">
         <h2 className="text-xl font-semibold">Join the waitlist</h2>
-        <form className="mt-4 flex gap-2" action="/api/waitlist" method="post">
+        <form
+          className="mt-4 flex gap-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const email = new FormData(form).get('email');
+            setWaitlistState('sending');
+            try {
+              const res = await fetch('/v1/waitlist', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ email }),
+              });
+              const body = (await res.json()) as { alreadyJoined?: boolean };
+              setWaitlistState(body.alreadyJoined ? 'already' : 'done');
+            } catch {
+              setWaitlistState('error');
+            }
+          }}
+        >
           <input type="email" name="email" required placeholder="you@example.com" className="flex-1 rounded-lg border border-zinc-700 bg-transparent px-3 py-2" />
-          <button className="rounded-lg px-4 py-2 font-medium" style={{ background: 'var(--accent)', color: '#08110c' }}>Notify me</button>
+          <button disabled={waitlistState === 'sending'} className="rounded-lg px-4 py-2 font-medium disabled:opacity-50" style={{ background: 'var(--accent)', color: '#08110c' }}>
+            {waitlistState === 'sending' ? '…' : 'Notify me'}
+          </button>
         </form>
-        <p className="mt-2 text-xs text-zinc-500">Double opt-in. No spam — launch notice only.</p>
+        <p className="mt-2 text-xs text-zinc-500">
+          {waitlistState === 'done' && 'You are on the list — we will email you at launch. No spam.'}
+          {waitlistState === 'already' && 'You are already on the list. See you at launch!'}
+          {waitlistState === 'error' && 'Something went wrong — please try again.'}
+          {(!waitlistState || waitlistState === 'idle') && 'Launch notice only. No spam.'}
+        </p>
       </section>
       <footer className="mt-16 border-t border-zinc-800 pt-6 text-xs text-zinc-500">
         <p>Contains information from DATA.GOV.HK / 資料一線通 — FEHD licensed restaurants. Geocoding via Lands Department ALS.</p>

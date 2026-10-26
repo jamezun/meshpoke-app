@@ -18,16 +18,25 @@ export type FehdRecord = {
   district: string;
 };
 
+// FEHD DIST codes → our districts.name_en (seed uses full official names).
+// Legend ships inside the file (<DIST_CODE><CODE ID="61">Yau Tsim</CODE>…); FEHD splits
+// Yau Tsim Mong into two codes (61 Yau Tsim, 62 Mong Kok) and spells C&W as "Central/Western".
+const DIST_ALIAS: Record<string, string> = {
+  'Yau Tsim': 'Yau Tsim Mong',
+  'Mong Kok': 'Yau Tsim Mong',
+  'Central/Western': 'Central and Western',
+  'Food Truck': '', // mobile trucks have no fixed district; geocoder assigns later
+};
+
 export function parseFehdXml(xml: string): FehdRecord[] {
   // isArray everywhere + no numeric parsing: FEHD licence numbers keep leading zeros
   const parser = new XMLParser({ ignoreAttributes: false, trimValues: true, parseTagValue: false, isArray: () => true });
   const doc = parser.parse(xml) as Record<string, unknown>;
 
-  // FEHD bulk format: <XMLLicenceMOE_MFE><XMLLicenceMOE_MFE>…rows…</></>
-  const rootKey = Object.keys(doc).find((k) => !k.startsWith('?')) ?? Object.keys(doc)[0];
-  const root = (doc[rootKey] as unknown[])?.[0] as Record<string, unknown[]> | undefined;
-  const list = root?.[rootKey] as unknown[] | undefined;
-  const flat = ((list ?? [root]) as Record<string, unknown[]>[]).filter(Boolean);
+  // Real format (LP_Restaurants_EN.XML): <DATA><LPS><LP>TYPE/DIST/LICNO/SS/ADR/INFO/EXPDATE</LP>…</LPS></DATA>
+  const data: Record<string, unknown[]> = ((doc.DATA as Record<string, unknown[]>[] | undefined)?.[0] as Record<string, unknown[]>) ?? {};
+  const lps = (data.LPS as Record<string, unknown[]>[] | undefined)?.[0];
+  const rows = (lps?.LP as Record<string, unknown>[] | undefined) ?? [];
 
   const one = (v: unknown): unknown => (Array.isArray(v) ? v[0] : v);
   const str = (v: unknown): string => {
@@ -35,20 +44,26 @@ export function parseFehdXml(xml: string): FehdRecord[] {
     return s === undefined || s === null ? '' : String(s).trim();
   };
 
-  return flat.map((row) => {
-    const r = row as Record<string, unknown>;
-    const ta = (one(r.TA) ?? {}) as Record<string, unknown>;
-    const addr = (one(ta.TA_AD) ?? {}) as Record<string, unknown>;
-    return {
-      licenceNo: str(r.LIC_NO),
-      licenceType: str(r.WI_ACTVTY_REST ?? r.LIC_TYPE),
-      nameEn: str(r.FLD_NME_E),
-      nameZh: str(r.FLD_NME_T),
-      addrEn: [str(ta.TA_EN), str(addr.AD_ST), str(addr.AD_BULD), str(addr.AD_BUFLR)].filter(Boolean).join(', '),
-      addrZh: [str(ta.TA_ZH), str(addr.AD_ST_ZH), str(addr.AD_BULD_ZH), str(addr.AD_BUFLR_ZH)].filter(Boolean).join(', '),
-      district: str(r.DISTRICT_C ?? r.DISTRICT),
-    };
-  }).filter((r) => r.licenceNo !== '');
+  // build code→name legend from the file itself (DIST_CODE → CODE ID/name)
+  const legend: Record<string, string> = {};
+  const distCode = (data.DIST_CODE as Record<string, unknown[]>[] | undefined)?.[0];
+  const codes = (distCode?.CODE as Record<string, unknown>[] | undefined) ?? [];
+  for (const c of codes) legend[String(one(c['@_ID']) ?? '')] = String(one(c['#text']) ?? '').trim();
+
+  return rows
+    .map((row) => {
+      const rawDistrict = DIST_ALIAS[legend[str(row.DIST)] ?? ''] ?? legend[str(row.DIST)] ?? '';
+      return {
+        licenceNo: str(row.LICNO),
+        licenceType: str(row.TYPE),
+        nameEn: str(row.SS),
+        nameZh: '', // EN file only; TC file can backfill later
+        addrEn: str(row.ADR),
+        addrZh: '',
+        district: rawDistrict,
+      };
+    })
+    .filter((r) => r.licenceNo !== '');
 }
 
 export type ImportResult = { inserted: number; updated: number; closed: number; reopened: number; geocodePending: number };

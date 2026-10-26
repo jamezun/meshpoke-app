@@ -13,7 +13,8 @@
     "db:generate": "bash scripts/db-generate.sh",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
-    "anonymize": "tsx src/jobs/anonymize-deleted.ts"
+    "anonymize": "tsx src/jobs/anonymize-deleted.ts",
+    "fehd:import": "tsx scripts/fehd-import.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
