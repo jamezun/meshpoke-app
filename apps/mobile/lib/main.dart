@@ -7,6 +7,7 @@ import 'package:meshpoke/features/auth/phone_screen.dart';
 import 'package:meshpoke/features/auth/sign_in_screen.dart';
 import 'package:meshpoke/core/shell.dart';
 import 'package:meshpoke/features/map/map_screen.dart';
+import 'package:meshpoke/features/map/venue_screens.dart';
 import 'package:meshpoke/features/spots/spots_screen.dart';
 import 'package:meshpoke/features/rooms/rooms_screen.dart';
 import 'package:meshpoke/features/inbox/inbox_screen.dart';
@@ -52,8 +53,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/venue/:id',
-        builder: (_, s) => const ShellScreen(child: MapScreen()),
+        builder: (_, s) => VenuePageScreen(venueId: s.pathParameters['id']!),
       ),
+      GoRoute(path: '/venue/add', builder: (_, __) => const AddPlaceScreen()),
+      GoRoute(path: '/about', builder: (_, __) => const AboutScreen()),
       GoRoute(
         path: '/r/:code',
         builder: (context, state) {
