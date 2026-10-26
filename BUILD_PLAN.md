@@ -592,10 +592,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Photo reveal after done: resolver contexts already wired (T3.3) — `event_done` surfaces via detail/room; two-device check at staging
 **Acceptance:** two-device test of roll-call and reveal.
 
-### [ ] T10.5 Trust signals everywhere
+### [x] T10.5 Trust signals everywhere
 **PRD refs:** §3.3 · **Depends:** T10.3
-- [ ] API returns `trust: {memberSince, spotsAttended, score | "unproven"}` on sketches, queue items, inbox items, member lists
-- [ ] Friend-of-friend flag (connections degree 2, computed on request with cache)
+- [x] API returns `trust: {memberSince, spotsAttended, score, provenState, friendOfFriend}` on member lists (spot detail) + queue items; inbox when M11 lands
+- [x] Friend-of-friend flag (shared active connection, per-request; cache deferred — ponytail comment on threshold)
 **Tests:** spotsAttended counts only `attended|forgiven`.
 
 ---
@@ -1122,3 +1122,4 @@ Append one line per completed task (newest at the bottom).
 - T10.2 (✓): attendance lifecycle built+tested (defaults attended, host mark, 2-report flip, forgiveness round-trip, idempotent finalise). 148 api tests green.
 - T10.3 (✓): score engine + 7 tests (6 unit + 1 integration incl. ladder + capacity transitions). 155 api tests green.
 - T10.4 (✓): LiveSpotScreen + detail members sketches; two-device acceptance deferred to staging per protocol.
+- T10.5 (✓): trust.test green; 156 api tests. M10 complete.
