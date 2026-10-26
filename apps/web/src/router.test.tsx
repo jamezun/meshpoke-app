@@ -14,5 +14,24 @@ describe('web routes', () => {
   it('pricing renders from shared constants (flat, founding banner)', () => {
     const { Router } = createRouter({ memory: true, initial: '/pricing' });
     render(<Router />);
+    expect(screen.getByText(/HK\$128/)).toBeTruthy();
+    expect(screen.getByText(/locked forever/i)).toBeTruthy();
+  });
+
+  it('static pages render: how-it-works, safety, venue, support, legal', () => {
+    for (const [path, needle] of [
+      ['/how-it-works', 'Rebook the crew'],
+      ['/safety', 'Scameter'],
+      ['/venue', 'Founding circle'],
+      ['/venue/pricing', 'per verified new-member visit'],
+      ['/support', 'Show-up Score'],
+      ['/terms', 'Hong Kong SAR'],
+      ['/privacy', 'PDPO'],
+    ] as const) {
+      const { Router } = createRouter({ memory: true, initial: path });
+      const r = render(<Router />);
+      expect(screen.getByText(new RegExp(needle))).toBeTruthy();
+      r.unmount();
+    }
   });
 });
