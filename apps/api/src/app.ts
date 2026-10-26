@@ -6,7 +6,7 @@ import sensible from '@fastify/sensible';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import pg from 'pg';
 import { corsOrigins, type Config } from './config.js';
 import { healthRoutes } from './routes/health.js';

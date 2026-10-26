@@ -1,5 +1,5 @@
 import pg from 'pg';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { stopInfra, useInfra } from './db.js';

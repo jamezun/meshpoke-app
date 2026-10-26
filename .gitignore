@@ -18,3 +18,4 @@ coverage/
 .dart_tool/
 .flutter-plugins*
 .openapi-generator/
+apps/api/dist/
