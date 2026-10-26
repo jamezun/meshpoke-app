@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meshpoke/core/api_client.dart';
 import 'spot_repository.dart';
+import 'host_queue_screen.dart';
 
 /// T9.5 spot detail + join (open) / apply (application, note ≤500) + leave.
 class SpotDetailScreen extends ConsumerStatefulWidget {
@@ -27,6 +28,7 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
         SnackBar(content: Text(switch (path) {
           'apply' => 'Applied — host will review',
           'join' => 'Joined (${res.data['role']})',
+          'cancel' => 'Spot cancelled',
           _ => 'Left the spot',
         })),
       );
@@ -115,7 +117,22 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
 
   Widget _action(SpotDetail s) {
     if (_busy) return const Center(child: CircularProgressIndicator());
-    if (s.myRole == 'host') return const Chip(label: Text('You host this spot'));
+    if (s.myRole == 'host') {
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        FilledButton.icon(
+          icon: const Icon(Icons.list),
+          label: const Text('Review queue'),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => HostQueueScreen(spotId: s.id)),
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: () => _act('cancel'),
+          child: const Text('Cancel spot'),
+        ),
+      ]);
+    }
     if (s.myRole != null && s.myApplication == null) {
       return FilledButton.tonal(
         onPressed: () => _act('leave'),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'spot_detail_screen.dart';
 import 'spot_repository.dart';
+import 'host_spot_screen.dart';
 
 /// Spots tab (T9.5): district-scoped event list + time filter.
 class SpotsScreen extends ConsumerStatefulWidget {
@@ -19,7 +20,15 @@ class _SpotsScreenState extends ConsumerState<SpotsScreen> {
   Widget build(BuildContext context) {
     final districts = ref.watch(districtListProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Spots')),
+      appBar: AppBar(
+        title: const Text('Spots'),
+        actions: [
+          IconButton(icon: const Icon(Icons.add), onPressed: () async {
+            final id = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const HostSpotScreen()));
+            if (id != null && _districtId != null) ref.invalidate(spotsProvider((_districtId!, _time)));
+          }),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
