@@ -149,7 +149,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Single command `pnpm api:openapi` regenerates both
 **Acceptance:** after adding the health route, both clients contain a typed `health` call.
 
-### [ ] T0.5 CI pipeline
+### [~] T0.5 CI pipeline
 **PRD refs:** §2.2 (CI/CD) · **Depends:** T0.3
 - [ ] GitHub Actions: on PR → install, typecheck, lint, test (with Docker for Testcontainers), build web
 - [ ] Flutter job: `flutter analyze` + `flutter test` (after M5 exists; add a placeholder now)
