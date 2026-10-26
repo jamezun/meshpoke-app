@@ -632,9 +632,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] AnimatedScale ripple on poke-back CTA (one-shot, 300ms)
 **Acceptance:** device test: poke → poke back → message.
 
-### [ ] T11.5 Web: inbox & connections
+### [x] T11.5 Web: inbox & connections
 **PRD refs:** §6.2 · **Depends:** T11.2, T6.4
-- [ ] Inbox with poke back, connections list, DM chat, People-you-met
+- [x] Web InboxPage: pokes tab (poke back · Free, Recommended/Newest), connections (Message → /app/rooms/:id DM, disconnect w/ confirm); PeopleYouMetPage (/app/people-you-met/:spotId) w/ 48h window notice
 **Acceptance:** parity with mobile for these flows.
 
 ---
@@ -1127,3 +1127,4 @@ Append one line per completed task (newest at the bottom).
 - T11.2 (✓): pokes.test 2 green (full poke→back→DM→disconnect→repoke cycle + people-you-met). 163 api tests.
 - T11.3 (✓): dmLock.test 2 green; ws gate wired in realtime.ts message:send. 165 api tests.
 - T11.4 (✓): poke_repository + poke_screens; analyze clean, 14 tests green. Device poke→back→message pending TestFlight.
+- T11.5 (✓): web parity for inbox flows (DM chat reuses RoomsPage). 8 web tests green. M11 5/5 ✔
