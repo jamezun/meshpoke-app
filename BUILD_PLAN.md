@@ -96,7 +96,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
-| M13 Safety & moderation | 2 | 5 | 0 | ☐ |
+| M13 Safety & moderation | 3 | 5 | 0 | ☐ |
 | M14 Notifications & activity feed | 1 | 4 | 0 | ☐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
@@ -670,11 +670,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] 3 distinct open reports → single auto-mute moderation_action; realtime message:send fails muted_pending_review
 **Tests:** block matrix; auto-mute threshold.
 
-### [ ] T13.2 Scam filters & link lock
+### [x] T13.2 Scam filters & link lock
 **PRD refs:** §7.2 · **Depends:** T11.3
-- [ ] Pattern library (`packages/shared/scam-patterns.ts`): crypto, investment returns, "download this app", move-to-Telegram/WhatsApp, phone numbers, @handles, emails
-- [ ] On send: flagged → interstitial required (`requireConfirm`); on receive: warning banner flag
-- [ ] Scameter link in scam report flow
+- [x] packages/shared/src/scam-patterns.ts — 8 pattern classes EN+TC (crypto, guaranteed returns, move-offplatform, download, phone HK formats, @handle, email, link); scanOutgoing/scanIncoming/scameterUrl; exports map added
+- [x] message:send → confirm_required + flags until confirmed:true (server-enforced interstitial); flags jsonb stored on messages (receive-side banner data)
+- [x] scameterUrl() helper (cyberdefender.hk) for report flow
 **Tests:** fixture messages flagged / not flagged.
 
 ### [ ] T13.3 Share-my-spot & safety ratings
@@ -1132,3 +1132,4 @@ Append one line per completed task (newest at the bottom).
 - T12.2 (✓): rebook.test green (poll/vote/finalize/409/hosting-cap). 168 api tests.
 - T12.3 (✓): flutter analyze clean + 14 tests, web 8 tests. M12 3/3 ✔
 - T13.1 (✓): safety.test 2 green (block matrix, auto-mute single-insert). 165 api tests.
+- T13.2 (✓): 24 shared tests (4 new scam), dmLock scam-interstitial WS test. 166 api tests.
