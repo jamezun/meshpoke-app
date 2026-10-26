@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meshpoke/core/api_client.dart';
 import 'spot_repository.dart';
@@ -64,7 +65,18 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
   Widget build(BuildContext context) {
     final detail = ref.watch(spotDetailProvider(widget.spotId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Spot')),
+      appBar: AppBar(
+        title: const Text('Spot'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => Share.share(
+              'https://www.meshpoke.com/s/${widget.spotId}',
+              subject: 'MeshPoke spot',
+            ),
+          ),
+        ],
+      ),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

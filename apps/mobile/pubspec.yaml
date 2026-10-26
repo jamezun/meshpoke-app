@@ -33,6 +33,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  share_plus: ^10.0.0
   meshpoke_api:
     path: meshpoke_api
   flutter_riverpod: ^2.6.1
