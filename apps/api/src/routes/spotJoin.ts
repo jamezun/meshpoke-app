@@ -118,6 +118,47 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     return { status: 'pending' };
   });
 
+  // T9.3 queue view: sorted-never-hidden (Recommended default), counts per status,
+  // express badge for plus/pro; FIFO within ties. Creator sees sketches only (T3.3).
+  app.get<{ Params: { id: string }; Querystring: { sort?: string } }>('/spots/:id/queue', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const userId = req.user!.id;
+    const host = rows(await db.execute(sql`select 1 from spot_members where spot_id = ${req.params.id}::uuid and user_id = ${userId} and role = 'host'`));
+    if (host.length === 0) return reply.code(403).send({ problem: { title: 'Host only', status: 403 } });
+    const sort = req.query?.sort === 'fifo' ? 'fifo' : 'recommended';
+    const apps = rows(await db.execute(sql`
+      select a.id, a.user_id, a.status, a.note, a.created_at,
+             coalesce(e.plan, 'free') as plan,
+             sc.score as score, coalesce(sc.proven_state, 'unproven') as proven_state,
+             coalesce(json_agg(json_build_object('keyword', k.keyword, 'level', k.level)) filter (where k.keyword is not null), '[]') as keywords
+        from applications a
+        left join entitlements e on e.user_id = a.user_id and (e.expires_at is null or e.expires_at > now())
+        left join showup_scores sc on sc.user_id = a.user_id
+        left join keywords k on k.user_id = a.user_id
+       where a.spot_id = ${req.params.id}::uuid and a.status in ('pending','waitlisted','accepted','declined')
+       group by a.id, e.plan, sc.score, sc.proven_state`));
+    const { recommendedScore, currentSortWeights } = await import('../sort.js');
+    const { vibe } = await import('@meshpoke/shared/vibe');
+    const weights = await currentSortWeights();
+    const spot = rows(await db.execute(sql`select required_keywords from spots where id = ${req.params.id}::uuid`));
+    const spotKw = ((spot[0]?.required_keywords as string[] | null) ?? []).map((k) => ({ keyword: k.toLowerCase(), level: 10 }));
+    const scored = apps.map((a): Record<string, unknown> => {
+      const kw = (((a.keywords as { keyword: string; level: number }[]) ?? []).map((k) => ({ keyword: String(k.keyword).toLowerCase(), level: k.level })));
+      const vibeVal = vibe(kw, spotKw); // empty on either side → 0.5 neutral
+      return { ...a, score: recommendedScore({ tier: a.plan as 'free' | 'plus' | 'pro', vibe: vibeVal, score: a.score === null ? null : Number(a.score) }, weights) };
+    });
+    scored.sort((x, y) => (sort === 'fifo' ? String(x.created_at).localeCompare(String(y.created_at)) : (y.score as number) - (x.score as number) || String(x.created_at).localeCompare(String(y.created_at))));
+    const counts: Record<string, number> = {};
+    for (const a of apps) counts[a.status as string] = (counts[a.status as string] ?? 0) + 1;
+    return {
+      sort,
+      counts,
+      queue: scored.map((a) => ({
+        applicationId: a.id, userId: a.user_id, status: a.status, note: a.note, createdAt: a.created_at,
+        score: a.score, provenState: a.proven_state, plan: a.plan, express: a.plan !== 'free',
+      })),
+    };
+  });
+
   // leave (both modes) — pre-event bail semantics live in T9.4; here = leave forming spot
   app.post<{ Params: { id: string } }>('/spots/:id/leave', { preHandler: [app.authenticate] }, async (req, reply) => {
     const userId = req.user!.id;
