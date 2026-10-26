@@ -55,7 +55,7 @@ jobs:
         if: hashFiles('apps/mobile/pubspec.yaml') != ''
         with:
           channel: stable
-          cache: true
+          cache: false
 
       - name: Analyze
         if: hashFiles('apps/mobile/pubspec.yaml') != ''
