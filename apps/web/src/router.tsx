@@ -7,6 +7,7 @@ import SafetyPage from './pages/Safety';
 import AboutPage from './pages/About';
 import VenueLandingPage from './pages/Venue';
 import VenuePricingPage from './pages/VenuePricing';
+import { VenueClaimPage } from './pages/VenueClaim';
 import SupportPage from './pages/Support';
 import { TermsPage, PrivacyPage } from './pages/Legal';
 import { LoginPage } from './auth/Login';
@@ -26,6 +27,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/about', element: <AboutPage /> },
     { path: '/venue', element: <VenueLandingPage /> },
     { path: '/venue/pricing', element: <VenuePricingPage /> },
+    { path: '/venue/claim', element: <VenueClaimPage /> },
     { path: '/support', element: <SupportPage /> },
     { path: '/terms', element: <TermsPage /> },
     { path: '/privacy', element: <PrivacyPage /> },
