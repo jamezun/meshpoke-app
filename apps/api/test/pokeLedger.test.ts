@@ -59,7 +59,7 @@ describe('lazy Monday reset', () => {
   test('stale last_reset_at resets to 0; fresh does not (Monday boundary)', async () => {
     const db = getDb(dbUrl);
     // stale: last Sunday 23:59 HKT (= Saturday 15:59 UTC)
-    const sundayNight = new Date(mostRecentMonday() - 60_000); // 1 min before Monday 00:00 HKT
+    const sundayNight = new Date(mostRecentMonday().getTime() - 60_000); // 1 min before Monday 00:00 HKT
     await pool.query(`insert into poke_balances (user_id, weekly_used, credits, last_reset_at)
                       values ($1, 3, 2, $2) on conflict (user_id) do update set weekly_used = 3, credits = 2, last_reset_at = $2`,
       [users.me.id, sundayNight.toISOString()]);
