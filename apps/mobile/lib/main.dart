@@ -36,6 +36,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const ShellScreen(child: RoomsScreen()),
       ),
       GoRoute(
+        path: '/rooms/:id',
+        builder: (_, s) => RoomScreen(roomId: s.pathParameters['id']!),
+      ),
+      GoRoute(
         path: '/inbox',
         builder: (_, __) => const ShellScreen(child: InboxScreen()),
       ),
