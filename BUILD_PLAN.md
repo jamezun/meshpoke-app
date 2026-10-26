@@ -648,10 +648,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] POST /v1/internal/crew-sweep: dormant_at set at 60d no rebook (freed from caps); reactivation on rebook in T12.2
 **Tests:** cap counts exclude dormant crews.
 
-### [ ] T12.2 Rebook with date poll
+### [x] T12.2 Rebook with date poll
 **PRD refs:** §3.7 · **Depends:** T12.1, T9.4
-- [ ] `POST /crews/{id}/rebook {poll_options[2..5]}` (hosting rights + capacity) → `rebooks`
-- [ ] Vote, finalize → creates event spot (same template + venue) with crew members pre-invited (still need confirm), optional public seats
+- [x] POST /v1/crews/:id/rebook {pollOptions 2–5} (hosting_capacity + plan cap gates, reactivates crew)
+- [x] POST /v1/rebooks/:id/vote (unique per user) + /finalize (creator only, 409 on repeat) → event spot same template+venue, crew pre-attached as members, optional publicSeats; rebook finalizes to new_spot_id
 **Tests:** finalize creates spot with correct members.
 
 ### [ ] T12.3 Mobile & web crew UI
@@ -1129,3 +1129,4 @@ Append one line per completed task (newest at the bottom).
 - T11.4 (✓): poke_repository + poke_screens; analyze clean, 14 tests green. Device poke→back→message pending TestFlight.
 - T11.5 (✓): web parity for inbox flows (DM chat reuses RoomsPage). 8 web tests green. M11 5/5 ✔
 - T12.1 (✓): crews.test 2 green (crew create/join/leave/whatsapp; cap excludes dormant after sweep). 167 api tests.
+- T12.2 (✓): rebook.test green (poll/vote/finalize/409/hosting-cap). 168 api tests.
