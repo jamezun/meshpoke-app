@@ -86,8 +86,8 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M0 Foundations | 0 | 6 | 6 | ✓ |
 | M1 Database & shared package | 0 | 5 | 5 | ✔ |
 | M2 Auth & accounts | 0 | 5 | 5 | ✔ |
-| M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
-| M4 Venues & geo | 0 | 6 | 0 | ☐ |
+| M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
+| M4 Venues & geo | 0 | 6 | 4 | ◐ |
 | M5 Mobile foundation | 0 | 6 | 0 | ☐ |
 | M6 Web foundation | 0 | 5 | 0 | ☐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
