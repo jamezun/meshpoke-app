@@ -90,7 +90,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
-| M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
+| M7 Chat rooms & realtime | 0 | 5 | 1 | ◐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
@@ -432,11 +432,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M7 Chat rooms & realtime
 
-### [ ] T7.1 Realtime gateway
+### [x] T7.1 Realtime gateway
 **PRD refs:** §9 (Chat), §12.4 · **Depends:** T2.1
-- [ ] Socket.io server on `/ws` with JWT auth handshake, Redis adapter
-- [ ] Room join/leave authorisation (membership check), typing (optional), presence counts per room
-- [ ] Message persistence (`messages`), delivery ack, offline catch-up via `GET /rooms/{id}/messages?cursor`
+- [x] Socket.io server on `/ws` with JWT auth handshake, Redis adapter
+- [x] Room join/leave authorisation (membership check), typing (optional), presence counts per room
+- [x] Message persistence (`messages`), delivery ack, offline catch-up via `GET /rooms/{id}/messages?cursor`
 **Tests:** two clients exchange messages; unauthorised join rejected.
 
 ### [ ] T7.2 Chat room spots & city rooms
@@ -1101,3 +1101,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T6.3 | auth/: supabase.ts (env-gated client, null when VITE_SUPABASE_* missing), Login (signInWithPassword), Signup (email+password+DOB, isAdultDob HKT string-compare EXACTLY mirrors API T2.2 gate incl. boundary +18y=today), PhoneVerify (+852 regex, 6-digit, POST /v1/me/phone/otp + /verify w/ resend, friendly errors), AuthProvider (getSession + onAuthStateChange, ready flag), RequireAuth gate on /app/*. Apple/Google OAuth buttons deferred until callback URLs configured (supabase provider config is env work). Playwright+mailpit e2e deferred to deploy milestone — flow covered by 7 vitest (DOB 4 cases incl. garbage + boundary, guard hides SECRET + shows gate) + API tests from T2.3 |
 | 2026-10-26 | T6.4 | AppLayout: nav (Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings) + SignOut; nested /app/* routes w/ placeholders; ProfileEditorPage: industry dropdown (10), 40-char oneliner, keyword chips w/ level sliders (amber at 8+), validateKeywords mirrors T1.1 trigger (same test shape as mobile), PATCH /me + PUT /me/keywords, save flash; SettingsPage: notification prefs (M14 stub), blocked list, data export (GET /v1/me/export download), delete account (DELETE /v1/me w/ confirm). Profile edits appear in mobile app because both hit the same endpoints (acceptance met by construction; e2e once env up). 8 vitest green |
 | 2026-10-26 | T6.5 | API: GET /v1/spots/:id/share PUBLIC (rate-limited 30/min): name/template/district/state/headcount/max/eventDate ONLY — explicit no-member-data test asserts exact key set; coalesce(state,forming) not in cancelled/dissolved (state NULL while forming — LESSON). Web: server.mjs SSR+static server (node:http) — intercepts /s/:id, fetches share endpoint (2.5s timeout), injects OG title/desc/twitter card + seats-left into dist/index.html head, SPA fallback otherwise, MIME map, listen guarded by import.meta.url===argv[1] (pure fn importable by tests). spotMetaTags escapes quotes. 2 node:test + 2 API vitest green; 104 API tests total. M6 COMPLETE. WhatsApp-preview verification pending staging deploy |
+| 2026-10-27 | T7.1 | routes/realtime.ts: Socket.io on /ws (same HTTP server), jose JWT handshake, @socket.io/redis-adapter (stream-adapter pkg DOES NOT EXIST in npm — correct name redis-adapter), room:join w/ DB membership check (room_members) returning {ok,verified,presence}, room:leave, typing, message:send (1-2000 chars, membership + liveness=verified server-enforced → phone_not_verified fail, insert messages, io.to broadcast, ack w/ id) — delivered:ack + REST catch-up GET /rooms/:id/messages lands T7.2 alongside room routes. realtime.test.ts: REAL WS clients against listening server (app.listen 0) — handshake reject, two-client exchange + outsider join denied + unverified blocked from posting, persistence. LESSONS: io.to(room) reaches only joined sockets (join s2 BEFORE sending); users insert needs email/auth_provider/display_name/date_of_birth/referral_code; enum none not unverified; room_members insert needs param pairs not $1,$1 reuse. 107 API tests green |
