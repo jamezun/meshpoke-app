@@ -96,7 +96,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
-| M13 Safety & moderation | 1 | 5 | 0 | ☐ |
+| M13 Safety & moderation | 2 | 5 | 0 | ☐ |
 | M14 Notifications & activity feed | 1 | 4 | 0 | ☐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
@@ -663,11 +663,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M13 Safety & moderation
 
-### [ ] T13.1 Reports & blocks
+### [x] T13.1 Reports & blocks
 **PRD refs:** §7.2, §7.3 · **Depends:** T7.1, T11.2
-- [ ] `POST /reports` (targets: user, message, spot, venue), `POST/DELETE /blocks/{user_id}`
-- [ ] Blocks hide both users from each other everywhere (queues, inbox, rooms, map member lists)
-- [ ] 3 distinct reports → auto-mute (posting disabled) pending review
+- [x] POST /v1/reports (targets user/message/spot/venue, dup 409, self 422), POST/DELETE /v1/blocks/:userId
+- [x] Blocks hide both users both directions: poke inbox, room members, spot members (queue inherits via applications join)
+- [x] 3 distinct open reports → single auto-mute moderation_action; realtime message:send fails muted_pending_review
 **Tests:** block matrix; auto-mute threshold.
 
 ### [ ] T13.2 Scam filters & link lock
@@ -1131,3 +1131,4 @@ Append one line per completed task (newest at the bottom).
 - T12.1 (✓): crews.test 2 green (crew create/join/leave/whatsapp; cap excludes dormant after sweep). 167 api tests.
 - T12.2 (✓): rebook.test green (poll/vote/finalize/409/hosting-cap). 168 api tests.
 - T12.3 (✓): flutter analyze clean + 14 tests, web 8 tests. M12 3/3 ✔
+- T13.1 (✓): safety.test 2 green (block matrix, auto-mute single-insert). 165 api tests.
