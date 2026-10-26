@@ -1,0 +1,36 @@
+export function HomePage() {
+  return (
+    <main className="mx-auto max-w-4xl px-6 py-16">
+      <h1 className="text-4xl font-bold tracking-tight">Poke the mesh.<br />Watch your network ripple.</h1>
+      <p className="mt-4 text-lg text-zinc-400">A live map for meeting people in real life. Spots, venues, crews — Hong Kong first.</p>
+      <div className="mt-8 flex gap-3">
+        <a href="#waitlist" className="rounded-lg px-5 py-2.5 font-medium" style={{ background: 'var(--accent)', color: '#08110c' }}>Join the waitlist</a>
+        <a href="/pricing" className="rounded-lg border border-zinc-700 px-5 py-2.5 font-medium">Pricing</a>
+      </div>
+      <section className="mt-16 grid gap-6 sm:grid-cols-3">
+        {[
+          ['Live map', 'See spots forming around you — tennis tonight, coffee tomorrow, drinks Friday.'],
+          ['Real verification', 'QR check-ins at the venue. No catfish, no ghost profiles.'],
+          ['Crews that stick', 'Had a good one? One tap rebooks the whole crew.'],
+        ].map(([t, d]) => (
+          <div key={t} className="rounded-xl border border-zinc-800 p-5">
+            <h3 className="font-semibold">{t}</h3>
+            <p className="mt-2 text-sm text-zinc-400">{d}</p>
+          </div>
+        ))}
+      </section>
+      <section id="waitlist" className="mt-16 rounded-xl border border-zinc-800 p-6">
+        <h2 className="text-xl font-semibold">Join the waitlist</h2>
+        <form className="mt-4 flex gap-2" action="/api/waitlist" method="post">
+          <input type="email" name="email" required placeholder="you@example.com" className="flex-1 rounded-lg border border-zinc-700 bg-transparent px-3 py-2" />
+          <button className="rounded-lg px-4 py-2 font-medium" style={{ background: 'var(--accent)', color: '#08110c' }}>Notify me</button>
+        </form>
+        <p className="mt-2 text-xs text-zinc-500">Double opt-in. No spam — launch notice only.</p>
+      </section>
+      <footer className="mt-16 border-t border-zinc-800 pt-6 text-xs text-zinc-500">
+        <p>Contains information from DATA.GOV.HK / 資料一線通 — FEHD licensed restaurants. Geocoding via Lands Department ALS.</p>
+        <p className="mt-2">© 2026 MeshPoke · <a href="/terms" className="underline">Terms</a> · <a href="/privacy" className="underline">Privacy</a> · <a href="/safety" className="underline">Safety</a></p>
+      </footer>
+    </main>
+  );
+}

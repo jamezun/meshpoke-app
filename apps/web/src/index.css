@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+/* Design tokens §13: mesh dark + light. CSS vars keep both themes one source. */
+:root {
+  --bg: #0b0d10;
+  --fg: #e8eaf0;
+  --accent: #4cc38a;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg: #f7f8fa; --fg: #1a1d24; --accent: #0e8a5f; }
+}
+body { background: var(--bg); color: var(--fg); }

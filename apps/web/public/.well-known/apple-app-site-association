@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAMID.meshpoke.meshpoke"],
+        "components": [
+          { "/": "/s/*" }, { "/": "/venue/*" }, { "/": "/r/*" }
+        ]
+      }
+    ]
+  }
+}
