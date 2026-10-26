@@ -10,7 +10,7 @@ import 'package:meshpoke/features/map/map_screen.dart';
 import 'package:meshpoke/features/map/venue_screens.dart';
 import 'package:meshpoke/features/spots/spots_screen.dart';
 import 'package:meshpoke/features/rooms/rooms_screen.dart';
-import 'package:meshpoke/features/inbox/inbox_screen.dart';
+import 'package:meshpoke/features/pokes/poke_screens.dart' show InboxScreen;
 import 'package:meshpoke/features/profile/profile_screen.dart';
 import 'package:meshpoke/features/profile/profile_edit_screen.dart';
 
