@@ -25,6 +25,7 @@ import { registerShare } from './routes/share.js';
 import { registerWaitlist } from './routes/waitlist.js';
 import { registerRealtime } from './routes/realtime.js';
 import { registerRooms } from './routes/rooms.js';
+import { registerSpots } from './routes/spots.js';
 import { registerMerchant } from './routes/merchant.js';
 import { registerAdmin } from './routes/admin.js';
 import { storageFromEnv } from './storage.js';
@@ -141,6 +142,7 @@ export async function buildApp(opts: BuildAppOptions) {
   registerAuth(app, config.DATABASE_URL, app.redis, config.GOTRUE_JWT_SECRET);
   const storage = storageFromEnv(process.env);
   await app.register(async (r) => registerRooms(r, config.DATABASE_URL), { prefix: '/v1' });
+  await app.register(async (r) => registerSpots(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMerchant(r, config.DATABASE_URL, storage), { prefix: '/v1' });
   await app.register(async (r) => registerAdmin(r, config.DATABASE_URL, storage), { prefix: '/v1' });
   const gotrue = new GoTrueClient(config);
