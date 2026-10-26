@@ -13,14 +13,11 @@ export interface MeshPokeClientOptions {
 export function createMeshPokeClient(opts: MeshPokeClientOptions) {
   const client = createClient<paths>({
     baseUrl: opts.baseUrl,
-    fetch: async (input, init) =>
-      globalThis.fetch(input, {
-        ...init,
-        headers: {
-          ...init?.headers,
-          ...(opts.getToken ? { Authorization: `Bearer ${await opts.getToken()}` } : {}),
-        },
-      }),
+    fetch: async (request: Request) => {
+      const token = await opts.getToken?.();
+      if (token) request.headers.set('Authorization', `Bearer ${token}`);
+      return globalThis.fetch(request);
+    },
   });
   return client;
 }
