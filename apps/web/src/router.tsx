@@ -9,6 +9,7 @@ import VenueLandingPage from './pages/Venue';
 import VenuePricingPage from './pages/VenuePricing';
 import { VenueClaimPage } from './pages/VenueClaim';
 import { MerchantPortalPage } from './pages/MerchantPortal';
+import { AdminPage } from './pages/Admin';
 import SupportPage from './pages/Support';
 import { TermsPage, PrivacyPage } from './pages/Legal';
 import { LoginPage } from './auth/Login';
@@ -30,6 +31,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/venue/pricing', element: <VenuePricingPage /> },
     { path: '/venue/claim', element: <VenueClaimPage /> },
     { path: '/merchant', element: <MerchantPortalPage /> },
+    { path: '/admin', element: <AdminPage /> },
     { path: '/support', element: <SupportPage /> },
     { path: '/terms', element: <TermsPage /> },
     { path: '/privacy', element: <PrivacyPage /> },

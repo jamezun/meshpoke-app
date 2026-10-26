@@ -3,7 +3,7 @@
  * users.id mirrors Supabase GoTrue auth.users.id (same UUID) — FK omitted so
  * tests can run on plain PostGIS without the auth schema.
  */
-import { pgTable, uuid, varchar, timestamp, date, pgEnum, smallint, boolean, jsonb, uniqueIndex, index, primaryKey, check } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, timestamp, date, pgEnum, smallint, boolean, jsonb, text, uniqueIndex, index, primaryKey, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { geographyPoint, geographyMultiPolygon } from '../geo.js';
 import { citext } from '../citext.js';
@@ -34,6 +34,7 @@ export const users = pgTable('users', {
   phoneVerifiedAt: timestamp('phone_verified_at', { withTimezone: true }),
   livenessState: livenessStateEnum('liveness_state').notNull().default('none'),
   isAdmin: boolean('is_admin').notNull().default(false),
+  adminRoles: text('admin_roles').array().notNull().default(sql`'{}'`),
   referralCode: varchar('referral_code', { length: 12 }).notNull(),
   referredBy: uuid('referred_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

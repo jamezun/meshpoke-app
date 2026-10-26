@@ -42,9 +42,9 @@ beforeAll(async () => {
   owner = crypto.randomUUID(); other = crypto.randomUUID(); const adminId = crypto.randomUUID();
   for (const [id, admin] of [[owner, false], [other, false], [adminId, true]] as const) {
     await pool.query(
-      `insert into users (id, email, auth_provider, display_name, date_of_birth, referral_code, liveness_state, is_admin)
-       values ($1::uuid, $2, 'email', $3, '1990-01-01', left($1::text,8), 'verified', $4)`,
-      [id, `${id}@t.test`, admin ? 'A' : 'M', admin]);
+      `insert into users (id, email, auth_provider, display_name, date_of_birth, referral_code, liveness_state, is_admin, admin_roles)
+       values ($1::uuid, $2, 'email', $3, '1990-01-01', left($1::text,8), 'verified', $4, $5)`,
+      [id, `${id}@t.test`, admin ? 'A' : 'M', admin, admin ? '{superadmin}' : '{}']);
   }
   adminTok = await token(adminId, true);
   const v = await pool.query(`

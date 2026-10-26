@@ -193,7 +193,7 @@ app.post<{ Params: { venueId: string }; Body: { name: string } }>(
   // admin approve/reject (RBAC enforced; also backs T8.3 review queue)
   app.post<{ Params: { id: string }; Body: { action: 'approve' | 'reject'; reason?: string } }>(
     '/admin/merchant-claims/:id',
-    { preHandler: [app.authenticate, app.requireRole('admin')] },
+    { preHandler: [app.authenticate, app.requireAdminRole('support')] },
     async (req, reply) => {
       const { action, reason } = req.body;
       const ma = await db.execute(sql`select id, venue_id, claim_status from merchant_accounts where id = ${req.params.id}::uuid`);

@@ -11,6 +11,8 @@ import { Redis } from 'ioredis';
 export type AuthUser = {
   id: string;
   role: 'user' | 'admin';
+  adminRoles: string[];
+  aal: string | null;
   phoneVerified: boolean;
   /** false until /me/onboard creates the users row; routes that need a row check this. */
   onboarded: boolean;
@@ -24,15 +26,18 @@ declare module 'fastify' {
     authenticate: (req: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
     requirePhoneVerified: (req: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
     requireRole: (role: AuthUser['role']) => (req: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
+    requireAdminRole: (role: string) => (req: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
   }
 }
 
-type UserRow = { id: string; is_admin: boolean; phone_verified_at: Date | null; liveness_state: string };
+type UserRow = { id: string; is_admin: boolean; phone_verified_at: Date | null; liveness_state: string; admin_roles: string[] };
 
-function toAuthUser(row: UserRow): AuthUser {
+function toAuthUser(row: UserRow, aal: string | null): AuthUser {
   return {
     id: row.id,
     role: row.is_admin ? 'admin' : 'user',
+    adminRoles: row.admin_roles ?? [],
+    aal,
     phoneVerified: row.phone_verified_at !== null,
     onboarded: true,
   };
@@ -76,12 +81,12 @@ export function registerAuth(app: FastifyInstance, dbUrl: string, redis: Redis, 
     }
 
     const { rows } = await pool.query<UserRow>(
-      `SELECT id, phone_verified_at, liveness_state, is_admin FROM users WHERE id = $1`,
+      `SELECT id, phone_verified_at, liveness_state, is_admin, admin_roles FROM users WHERE id = $1`,
       [sub],
     );
     if (rows.length === 0) {
       // valid GoTrue token, no users row yet → onboarding candidate (not an error)
-      req.user = { id: sub, role: 'user', phoneVerified: false, onboarded: false };
+      req.user = { id: sub, role: 'user', adminRoles: [], aal: typeof claims.aal === 'string' ? claims.aal : null, phoneVerified: false, onboarded: false };
       try {
         await redis.set(cacheKey, JSON.stringify(req.user), 'EX', 60);
       } catch {
@@ -89,7 +94,7 @@ export function registerAuth(app: FastifyInstance, dbUrl: string, redis: Redis, 
       }
       return;
     }
-    req.user = toAuthUser(rows[0]);
+    req.user = toAuthUser(rows[0], typeof claims.aal === 'string' ? claims.aal : null);
     try {
       await redis.set(cacheKey, JSON.stringify(req.user), 'EX', 60);
     } catch {
@@ -107,6 +112,19 @@ export function registerAuth(app: FastifyInstance, dbUrl: string, redis: Redis, 
     return async (req: FastifyRequest, reply: FastifyReply) => {
       if (req.user?.role !== role) {
         return reply.code(403).send({ type: 'about:blank', title: 'Forbidden', status: 403 });
+      }
+    };
+  });
+
+  // fine-grained admin RBAC: superadmin passes everything; MFA enforced in prod via ADMIN_REQUIRE_MFA
+  app.decorate('requireAdminRole', (role: string) => {
+    return async (req: FastifyRequest, reply: FastifyReply) => {
+      const u = req.user;
+      if (!u || u.role !== 'admin' || (!u.adminRoles.includes('superadmin') && !u.adminRoles.includes(role))) {
+        return reply.code(403).send({ type: 'about:blank', title: 'Forbidden', status: 403 });
+      }
+      if (process.env.ADMIN_REQUIRE_MFA === 'true' && u.aal !== 'aal2') {
+        return reply.code(403).send({ type: 'about:blank', title: 'Admin MFA required', status: 403, detail: 'Enroll TOTP then re-authenticate.' });
       }
     };
   });

@@ -25,6 +25,7 @@ import { registerShare } from './routes/share.js';
 import { registerRealtime } from './routes/realtime.js';
 import { registerRooms } from './routes/rooms.js';
 import { registerMerchant } from './routes/merchant.js';
+import { registerAdmin } from './routes/admin.js';
 import { storageFromEnv } from './storage.js';
 import { GoTrueClient } from './gotrue.js';
 import { initSentry } from './observability.js';
@@ -140,6 +141,7 @@ export async function buildApp(opts: BuildAppOptions) {
   const storage = storageFromEnv(process.env);
   await app.register(async (r) => registerRooms(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMerchant(r, config.DATABASE_URL, storage), { prefix: '/v1' });
+  await app.register(async (r) => registerAdmin(r, config.DATABASE_URL, storage), { prefix: '/v1' });
   const gotrue = new GoTrueClient(config);
   await app.register(
     (instance) => {
