@@ -91,7 +91,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
-| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
+| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 1 | ◐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
@@ -468,11 +468,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M8 Merchant claim, admin basics, Phase 0 release
 
-### [ ] T8.1 Merchant claim flow
+### [x] T8.1 Merchant claim flow
 **PRD refs:** §4.2 (claims), §12.8 · **Depends:** T4.4, T6.3
-- [ ] `/venue/claim` web flow: search venue (or add), upload Business Registration certificate (R2 private), declare price band, contact details
-- [ ] `POST /merchant/claim` → `merchant_accounts (claim_status=pending, tier=starter)`; staff table with owner
-- [ ] On approval: venue `claimed_by_merchant_id`, users can no longer edit the venue
+- [x] `/venue/claim` web flow: search venue (or add), upload Business Registration certificate (R2 private), declare price band, contact details
+- [x] `POST /merchant/claim` → `merchant_accounts (claim_status=pending, tier=starter)`; staff table with owner
+- [x] On approval: venue `claimed_by_merchant_id`, users can no longer edit the venue
 **Tests:** one active claim per venue; rejected claim can be resubmitted.
 
 ### [ ] T8.2 Merchant portal shell (Starter features)
@@ -1106,3 +1106,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T7.3 | src/safety.ts: LINK_RE (https?://|www.), HANDLE_RE (@handle) → messageGuard (link+unverified → link_not_allowed; flags jsonb persisted on messages: link-detected/handle-detected — client renders interstitial on flag), checkMsgRate (Redis INCR per user per minute, 20/min, TTL 120s). Wired into realtime.ts message:send before insert (rate_limited fail ack). DM link-lock deferred to T13.2 as planned. safety.test.ts 5 tests. 115 API tests green |
 | 2026-10-27 | T7.4 | lib/core/chat_socket.dart (socket_io_client 2.0.3+1: websocket transport, /ws path, setAuth token, reconnect 2s, broadcast streams for messages/presence/typing/connection/failed; sendMessage queues offline + flush on reconnect; emitWithAck ack-fail → failed stream). rooms_screen.dart rebuilt on apiClientProvider+Supabase session (NOT the invented api/authSession helpers — actual pattern is Dio provider w/ GoTrue interceptor; spots/inbox still placeholders): RoomsScreen (list w/ district title, last message, member count, pull-refresh), RoomScreen (history load, live messages, member drawer w/ photoAccess full/hidden, offline + read-only banners, typing debounce 2s; /me phoneVerified gates composer). /rooms/:id route added. LESSONS: OptionBuilder has setReconnectionDelay (no Ms suffix); socket.emit takes [data] single arg → multi-arg server handlers need List payload. flutter test 14 green; dart analyze 0 errors (17 pre-existing infos). <1s round-trip acceptance deferred to two-device staging (server acks verified in T7.1 tests) |
 | 2026-10-27 | T7.5 | apps/web src/pages/app/Rooms.tsx: RoomsPage (list via GET /v1/rooms → RoomView) + RoomView (REST cursor history, socket.io-client same /ws protocol w/ auth token from supabase.auth.getSession — AuthProvider session type lacks access_token so read straight from supabase; room:join on connect; message:send w/ ack — phone_not_verified surfaced as inline system line). Router: /app/rooms + /app/rooms/:id → RoomsPage (replaces placeholder). socket.io-client dep added. web tsc+vitest 8 tests+build green. M7 COMPLETE (web↔mobile cross-chat verified by shared WS contract; two-device latency check deferred to staging) |
+| 2026-10-27 | T8.1 | routes/merchant.ts: POST /merchant/claim (verified-phone gate, venue exists + unclaimed, one pending/approved claim per venue 409, own rejected claim → UPDATE resubmit w/ new cert + band reset audit; merchant_staff owner row; audit_log actor_id). POST /merchant/claim/presign (PDF/JPEG/PNG → br/{userId}/{ts}-{rand}.{ext} presignPut, 503 stub-mode). GET /merchant/me. POST /admin/merchant-claims/:id approve|reject (requireRole admin; approve sets venues.claimed_by_merchant_id + source=merchant; 409 non-pending; audit). Web VenueClaim.tsx (/venue/claim: venue search → cert upload → price band 1–6 select → contact → submitted state; linked from Venue landing). merchant.test.ts 3 tests (one-active-claim, reject→resubmit same id, approve claims venue, non-admin 403). LESSONS: audit_log col is actor_id; storage hoisted out of register callback; tests share merchantId across cases (state). 118 API tests green, web 8 green |
