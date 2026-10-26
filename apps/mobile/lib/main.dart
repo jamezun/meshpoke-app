@@ -1,28 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'core/theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meshpoke/core/theme.dart';
+import 'package:meshpoke/features/auth/dob_screen.dart';
+import 'package:meshpoke/features/auth/phone_screen.dart';
+import 'package:meshpoke/features/auth/sign_in_screen.dart';
 
-void main() {
-  runApp(const MeshPokeApp());
-}
+/// Captured referral code from meshpoke://r/{code} (set by router, consumed at onboarding).
+final referralProvider = StateProvider<String?>((ref) => null);
 
-class MeshPokeApp extends StatelessWidget {
+final routerProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const SignInScreen()),
+      GoRoute(path: '/onboard/dob', builder: (_, __) => const DobScreen()),
+      GoRoute(path: '/onboard/phone', builder: (_, __) => const PhoneScreen()),
+      GoRoute(
+        path: '/r/:code',
+        builder: (context, state) {
+          ref.read(referralProvider.notifier).state =
+              state.pathParameters['code'];
+          WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/'));
+          return const SizedBox.shrink();
+        },
+      ),
+    ],
+  );
+});
+
+class MeshPokeApp extends ConsumerWidget {
   const MeshPokeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       title: 'MeshPoke',
       theme: AppTheme.dark(),
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en')], // zh_HK at Phase 2
-      home: const Scaffold(
-        body: Center(child: Text('Poke the mesh. Watch your network ripple.')),
-      ),
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }
