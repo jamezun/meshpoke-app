@@ -617,10 +617,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `GET /v1/people-you-met/:spotId` (48h window flag, attendees attended|forgiven only, trust attached)
 **Tests:** poke back free + connection; disconnect closes DM; reconnect via new mutual poke.
 
-### [ ] T11.3 DMs
+### [x] T11.3 DMs
 **PRD refs:** §9 (Chat) · **Depends:** T11.2, T7.1
-- [ ] DM room per connection; closed on disconnect (history hidden for both)
-- [ ] Link lock: links/handles blocked unless the two users share an `attended|forgiven` spot (enforced server-side)
+- [x] DM room per connection (T11.2 openDm); disconnect sets left_at on both members (history hidden via room access gate)
+- [x] Link lock server-side: ws message:send gate `dm_link_locked` unless dmShareAttendedSpot (links AND handles)
 **Tests:** link lock on/off cases.
 
 ### [ ] T11.4 Mobile: pokes, inbox, connections
@@ -1125,3 +1125,4 @@ Append one line per completed task (newest at the bottom).
 - T10.5 (✓): trust.test green; 156 api tests. M10 complete.
 - T11.1 (✓): 5 tests green (Monday boundary via mirror fn, all 4 cost branches, expiry no-refund). 161 api tests total.
 - T11.2 (✓): pokes.test 2 green (full poke→back→DM→disconnect→repoke cycle + people-you-met). 163 api tests.
+- T11.3 (✓): dmLock.test 2 green; ws gate wired in realtime.ts message:send. 165 api tests.
