@@ -10,8 +10,13 @@ import { getDb } from '../db/client.js';
 import { keywords } from '../db/schema/core.js';
 import { normalizeKeyword } from '@meshpoke/shared/keywords';
 
+const kwOrWithLevel = z.union([
+  z.string().trim().min(1).max(40),
+  z.object({ keyword: z.string().trim().min(1).max(40), level: z.number().int().min(1).max(10) }),
+]);
+
 const putSchema = z.object({
-  keywords: z.array(z.string().trim().min(1).max(40)).min(0).max(20), // pre-dedup headroom; real cap after normalize
+  keywords: z.array(kwOrWithLevel).min(0).max(20), // pre-dedup headroom; real cap after normalize
 });
 
 export function registerKeywords(app: FastifyInstance, dbUrl: string) {
@@ -32,7 +37,12 @@ export function registerKeywords(app: FastifyInstance, dbUrl: string) {
       return reply.code(422).send({ type: 'about:blank', title: 'Unprocessable Entity', status: 422, errors: parsed.error.issues });
     }
 
-    const normalized = [...new Set(parsed.data.keywords.map(normalizeKeyword))].filter((k) => k.length > 0);
+    const norm = (k: string | { keyword: string; level: number }) =>
+      typeof k === 'string' ? { keyword: normalizeKeyword(k), level: undefined as number | undefined } : { keyword: normalizeKeyword(k.keyword), level: k.level };
+    // later entries win on level; dedupe on keyword
+    const byKw = new Map<string, number | undefined>();
+    for (const item of parsed.data.keywords.map(norm)) if (item.keyword.length > 0) byKw.set(item.keyword, item.level);
+    const normalized = [...byKw.keys()];
 
     if (normalized.length > 10) {
       return reply.code(422).send({ type: 'about:blank', title: 'Too many keywords', status: 422, detail: 'Max 10 keywords (you have ' + normalized.length + ')' });

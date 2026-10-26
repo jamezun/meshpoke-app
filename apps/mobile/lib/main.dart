@@ -11,6 +11,7 @@ import 'package:meshpoke/features/spots/spots_screen.dart';
 import 'package:meshpoke/features/rooms/rooms_screen.dart';
 import 'package:meshpoke/features/inbox/inbox_screen.dart';
 import 'package:meshpoke/features/profile/profile_screen.dart';
+import 'package:meshpoke/features/profile/profile_edit_screen.dart';
 
 /// Captured referral code from meshpoke://r/{code} (set by router, consumed at onboarding).
 final referralProvider = StateProvider<String?>((ref) => null);
@@ -41,6 +42,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         builder: (_, __) => const ShellScreen(child: ProfileScreen()),
       ),
+      GoRoute(path: '/profile/edit', builder: (_, __) => const ProfileEditScreen()),
       GoRoute(
         path: '/spot/:id',
         builder: (_, s) => const ShellScreen(child: MapScreen()),
