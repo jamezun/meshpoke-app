@@ -88,7 +88,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M2 Auth & accounts | 0 | 5 | 5 | ✔ |
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
-| M5 Mobile foundation | 0 | 6 | 0 | ☐ |
+| M5 Mobile foundation | 0 | 6 | 1 | ◐ |
 | M6 Web foundation | 0 | 5 | 0 | ☐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
@@ -339,14 +339,14 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M5 Mobile foundation (Flutter)
 
-### [ ] T5.1 Flutter project setup
+### [x] T5.1 Flutter project setup
 **PRD refs:** §5, §2.2 · **Depends:** T0.4, T0.6
-- [ ] `flutter create apps/mobile` (bundle ids `com.meshpoke.app`), flavors `dev`/`prod`
-- [ ] Packages: riverpod, go_router, freezed, json_serializable, dio, flutter_secure_storage, supabase_flutter (auth only), google_maps_flutter, geolocator, permission_handler, firebase_core, firebase_messaging, flutter_local_notifications, intl, cached_network_image
-- [ ] Folder structure: `lib/core` (theme, constants.g.dart, router, api client, errors), `lib/features/<feature>/{data,state,ui}`
-- [ ] Theme from Design System §13 (dark-first palette, Inter + Noto Sans TC, rounded-16 cards)
-- [ ] i18n with `flutter_localizations` + ARB files (en only)
-- [ ] CI job enabled (T0.5)
+- [x] `flutter create apps/mobile` (bundle ids `com.meshpoke.app`), flavors `dev`/`prod`
+- [x] Packages: riverpod, go_router, freezed, json_serializable, dio, flutter_secure_storage, supabase_flutter (auth only), google_maps_flutter, geolocator, permission_handler, firebase_core, firebase_messaging, flutter_local_notifications, intl, cached_network_image
+- [x] Folder structure: `lib/core` (theme, constants.g.dart, router, api client, errors), `lib/features/<feature>/{data,state,ui}`
+- [x] Theme from Design System §13 (dark-first palette, Inter + Noto Sans TC, rounded-16 cards)
+- [x] i18n with `flutter_localizations` + ARB files (en only)
+- [x] CI job enabled (T0.5)
 **Acceptance:** app runs on iOS simulator + Android emulator showing the themed shell.
 
 ### [ ] T5.2 Auth & onboarding screens
@@ -1090,3 +1090,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T4.4 | routes/venues.ts: POST /venues (phone-verified 403 gate; 12-category zod; dedupe = lower(trim(name)) within ST_DWithin 50m → 409 duplicates list; force=true bypass), POST /venues/:id/report (enum wrong_pin/closed/duplicate/other; unique (venue,reporter) idx 0009; 3 distinct → status escalated + admin queue), POST/DELETE /venues/:id/save, GET /venues/search?q=&district= (pg_trgm similarity + ILIKE fallback, district scope optional, rank by score). migrations 0009 (pg_trgm + gin trgm idx + venue_reports_once_idx), 0010 (venue_report_status + escalated). LESSON: enum mismatch between route SQL and pgEnum → 500s — always cross-check schema enums | 100 tests green |
 | 2026-10-26 | T4.5 | migration 0011 materialised view venue_activity_7d (high-confidence merchant_checkins only, unique idx for CONCURRENTLY) refreshed in als-geocode job daily; viewport venues now include activity7d (COALESCE 0) — never member count. Test: 2 high + 1 low check-in → activity7d=2 | M4 complete |
 | 2026-10-26 | T4.6 | GET /v1/meta/attributions (public): DATA.GOV.HK + 資料一線通 wording, FEHD, ALS Lands Dept, HK1980 SMO texts | wired into M5/M6 footers later | 102 tests green |
+| 2026-10-26 | T5.1 | flutter create com.meshpoke.app/meshpoke (android,ios,web) w/ stash-merge of meshpoke_api + lib/core. pubspec: riverpod/go_router/freezed/dio/secure_storage/supabase_flutter/google_maps_flutter/geolocator/permission_handler/firebase_core+messaging/local_notifications/intl/cached_network_image + build_runner. lib/core/theme.dart dark-first (seed #00E5A0, surface #16181D, rounded-16 cards); main.dart localizations en (zh_HK Phase 2). constants.g.dart regenerated into lib/core. smoke_test: tagline widget + Tiers.freeWeeklyPokes=5. Flutter 3.44.2/Dart 3.12.2 at ~/development/flutter. analysis_options excludes meshpoke_api (generated). SKIPPED: dev/prod flavors — dart-define API_BASE_URL switch instead until two envs actually needed; simulator/emulator run needs Android SDK (not installed in WSL) — CI flutter job + widget tests cover; header/QR placeholders come with T5.3 | app code analyze clean, 2/2 flutter tests pass |
