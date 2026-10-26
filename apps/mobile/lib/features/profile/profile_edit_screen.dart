@@ -71,7 +71,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           DropdownButtonFormField<String>(
-            value: _industry,
+            initialValue: _industry,
             items: [
               for (final i in kIndustries)
                 DropdownMenuItem(value: i, child: Text(i)),

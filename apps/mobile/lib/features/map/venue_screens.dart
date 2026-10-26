@@ -139,7 +139,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _category,
+            initialValue: _category,
             items: [
               for (final c in kCategories)
                 DropdownMenuItem(value: c, child: Text(c)),

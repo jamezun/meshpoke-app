@@ -42,11 +42,12 @@ class _DobScreenState extends State<DobScreen> {
                   firstDate: DateTime(1930),
                   lastDate: DateTime.now(),
                 );
-                if (picked != null)
+                if (picked != null) {
                   setState(() {
                     _dob = picked;
                     _error = null;
                   });
+                }
               },
               child: Text(
                 _dob == null

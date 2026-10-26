@@ -22,9 +22,9 @@ enum _DateFilter { today, week, all }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
   final _controller = Completer<GoogleMapController>();
-  bool _mapFailed = false;
+  final bool _mapFailed = false;
   bool _permissionDenied = false;
-  CameraPosition _camera = const CameraPosition(
+  final CameraPosition _camera = const CameraPosition(
     target: LatLng(22.2819, 114.1576),
     zoom: 14,
   ); // Central, HK

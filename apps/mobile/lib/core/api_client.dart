@@ -18,8 +18,9 @@ final apiClientProvider = Provider<Dio>((ref) {
     InterceptorsWrapper(
       onRequest: (options, handler) async {
         final session = Supabase.instance.client.auth.currentSession;
-        if (session != null)
+        if (session != null) {
           options.headers['Authorization'] = 'Bearer ${session.accessToken}';
+        }
         handler.next(options);
       },
     ),
