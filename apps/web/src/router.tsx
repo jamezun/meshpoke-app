@@ -12,6 +12,9 @@ import { TermsPage, PrivacyPage } from './pages/Legal';
 import { LoginPage } from './auth/Login';
 import { SignupPage } from './auth/Signup';
 import { PhoneVerifyPage } from './auth/PhoneVerify';
+import { SettingsPage } from './layouts/AppLayout';
+import { AppPage } from './pages/app/Placeholder';
+import { ProfileEditorPage } from './pages/app/ProfileEditor';
 
 export function createRouter(opts: { memory?: boolean; initial?: string } = {}) {
   const routes = [
@@ -28,7 +31,21 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/login', element: <LoginPage /> },
     { path: '/signup', element: <SignupPage /> },
     { path: '/verify-phone', element: <PhoneVerifyPage /> },
-    { path: '/app/*', element: <AppLayout /> },
+    {
+      path: '/app',
+      element: <AppLayout />,
+      children: [
+        { index: true, element: <AppPage title="Desk companion" note="Your MeshPoke hub — the full map lives in the mobile app." /> },
+        { path: 'inbox', element: <AppPage title="Inbox" /> },
+        { path: 'spots', element: <AppPage title="Spots" /> },
+        { path: 'rooms', element: <AppPage title="Rooms" /> },
+        { path: 'connections', element: <AppPage title="Connections" /> },
+        { path: 'wallet', element: <AppPage title="Wallet" /> },
+        { path: 'billing', element: <AppPage title="Billing" /> },
+        { path: 'profile', element: <ProfileEditorPage /> },
+        { path: 'settings', element: <SettingsPage /> },
+      ],
+    },
   ];
   const router = opts.memory ? createMemoryRouter(routes, { initialEntries: [opts.initial ?? '/'] }) : createBrowserRouter(routes);
   return { Router: () => <RouterProvider router={router} /> };
