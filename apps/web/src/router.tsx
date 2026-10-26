@@ -10,6 +10,7 @@ import VenuePricingPage from './pages/VenuePricing';
 import SupportPage from './pages/Support';
 import { TermsPage, PrivacyPage } from './pages/Legal';
 import { LoginPage } from './auth/Login';
+import RoomsPage from './pages/app/Rooms.js';
 import { SignupPage } from './auth/Signup';
 import { PhoneVerifyPage } from './auth/PhoneVerify';
 import { SettingsPage } from './layouts/AppLayout';
@@ -38,7 +39,8 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
         { index: true, element: <AppPage title="Desk companion" note="Your MeshPoke hub — the full map lives in the mobile app." /> },
         { path: 'inbox', element: <AppPage title="Inbox" /> },
         { path: 'spots', element: <AppPage title="Spots" /> },
-        { path: 'rooms', element: <AppPage title="Rooms" /> },
+        { path: 'rooms', element: <RoomsPage /> },
+        { path: 'rooms/:id', element: <RoomsPage /> },
         { path: 'connections', element: <AppPage title="Connections" /> },
         { path: 'wallet', element: <AppPage title="Wallet" /> },
         { path: 'billing', element: <AppPage title="Billing" /> },
