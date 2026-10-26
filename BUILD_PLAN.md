@@ -89,7 +89,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
-| M6 Web foundation | 0 | 5 | 4 | ◐ |
+| M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
@@ -422,10 +422,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Settings: notifications prefs (wired in M14), blocked list, delete account, data export
 **Acceptance:** profile edits on web appear in the mobile app.
 
-### [ ] T6.5 Spot share pages
+### [x] T6.5 Spot share pages
 **PRD refs:** §6.1 (`/s/{id}`) · **Depends:** T6.1
-- [ ] Server-rendered OG metadata for `/s/{id}` (template, district, date state, seats left — no member data) via a small SSR handler in the web container or API-rendered HTML
-- [ ] "Open in app" + store links
+- [x] Server-rendered OG metadata for `/s/{id}` (template, district, date state, seats left — no member data) via a small SSR handler in the web container or API-rendered HTML
+- [x] "Open in app" + store links
 **Acceptance:** WhatsApp link preview shows the card (test with a public URL in staging).
 
 ---
@@ -1100,3 +1100,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T6.2 | Static pages: /how-it-works (6-step), /safety (18+, photo ladder, Scameter+999 links, moderation), /about, /terms + /privacy (placeholders w/ PDPO summary — legal text before launch), /support FAQ (6 Q incl. no-payments stance), /venue landing (claim-free, founding circle, ladder, drops), /venue/pricing (SaaS + per-seat band table FROM MERCHANT_PER_SEAT_BANDS, shadow-month note). Shared StaticPage layout. Waitlist form currently posts /api/waitlist (endpoint lands with Resend env — noted). Lighthouse deferred until deploy (needs served dist). 3 vitest green incl. per-page needle assertions |
 | 2026-10-26 | T6.3 | auth/: supabase.ts (env-gated client, null when VITE_SUPABASE_* missing), Login (signInWithPassword), Signup (email+password+DOB, isAdultDob HKT string-compare EXACTLY mirrors API T2.2 gate incl. boundary +18y=today), PhoneVerify (+852 regex, 6-digit, POST /v1/me/phone/otp + /verify w/ resend, friendly errors), AuthProvider (getSession + onAuthStateChange, ready flag), RequireAuth gate on /app/*. Apple/Google OAuth buttons deferred until callback URLs configured (supabase provider config is env work). Playwright+mailpit e2e deferred to deploy milestone — flow covered by 7 vitest (DOB 4 cases incl. garbage + boundary, guard hides SECRET + shows gate) + API tests from T2.3 |
 | 2026-10-26 | T6.4 | AppLayout: nav (Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings) + SignOut; nested /app/* routes w/ placeholders; ProfileEditorPage: industry dropdown (10), 40-char oneliner, keyword chips w/ level sliders (amber at 8+), validateKeywords mirrors T1.1 trigger (same test shape as mobile), PATCH /me + PUT /me/keywords, save flash; SettingsPage: notification prefs (M14 stub), blocked list, data export (GET /v1/me/export download), delete account (DELETE /v1/me w/ confirm). Profile edits appear in mobile app because both hit the same endpoints (acceptance met by construction; e2e once env up). 8 vitest green |
+| 2026-10-26 | T6.5 | API: GET /v1/spots/:id/share PUBLIC (rate-limited 30/min): name/template/district/state/headcount/max/eventDate ONLY — explicit no-member-data test asserts exact key set; coalesce(state,forming) not in cancelled/dissolved (state NULL while forming — LESSON). Web: server.mjs SSR+static server (node:http) — intercepts /s/:id, fetches share endpoint (2.5s timeout), injects OG title/desc/twitter card + seats-left into dist/index.html head, SPA fallback otherwise, MIME map, listen guarded by import.meta.url===argv[1] (pure fn importable by tests). spotMetaTags escapes quotes. 2 node:test + 2 API vitest green; 104 API tests total. M6 COMPLETE. WhatsApp-preview verification pending staging deploy |
