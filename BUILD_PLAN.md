@@ -83,7 +83,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
-| M0 Foundations | 0 | 6 | 4 | ◐ |
+| M0 Foundations | 0 | 6 | 5 | ◐ |
 | M1 Database & shared package | 0 | 5 | 0 | ☐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
@@ -149,11 +149,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Single command `pnpm api:openapi` regenerates both
 **Acceptance:** after adding the health route, both clients contain a typed `health` call.
 
-### [~] T0.5 CI pipeline
+### [x] T0.5 CI pipeline
 **PRD refs:** §2.2 (CI/CD) · **Depends:** T0.3
-- [ ] GitHub Actions: on PR → install, typecheck, lint, test (with Docker for Testcontainers), build web
-- [ ] Flutter job: `flutter analyze` + `flutter test` (after M5 exists; add a placeholder now)
-- [ ] Cache pnpm store and Flutter pub cache
+- [x] GitHub Actions: on PR → install, typecheck, lint, test (with Docker for Testcontainers), build web
+- [x] Flutter job: `flutter analyze` + `flutter test` (after M5 exists; add a placeholder now)
+- [x] Cache pnpm store and Flutter pub cache
 **Acceptance:** a PR shows green checks.
 
 ### [ ] T0.6 Shared constants package
@@ -1068,3 +1068,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T0.2 | Dev stack: postgis 15-3.4 + redis 7 + mailpit + standalone GoTrue (v2.132.3) + db-init (auth schema, postgis ext, supabase_auth_admin role w/ search_path); .env.example; Zod config loader; acceptance verified (health/postgis/signup+token) | GoTrue v2.158+ broken standalone (mixed env prefixes, half-applied migrations) — pinned v2.132.3; autoconfirm spelling to verify at T2.1 |
 | 2026-10-26 | T0.3 | API skeleton: Fastify 5 factory (app.ts/server.ts split), CORS allowlist + helmet + rate-limit (Redis store, health exempt) + sensible + Zod type provider + problem+json errors w/ request ids, swagger /docs dev-only + openapi.json export script, /v1/health (db+redis checks), pino + dotenv, Vitest + Testcontainers (PostGIS+Redis per run) — 3 integration tests green | WSL: testcontainers needs DOCKER_CONFIG shim (infra/test-docker-config) b/c Docker Desktop credsStore; pnpm override cookie@^1.0.2 (ESM-only cookie@2 breaks light-my-request require); dev env via dotenv not NODE_OPTIONS (--env-file blocked) |
 | 2026-10-26 | T0.4 | Generated clients: packages/api-client (openapi-typescript + openapi-fetch wrapper w/ bearer hook); Dart dart-dio SDK at apps/mobile/meshpoke_api (pubName=meshpoke_api) via openapi-generator Docker image (no local Java); single pnpm api:openapi chains spec + TS + Dart | Dart SDK consumed as path dep when apps/mobile pubspec lands (T5.1); regenerate needs docker |
+| 2026-10-26 | T0.5 | GitHub Actions CI (.github/workflows/ci.yml): node job (pnpm cache, typecheck/lint/test w/ Testcontainers/build) + flutter placeholder job; green on main run 40282383354 | hashFiles() is step-level only (job-level if broke workflow); CI caught ioredis default-import vs NodeNext — named import; ubuntu-latest→26 migration notice |
