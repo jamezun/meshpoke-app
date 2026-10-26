@@ -53,6 +53,9 @@ importers:
       '@fastify/swagger':
         specifier: ^9.4.0
         version: 9.9.2
+      '@meshpoke/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       dotenv:
         specifier: ^18.0.9
         version: 18.0.9
