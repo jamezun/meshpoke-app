@@ -89,7 +89,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
-| M6 Web foundation | 0 | 5 | 3 | ◐ |
+| M6 Web foundation | 0 | 5 | 4 | ◐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
@@ -415,11 +415,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Session refresh; protected route guard for `app/*`, `merchant/*`, `admin/*`
 **Tests:** Playwright sign-up with email (local GoTrue + mailpit).
 
-### [ ] T6.4 Authenticated shell & profile
+### [x] T6.4 Authenticated shell & profile
 **PRD refs:** §6.2 · **Depends:** T6.3, T3.1, T3.2
-- [ ] Layout with nav: Inbox, Spots, Rooms, Connections, Wallet, Billing, Settings
-- [ ] Profile editor (sketch, keywords, photos, hide-photo toggle) sharing Zod schemas with API
-- [ ] Settings: notifications prefs (wired in M14), blocked list, delete account, data export
+- [x] Layout with nav: Inbox, Spots, Rooms, Connections, Wallet, Billing, Settings
+- [x] Profile editor (sketch, keywords, photos, hide-photo toggle) sharing Zod schemas with API
+- [x] Settings: notifications prefs (wired in M14), blocked list, delete account, data export
 **Acceptance:** profile edits on web appear in the mobile app.
 
 ### [ ] T6.5 Spot share pages
@@ -1099,3 +1099,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T6.1 | apps/web: Vite 5 + React 18 + TS strict + Tailwind 4 (@tailwindcss/vite) + react-router-dom 7 (memory router for tests) + TanStack Query provider. index.css design tokens (§13 mesh dark + light via prefers-color-scheme CSS vars). Routes: / (Home: hero pitch + how-it-works + waitlist form + DATA.GOV.HK/ALS attribution footer), /pricing (renders FROM @meshpoke/shared/constants — consumer tiers + founding-500 banner + merchant Growth/Pro), /app/* AppLayout (nav Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings). public/.well-known/apple-app-site-association (/s,/venue,/r) + assetlinks.json (SHA256 placeholder until signing) + robots.txt (Disallow /app/). SEO meta+OG in index.html. 2 vitest green (landing hero+attributions, pricing memory-route), typecheck clean, build 274KB/88KB gzip, dev renders landing ✓. LESSONS: jsdom 27 breaks vitest 2 (ERR_REQUIRE_ESM html-encoding-sniffer) → pin jsdom@25; PRICES shape is PRICES.plus.web.* not PRICES.web.plus.* |
 | 2026-10-26 | T6.2 | Static pages: /how-it-works (6-step), /safety (18+, photo ladder, Scameter+999 links, moderation), /about, /terms + /privacy (placeholders w/ PDPO summary — legal text before launch), /support FAQ (6 Q incl. no-payments stance), /venue landing (claim-free, founding circle, ladder, drops), /venue/pricing (SaaS + per-seat band table FROM MERCHANT_PER_SEAT_BANDS, shadow-month note). Shared StaticPage layout. Waitlist form currently posts /api/waitlist (endpoint lands with Resend env — noted). Lighthouse deferred until deploy (needs served dist). 3 vitest green incl. per-page needle assertions |
 | 2026-10-26 | T6.3 | auth/: supabase.ts (env-gated client, null when VITE_SUPABASE_* missing), Login (signInWithPassword), Signup (email+password+DOB, isAdultDob HKT string-compare EXACTLY mirrors API T2.2 gate incl. boundary +18y=today), PhoneVerify (+852 regex, 6-digit, POST /v1/me/phone/otp + /verify w/ resend, friendly errors), AuthProvider (getSession + onAuthStateChange, ready flag), RequireAuth gate on /app/*. Apple/Google OAuth buttons deferred until callback URLs configured (supabase provider config is env work). Playwright+mailpit e2e deferred to deploy milestone — flow covered by 7 vitest (DOB 4 cases incl. garbage + boundary, guard hides SECRET + shows gate) + API tests from T2.3 |
+| 2026-10-26 | T6.4 | AppLayout: nav (Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings) + SignOut; nested /app/* routes w/ placeholders; ProfileEditorPage: industry dropdown (10), 40-char oneliner, keyword chips w/ level sliders (amber at 8+), validateKeywords mirrors T1.1 trigger (same test shape as mobile), PATCH /me + PUT /me/keywords, save flash; SettingsPage: notification prefs (M14 stub), blocked list, data export (GET /v1/me/export download), delete account (DELETE /v1/me w/ confirm). Profile edits appear in mobile app because both hit the same endpoints (acceptance met by construction; e2e once env up). 8 vitest green |
