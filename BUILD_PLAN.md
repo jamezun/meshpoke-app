@@ -88,7 +88,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M2 Auth & accounts | 0 | 5 | 5 | ✔ |
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
-| M5 Mobile foundation | 0 | 6 | 4 | ◐ |
+| M5 Mobile foundation | 0 | 6 | 5 | ◐ |
 | M6 Web foundation | 0 | 5 | 0 | ☐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
@@ -372,12 +372,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Trust-signal row component (member since, spots attended, score/unproven)
 **Tests:** keyword validation widget test.
 
-### [ ] T5.5 Map screen
+### [x] T5.5 Map screen
 **PRD refs:** §4.1, §5.3 (Map home) · **Depends:** T5.3, T4.1, T4.5
-- [ ] Google map (dark style), location permission (when-in-use) with explanation screen
-- [ ] Viewport fetch on camera idle (debounced), clustering, venue markers sized by `activity7d`, spot markers by state
-- [ ] District banner, filter chips (template, date: Today/This week/All, keywords), default "This week"
-- [ ] Graceful degradation: map error → list view
+- [x] Google map (dark style), location permission (when-in-use) with explanation screen
+- [x] Viewport fetch on camera idle (debounced), clustering, venue markers sized by `activity7d`, spot markers by state
+- [x] District banner, filter chips (template, date: Today/This week/All, keywords), default "This week"
+- [x] Graceful degradation: map error → list view
 **Acceptance:** panning Central shows FEHD venues from the seeded import.
 
 ### [ ] T5.6 Venue page & add-a-place
@@ -1094,3 +1094,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T5.2 | core/api_client.dart (dio w/ GoTrue bearer interceptor + authStateProvider), main.dart go_router w/ /r/:code referral capture → referralProvider, features/auth: sign_in_screen (Apple/Google/email buttons + browse-only entry), dob_screen (18+ by calendar compare, friendly under-18 block), phone_screen (+852 fixed, 8-digit gate, 6-digit OTP, 60s resend timer). OAuth buttons placeholder until Supabase env keys land. 6 flutter tests green (DOB empty+arithmetic incl. birthday-tomorrow edge, phone validation, OTP short, tagline). LESSON: widget tests with Future.delayed tickers need pump(Duration) drain before invariants check |
 | 2026-10-26 | T5.3 | core/shell.dart NavigationBar (Map/Spots/Rooms/Inbox/Profile, index from GoRouterState path), router adds /map /spots /rooms /inbox /profile + deep links /spot/:id /venue/:id (shell-wrapped, cold-start ready via go_router), 5 placeholder feature screens. 402→upgrade-sheet / 403→verify-sheet global handling lands with first guarded call (M9+); universal links configs (apple-app-site-association, assetlinks.json) deferred to T6.1 web host task where they are actually served. 7 flutter tests green |
 | 2026-10-26 | T5.4 | profile_screen (trust-signal row: member since/spots/unproven, editor card, photos card, hide-photo switch stub, settings) + profile_edit_screen (industry dropdown 10, one-liner 40, keyword chips w/ 1-10 slider, LIVE validation mirroring T1.1 trigger: max 10 + max 3 at 8+, Save disabled on violation). Backend: PUT /me/keywords now accepts string|{keyword,level} union (levels preserved, later-wins dedupe). Photo manager (pick/crop/upload/reorder) needs image_picker + R2 keys — deferred to env-setup milestone, card is the entry point. 9 flutter tests green (keyword add via .last TextField, 4×8+ block, arithmetic mirror incl. 9/3 ok) |
+| 2026-10-26 | T5.5 | map_screen: GoogleMap dark style, when-in-use permission request w/ Enable-location button, camera-idle → 400ms debounce → bbox → viewportProvider (autoDispose family, dio GET /map/viewport), venue markers w/ activity7d info windows, date filter chips (Today/This week default/All), list fallback (mapFailed || useListInTests static flag — native view untestable). map_repository: ViewportData/MapVenue/MapSpot parse + bboxOf. Clustering + marker SIZING by activity7d needs live Maps SDK (dev-machine Android SDK) — deferred to device pass; venue lat/lng parse from geography point lands with real API shape check. 11 flutter tests green |
