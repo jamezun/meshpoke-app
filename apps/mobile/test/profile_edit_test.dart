@@ -19,14 +19,21 @@ void main() {
     // raise 4 sliders to 8 → error appears, Save disabled
     for (var i = 0; i < 4; i++) {
       final slider = find.byType(Slider).at(i);
-      await tester.dragUntilVisible(slider, find.byType(ListView), const Offset(0, -40));
+      await tester.dragUntilVisible(
+        slider,
+        find.byType(ListView),
+        const Offset(0, -40),
+      );
       // set via long-press drag is fiddly; use onChanged semantics instead:
       final widget = tester.widget<Slider>(slider);
       widget.onChanged?.call(8);
       await tester.pump();
     }
     expect(find.textContaining('Max 3 keywords at level 8+'), findsOneWidget);
-    expect(tester.widget<FilledButton>(find.byType(FilledButton)).enabled, isFalse);
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).enabled,
+      isFalse,
+    );
   });
 
   test('validation arithmetic mirrors DB trigger', () {
@@ -40,6 +47,7 @@ void main() {
       if (high > 3) return 'Max 3 keywords at level 8+ (you have \$high).';
       return null;
     }
+
     expect(validate(mk(10, 3)), isNull);
     expect(validate(mk(11, 0)), contains('Max 10'));
     expect(validate(mk(10, 4)), contains('Max 3'));

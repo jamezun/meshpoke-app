@@ -42,7 +42,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         builder: (_, __) => const ShellScreen(child: ProfileScreen()),
       ),
-      GoRoute(path: '/profile/edit', builder: (_, __) => const ProfileEditScreen()),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (_, __) => const ProfileEditScreen(),
+      ),
       GoRoute(
         path: '/spot/:id',
         builder: (_, s) => const ShellScreen(child: MapScreen()),
