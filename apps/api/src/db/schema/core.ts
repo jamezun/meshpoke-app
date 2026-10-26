@@ -29,7 +29,8 @@ export const users = pgTable('users', {
   authProvider: authProviderEnum('auth_provider').notNull(),
   displayName: varchar('display_name', { length: 40 }).notNull(),
   dateOfBirth: date('date_of_birth').notNull(), // age >= 18 checked in API
-  phoneE164: varchar('phone_e164', { length: 20 }), // PII: encrypted at rest via helper (T1.5), unique hash column added then
+  phoneE164: varchar('phone_e164', { length: 120 }), // PII: AES-256-GCM envelope from db/pii.ts
+  phoneHash: varchar('phone_hash', { length: 64 }), // HMAC-SHA256 for uniqueness lookups
   phoneVerifiedAt: timestamp('phone_verified_at', { withTimezone: true }),
   livenessState: livenessStateEnum('liveness_state').notNull().default('none'),
   referralCode: varchar('referral_code', { length: 12 }).notNull(),
@@ -39,6 +40,7 @@ export const users = pgTable('users', {
 }, (t) => [
   uniqueIndex('users_referral_code_idx').on(t.referralCode),
   uniqueIndex('users_email_idx').on(t.email),
+  uniqueIndex('users_phone_hash_idx').on(t.phoneHash),
 ]);
 
 // ── profile ─────────────────────────────────────────────────────

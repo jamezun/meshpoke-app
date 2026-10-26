@@ -29,6 +29,13 @@
       "when": 1792999539913,
       "tag": "0003_small_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792999759522,
+      "tag": "0004_old_karma",
+      "breakpoints": true
     }
   ]
 }
