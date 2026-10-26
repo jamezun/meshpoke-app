@@ -24,6 +24,7 @@ export async function startJobs(databaseUrl: string, fehdUrl: string, districtFi
   await boss.schedule('fehd-import', '0 2 * * *', { filter: districtFilter });
   await boss.work('als-geocode', async () => {
     const r = await geocodePendingVenues(pool);
+    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY venue_activity_7d');
     console.log('[jobs] als-geocode', JSON.stringify(r));
   });
   await boss.schedule('als-geocode', '30 2 * * *');

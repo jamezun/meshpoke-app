@@ -71,8 +71,10 @@ export function registerMap(app: FastifyInstance, dbUrl: string) {
 
     const venues = await db.execute(sql`
       SELECT v.id, v.display_name AS name, v.category, v.location::text AS point, v.pin_tier, v.status,
+             COALESCE(a.activity7d, 0) AS activity7d,
              (SELECT count(*)::int FROM merchant_checkins c WHERE c.venue_id = v.id AND c.confidence = 'high') AS checkin_count
       FROM venues v
+      LEFT JOIN venue_activity_7d a ON a.venue_id = v.id
       WHERE ST_Within(v.location::geometry, ST_MakeEnvelope(${minLng}, ${minLat}, ${maxLng}, ${maxLat}, 4326))
         AND v.status = 'active'
       LIMIT 400`);

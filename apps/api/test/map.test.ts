@@ -116,6 +116,29 @@ describe('T4.1 districts & viewport', () => {
     expect((await app!.inject({ method: 'GET', url: '/v1/map/viewport', headers })).statusCode).toBe(400);
   });
 
+  it('activity7d: high-confidence merchant check-ins counted; low excluded (T4.5)', async () => {
+    // seed merchant_checkins: 2 high + 1 low for the Central venue
+    await pool!.query(
+      `INSERT INTO merchant_checkins (venue_id, user_id, scanned_by, context, confidence, gps_distance_m)
+       VALUES ('11111111-1111-1111-1111-111111111111', $1, $1, 'member_visit', 'high', 10)`,
+      [crypto.randomUUID()],
+    );
+    await pool!.query(
+      `INSERT INTO merchant_checkins (venue_id, user_id, scanned_by, context, confidence, gps_distance_m)
+       VALUES ('11111111-1111-1111-1111-111111111111', $1, $1, 'drop', 'high', 5)`,
+      [crypto.randomUUID()],
+    );
+    await pool!.query(
+      `INSERT INTO merchant_checkins (venue_id, user_id, scanned_by, context, confidence, gps_distance_m)
+       VALUES ('11111111-1111-1111-1111-111111111111', $1, $1, 'member_visit', 'low', 5000)`,
+      [crypto.randomUUID()],
+    );
+    await pool!.query(`REFRESH MATERIALIZED VIEW venue_activity_7d`);
+    const res = await app!.inject({ method: 'GET', url: '/v1/map/viewport?bbox=114.14,22.27,114.17,22.29', headers });
+    const v = res.json().venues.find((x: { name: string }) => x.name === 'Central Test Cafe');
+    expect(v.activity7d).toBe(2); // low-confidence excluded, high counted
+  });
+
   it('GET /districts/:id/spots lists scoped spots; unknown district 404', async () => {
     const res = await app!.inject({ method: 'GET', url: `/v1/districts/${centralDistrict}/spots`, headers });
     expect(res.json().spots).toHaveLength(1);
