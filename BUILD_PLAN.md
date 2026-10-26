@@ -602,11 +602,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M11 Pokes & connections
 
-### [ ] T11.1 Poke ledger & cost resolution
+### [x] T11.1 Poke ledger & cost resolution
 **PRD refs:** §3.4 · **Depends:** T2.5, T10.2
-- [ ] `poke_balances` with lazy Monday 00:00 HKT reset (`last_reset_at < mostRecentMondayMidnightHKT(now)` → reset)
-- [ ] `resolvePokeCost(from, to, source)` order: (1) pending poke from `to` exists → `free_poke_back`; (2) both attended same done spot within 48h → `free_post_spot`; (3) weekly allowance → `weekly`; (4) credits → `credit`; else 402
-- [ ] Expiry job (7 days) → `expired`, **no refund**
+- [x] `poke_balances` lazy Monday 00:00 HKT reset via upsert-with-WHERE (atomic, no read-then-write)
+- [x] `resolvePokeCost` order: pending-poke-back → shared done spot 48h → weekly → credits → {error:no_allowance} (402 at route layer T11.2)
+- [x] Expiry sweep `POST /internal/poke-expiry` → expired, no refund (test proves credits untouched)
 **Tests:** Monday boundary (Sun 23:59 vs Mon 00:00 HKT); each cost branch; expiry no refund.
 
 ### [ ] T11.2 Poke & connection endpoints
@@ -1123,3 +1123,4 @@ Append one line per completed task (newest at the bottom).
 - T10.3 (✓): score engine + 7 tests (6 unit + 1 integration incl. ladder + capacity transitions). 155 api tests green.
 - T10.4 (✓): LiveSpotScreen + detail members sketches; two-device acceptance deferred to staging per protocol.
 - T10.5 (✓): trust.test green; 156 api tests. M10 complete.
+- T11.1 (✓): 5 tests green (Monday boundary via mirror fn, all 4 cost branches, expiry no-refund). 161 api tests total.
