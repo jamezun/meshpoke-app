@@ -1,18 +1,25 @@
 {
   "name": "@meshpoke/api-client",
-  "version": "0.0.1",
+  "private": true,
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
-    "build": "echo 'build lands in a later milestone'",
-    "test": "echo 'no tests yet'",
+    "generate": "openapi-typescript ../../apps/api/openapi.json -o ./src/schema.generated.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
     "eslint": "^9.14.0",
+    "openapi-typescript": "^7.4.2",
     "typescript": "~5.6.3",
     "typescript-eslint": "^8.14.0"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.0"
   }
 }

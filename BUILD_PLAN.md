@@ -142,7 +142,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 **Tests:** health endpoint integration test.
 **Acceptance:** `pnpm --filter api dev` serves `/v1/health`; `pnpm test` runs the integration test green.
 
-### [ ] T0.4 Generated API clients
+### [~] T0.4 Generated API clients
 **PRD refs:** §2.2 · **Depends:** T0.3
 - [ ] `packages/api-client`: `openapi-typescript` + `openapi-fetch` wrapper exporting a typed client
 - [ ] Dart client generation script (`openapi-generator-cli generate -g dart-dio`) into `apps/mobile/lib/api/generated/`

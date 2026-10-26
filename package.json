@@ -12,7 +12,7 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "api:openapi": "pnpm --filter @meshpoke/api openapi"
+    "api:openapi": "pnpm --filter @meshpoke/api openapi && pnpm --filter @meshpoke/api-client generate && docker run --rm -v \"$PWD:/local\" openapitools/openapi-generator-cli:v7.10.0 generate -i /local/apps/api/openapi.json -g dart-dio -o /local/apps/mobile/meshpoke_api --additional-properties=pubName=meshpoke_api"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
