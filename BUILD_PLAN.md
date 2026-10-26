@@ -85,7 +85,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
 | M1 Database & shared package | 0 | 5 | 5 | ✔ |
-| M2 Auth & accounts | 0 | 5 | 2 | ◐ |
+| M2 Auth & accounts | 0 | 5 | 3 | ◐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
 | M5 Mobile foundation | 0 | 6 | 0 | ☐ |
@@ -234,12 +234,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `GET /me`, `PATCH /me` (display name, sketch fields)
 **Tests:** age 17y364d rejected, 18y0d accepted; duplicate onboard is idempotent.
 
-### [ ] T2.3 Phone verification sync
+### [x] T2.3 Phone verification sync
 **PRD refs:** §6.1 (BM), §7.1 · **Depends:** T2.2
-- [ ] GoTrue phone OTP configured for +852 only (API also validates `^\+852\d{8}$` before calling)
-- [ ] After OTP success, client calls `POST /me/phone/confirm`; API reads the verified phone from GoTrue admin API, checks uniqueness via hash, stores encrypted, sets `phone_verified_at`
-- [ ] One account per phone: second account with same phone → 409
-- [ ] Rate limit OTP requests 3/hour per user and per IP
+- [x] GoTrue phone OTP configured for +852 only (API also validates `^\+852\d{8}$` before calling)
+- [x] After OTP success, client calls `POST /me/phone/confirm`; API reads the verified phone from GoTrue admin API, checks uniqueness via hash, stores encrypted, sets `phone_verified_at`
+- [x] One account per phone: second account with same phone → 409
+- [x] Rate limit OTP requests 3/hour per user and per IP
 **Tests:** happy path; duplicate phone; non-852 rejected.
 
 ### [ ] T2.4 Account deletion & data export
@@ -1077,3 +1077,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T1.5 | db/client.ts (getPool/getDb/withTx/lockRow/claimSlot — drizzle sql-template based, raw {sql,params} objects break execute), pagination.ts (keyset cursor base64url ts|id, row-value comparison), db/pii.ts (AES-256-GCM v1 envelope + HMAC piiHash) + users.phone_hash unique (0004); tests: PII roundtrip/tamper/determinism, cursor, 40-concurrent-claimSlot exact-25 no-oversell, withTx rollback | 26 tests green |
 | 2026-10-26 | T2.1 | src/auth.ts: authenticate decorator (jose jwtVerify HS256, sub→users row, Redis auth:user:<id> 60s cache w/ graceful fallback), requirePhoneVerified→403, requireRole(admin)→403; users.is_admin bool (0005, seed admin updated); wired in app.ts after routes. Tests: 3 (401 no/expired/forged token, 200 valid+claims; phone+admin guards; ghost sub 401). Mini Fastify instance in test (cannot add routes to listening app). jose exports jwtVerify NOT verify | 29 api tests green |
 | 2026-10-26 | T2.2 | routes/me.ts: POST /me/onboard (calendar-date HKT 18+ gate — no Duration math; referral resolve w/ self-ref block; referral_code MP+6 CJO-free alphabet w/ collision retry; users+profiles row in tx; idempotent + race-safe), GET /me (join profiles), PATCH /me (display_name/industry enum 10/role_oneliner 40/hide_photo). AuthUser.onboarded flag — authenticate no longer 401s pre-onboard users (chicken-and-egg fix; cached 60s). shared package exports ./time ./constants. Tests: 5 (17y364d→422/18y0d→201 — dobFor offset +1 = 18th birthday tomorrow, first sign was backwards; idempotent onboard; referral link + self-ignore; PATCH validation) | 34 tests green |
+| 2026-10-26 | T2.3 | gotrue.ts client (sendOtp/adminGetUser/adminSignOutAll, raw fetch); routes/phone.ts: POST /me/phone/otp (validate ^\+852\d{8}$, Redis INCR 3/h per user + 10/h per IP — IP looser for HK NAT, proxy to GoTrue), POST /me/phone/confirm (GoTrue phone_confirmed_at check 409, 852 re-validate, piiHash dup 409, encryptPii store + phone_verified_at, auth cache DEL). auth cache invalidation on onboard + phone-confirm. Tests: 4 (happy, unconfirmed/foreign 409/422, dup phone 409, 429). LESSONS: pii.ts reads process.env directly — test/setup.ts seeds PII key; per-IP 3/h blocks NAT offices | 38 tests green |
