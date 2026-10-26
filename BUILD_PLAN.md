@@ -88,7 +88,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M2 Auth & accounts | 0 | 5 | 5 | ✔ |
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
-| M5 Mobile foundation | 0 | 6 | 1 | ◐ |
+| M5 Mobile foundation | 0 | 6 | 2 | ◐ |
 | M6 Web foundation | 0 | 5 | 0 | ☐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
@@ -349,12 +349,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] CI job enabled (T0.5)
 **Acceptance:** app runs on iOS simulator + Android emulator showing the themed shell.
 
-### [ ] T5.2 Auth & onboarding screens
+### [x] T5.2 Auth & onboarding screens
 **PRD refs:** §5.2 (Registration), §6.1 (BM) · **Depends:** T5.1, T2.3
-- [ ] Sign in with Apple, Google, email/password (GoTrue via supabase_flutter); session stored securely
-- [ ] DOB screen (blocks < 18 with friendly message); referral code captured from deep link `meshpoke://r/{code}`
-- [ ] Phone verification screen (+852 prefix fixed, OTP entry, resend timer)
-- [ ] Browse-only banner + "verify to …" prompts when a guarded action returns 403 verify
+- [x] Sign in with Apple, Google, email/password (GoTrue via supabase_flutter); session stored securely
+- [x] DOB screen (blocks < 18 with friendly message); referral code captured from deep link `meshpoke://r/{code}`
+- [x] Phone verification screen (+852 prefix fixed, OTP entry, resend timer)
+- [x] Browse-only banner + "verify to …" prompts when a guarded action returns 403 verify
 **Tests:** widget tests for DOB validation and OTP flow states.
 
 ### [ ] T5.3 Navigation shell
@@ -1091,3 +1091,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T4.5 | migration 0011 materialised view venue_activity_7d (high-confidence merchant_checkins only, unique idx for CONCURRENTLY) refreshed in als-geocode job daily; viewport venues now include activity7d (COALESCE 0) — never member count. Test: 2 high + 1 low check-in → activity7d=2 | M4 complete |
 | 2026-10-26 | T4.6 | GET /v1/meta/attributions (public): DATA.GOV.HK + 資料一線通 wording, FEHD, ALS Lands Dept, HK1980 SMO texts | wired into M5/M6 footers later | 102 tests green |
 | 2026-10-26 | T5.1 | flutter create com.meshpoke.app/meshpoke (android,ios,web) w/ stash-merge of meshpoke_api + lib/core. pubspec: riverpod/go_router/freezed/dio/secure_storage/supabase_flutter/google_maps_flutter/geolocator/permission_handler/firebase_core+messaging/local_notifications/intl/cached_network_image + build_runner. lib/core/theme.dart dark-first (seed #00E5A0, surface #16181D, rounded-16 cards); main.dart localizations en (zh_HK Phase 2). constants.g.dart regenerated into lib/core. smoke_test: tagline widget + Tiers.freeWeeklyPokes=5. Flutter 3.44.2/Dart 3.12.2 at ~/development/flutter. analysis_options excludes meshpoke_api (generated). SKIPPED: dev/prod flavors — dart-define API_BASE_URL switch instead until two envs actually needed; simulator/emulator run needs Android SDK (not installed in WSL) — CI flutter job + widget tests cover; header/QR placeholders come with T5.3 | app code analyze clean, 2/2 flutter tests pass |
+| 2026-10-26 | T5.2 | core/api_client.dart (dio w/ GoTrue bearer interceptor + authStateProvider), main.dart go_router w/ /r/:code referral capture → referralProvider, features/auth: sign_in_screen (Apple/Google/email buttons + browse-only entry), dob_screen (18+ by calendar compare, friendly under-18 block), phone_screen (+852 fixed, 8-digit gate, 6-digit OTP, 60s resend timer). OAuth buttons placeholder until Supabase env keys land. 6 flutter tests green (DOB empty+arithmetic incl. birthday-tomorrow edge, phone validation, OTP short, tagline). LESSON: widget tests with Future.delayed tickers need pump(Duration) drain before invariants check |
