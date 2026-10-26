@@ -489,12 +489,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Venues: import runs, geocode-failed queue (set pin manually), venue reports, merge duplicates
 **Tests:** non-admin gets 403 on all admin routes.
 
-### [ ] T8.4 Staging deploy (first)
+### [~] T8.4 Staging deploy (first)
 **PRD refs:** §2.3 · **Depends:** T6.2, T8.2
-- [ ] On the existing Hetzner box: create `meshpoke` DB + `meshpoke_app` role + PostGIS extension on the existing Postgres
-- [ ] Dokploy apps: `meshpoke-api`, `meshpoke-web`, `meshpoke-auth`, `meshpoke-redis` with memory limits
-- [ ] Cloudflare DNS for `staging.meshpoke.com`, `api-staging…`, `auth-staging…`
-- [ ] Nightly `pg_dump` to R2 job; restore runbook in `infra/RUNBOOK.md`
+- [x] On the existing Hetzner box: create `meshpoke` DB + `meshpoke_app` role + PostGIS extension on the existing Postgres
+- [~] Dokploy apps: compose ready at `infra/staging/meshpoke-staging.yml` — user pastes into Dokploy (RUNBOOK §2)
+- [~] Cloudflare DNS for `staging.meshpoke.com`, `api-staging…`, `auth-staging…` — user adds 3 A records (RUNBOOK §1)
+- [x] Nightly `pg_dump` cron on VPS (14-day local retention; R2 offload TODO); restore runbook in `infra/RUNBOOK.md`
 **Acceptance:** staging reachable over HTTPS; SupremaNode unaffected (memory headroom checked).
 
 ### [ ] T8.5 Phase 0 internal release
@@ -1109,3 +1109,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T8.1 | routes/merchant.ts: POST /merchant/claim (verified-phone gate, venue exists + unclaimed, one pending/approved claim per venue 409, own rejected claim → UPDATE resubmit w/ new cert + band reset audit; merchant_staff owner row; audit_log actor_id). POST /merchant/claim/presign (PDF/JPEG/PNG → br/{userId}/{ts}-{rand}.{ext} presignPut, 503 stub-mode). GET /merchant/me. POST /admin/merchant-claims/:id approve|reject (requireRole admin; approve sets venues.claimed_by_merchant_id + source=merchant; 409 non-pending; audit). Web VenueClaim.tsx (/venue/claim: venue search → cert upload → price band 1–6 select → contact → submitted state; linked from Venue landing). merchant.test.ts 3 tests (one-active-claim, reject→resubmit same id, approve claims venue, non-admin 403). LESSONS: audit_log col is actor_id; storage hoisted out of register callback; tests share merchantId across cases (state). 118 API tests green, web 8 green |
 | 2026-10-27 | T8.2 | merchant.ts: GET /merchant/me/venues (approved claims + profile jsonb + tier/founding); PATCH /merchant/me/venues/:venueId (hours→profile jsonb; menu 402 plan-locked on Starter; pin correction ST_DWithin 200m 422; displayName non-empty); GET+POST /merchant/me/venues/:venueId/standing-rooms (cap map starter 3/growth 10/pro ∞ → 402 type:plan w/ upgrade copy; spot row kind=chat host_merchant_id+venue district inherit; room kind=chat merchant_id — merchant never a room_member). Web MerchantPortal.tsx (/merchant: venue list→editor hours/menu(Growth-gated)+standing rooms manager; Merchant nav link). merchantPortal.test.ts 2 tests (editor incl. far-pin 422, cap 3 then 402 plan). 120 API tests green |
 | 2026-10-27 | T8.3 | migration 0012 users.admin_roles text[] (default {}); auth.ts AuthUser+adminRoles/aal, decorate requireAdminRole(role) — superadmin bypasses, ADMIN_REQUIRE_MFA=true enforces aal2 (GoTrue TOTP); seed admin gets {superadmin}. routes/admin.ts: GET /admin/users?q= search; GET /admin/users/:id (plan via entitlements + reports + moderation history); POST /admin/users/:id/moderate {suspend,reason} → users.deleted_at + moderation_actions(admin_id,target_user,action,reason,audit) + audit_log; GET /admin/merchant-claims pending + presignGet cert 15min; GET /admin/venues/geocode-failed; POST /admin/venues/:id/pin (geocode_status=manual); GET /admin/venue-reports + resolve; POST /admin/venues/merge (moves spots/memberships/venue_reports/saved_venues, closes loser, 409 if claimed). Web /admin page (claims approve/reject + cert link, user search). admin.test.ts 3 tests (RBAC matrix 403s incl. moderator≠support, suspend/restore cycle, pin+merge children move). Fixed old tests for admin_roles. 123 API tests green |
+- T8.4 (partial ◐): Dockerfiles (api+web, both smoke-tested), Dokploy compose, meshpoke DB+role+postgis on Hetzner, nightly pg_dump cron, staging secrets + RUNBOOK. CI green again (web lint globals, shared dist build + exports map, flutter analyze infos, turbo typecheck ^build, flutter SDK cache off). Remaining: user DNS + Dokploy paste per RUNBOOK.
