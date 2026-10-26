@@ -17,6 +17,7 @@ import { registerDataOwner } from './routes/dataOwner.js';
 import { registerCaps } from './routes/caps.js';
 import { registerKeywords } from './routes/keywords.js';
 import { registerPhotos } from './routes/photos.js';
+import { registerUsers } from './routes/users.js';
 import { storageFromEnv } from './storage.js';
 import { GoTrueClient } from './gotrue.js';
 import { initSentry } from './observability.js';
@@ -136,7 +137,10 @@ export async function buildApp(opts: BuildAppOptions) {
       registerCaps(instance, config.DATABASE_URL);
       registerKeywords(instance, config.DATABASE_URL);
       const storage = storageFromEnv(process.env);
-      if (storage) registerPhotos(instance, config.DATABASE_URL, storage);
+      if (storage) {
+        registerPhotos(instance, config.DATABASE_URL, storage);
+        registerUsers(instance, config.DATABASE_URL, storage);
+      }
     },
     { prefix: '/v1' },
   );
