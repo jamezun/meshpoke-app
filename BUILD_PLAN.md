@@ -609,12 +609,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Expiry sweep `POST /internal/poke-expiry` → expired, no refund (test proves credits untouched)
 **Tests:** Monday boundary (Sun 23:59 vs Mon 00:00 HKT); each cost branch; expiry no refund.
 
-### [ ] T11.2 Poke & connection endpoints
+### [x] T11.2 Poke & connection endpoints
 **PRD refs:** §3.4, §12.4 · **Depends:** T11.1, T9.3
-- [ ] `POST /pokes {to, note, source, spot_id?}` (phone-verified, note length by plan, not blocked, not already connected, one pending poke per direction)
-- [ ] Poke back creates `connections` row atomically and marks both pokes `returned`; opens DM room
-- [ ] `GET /pokes/incoming?sort=` (Recommended with inbox vibe), `GET /connections`, `POST /connections/{id}/disconnect` (silent, closes DM for both)
-- [ ] `GET /people-you-met/{spot_id}` (48h, attendees only, excludes absent)
+- [x] `POST /v1/pokes` (phone-verified, note limit 200/500 by plan, block check both directions, 409 if connected, 409 dup pending)
+- [x] Poke back → connection upsert (reactivates if disconnected) + both pokes `returned` + DM room with both members
+- [x] `GET /v1/pokes/incoming?sort=` (recommended: 0.2/0.5/0.3 w/ trust), `GET /v1/connections` (roomId attached), `POST /v1/connections/:id/disconnect` (silent, DM closed both sides)
+- [x] `GET /v1/people-you-met/:spotId` (48h window flag, attendees attended|forgiven only, trust attached)
 **Tests:** poke back free + connection; disconnect closes DM; reconnect via new mutual poke.
 
 ### [ ] T11.3 DMs
@@ -1124,3 +1124,4 @@ Append one line per completed task (newest at the bottom).
 - T10.4 (✓): LiveSpotScreen + detail members sketches; two-device acceptance deferred to staging per protocol.
 - T10.5 (✓): trust.test green; 156 api tests. M10 complete.
 - T11.1 (✓): 5 tests green (Monday boundary via mirror fn, all 4 cost branches, expiry no-refund). 161 api tests total.
+- T11.2 (✓): pokes.test 2 green (full poke→back→DM→disconnect→repoke cycle + people-you-met). 163 api tests.
