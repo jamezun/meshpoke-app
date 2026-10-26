@@ -281,10 +281,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `GET /users/{id}?context=&contextId=`
 **Tests:** a full matrix test (every context × relationship) — this test is a launch gate.
 
-### [ ] T3.4 Vibe match
+### [x] T3.4 Vibe match
 **PRD refs:** §3.2 · **Depends:** T3.1
-- [ ] `vibe(userKeywords, referenceKeywords)` per PRD formula; returns 0.5 if either side empty; clamp [0,1]
-- [ ] Display helper → integer % capped at 99
+- [x] `vibe(userKeywords, referenceKeywords)` per PRD formula; returns 0.5 if either side empty; clamp [0,1]
+- [x] Display helper → integer % capped at 99
 **Tests:** worked examples incl. empty sides.
 
 ---
@@ -1083,3 +1083,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T3.1 | shared/keywords.ts: KEYWORD_SUGGESTIONS (~50) + normalizeKeyword (trim/lower/collapse + alias fold: boardgames→board games, hike→hiking, rnd→running, it→tech, cantonese/mandarin→language exchange). routes/keywords.ts: GET /me/keywords, PUT replace-set (delete+insert tx preserving levels; pre-validate ≤10 post-normalize/dedupe; DB trigger mapped to friendly 422). NOTE: level-8 cap = keyword LEVEL not char length — my first impl conflated; 4-high state unreachable by construction (trigger blocks both insert & level-raise), test proves via SQL UPDATE backstop | 50 tests green |
 | 2026-10-26 | T3.2 | deps +@aws-sdk/client-s3 +s3-request-presigner +sharp. storage.ts (S3Client R2-compatible, presignPut/Get 10min, get/put/del). routes/photos.ts: POST /me/photos (content-type allowlist, 6-max, lowest-slot reuse), POST /me/photos/confirm (download → sharp rotate/auto-orient strips EXIF → 1080 full + 320 thumb jpeg → re-upload → slots in profiles.photos jsonb), GET /me/photos signed URLs, DELETE /me/photos/:n, PUT /me/photos/order (first=primary). Env-gated: no R2_ENDPOINT → routes not registered (dev stub). Tests: 5 (EXIF+resize proof, full flow, 7th 422 + slot reuse, type/size/garbage/409, reorder) | 55 tests green |
 | 2026-10-26 | T3.3 | src/photoAccess.ts resolveProfileView: map→none ALWAYS, spot_card/queue/inbox→sketch, chat_room→primary (sketch if hide_photo_in_rooms; full if connected), event_room→primary (full if connected), event_done→full iff both attended same spot (SQL join attendance), profile→sketch/full by connection, blocks both directions→none (404). routes/users.ts GET /users/:id?context=&contextId= (sketch layer: name/industry/oneliner/keywords/phone_verified; primary photo signed URL; full adds prompts/socials/all photos). TESTS: 24-case full matrix (every context×relationship incl. blocked-overrides-all + hide flag + API shape) — LAUNCH GATE. LESSON: spots col = host_user_id (host_user_id/host_merchant_id, not created_by); least($1::uuid) casts needed | 79 tests green |
+| 2026-10-26 | T3.4 | packages/shared/src/vibe.ts: vibe() per PRD §3.2 (sum min(levelA,levelB)/10 over shared ÷ max(1,|reference|), clamp [0,1], either side empty → 0.5), vibePercent() cap 99. Exported from shared index. Tests: 8 (empty-sides, worked example 0.4, min-level cap, clamp, disjoint, percent cap) | M3 done: 20 shared + 79 api tests green |
