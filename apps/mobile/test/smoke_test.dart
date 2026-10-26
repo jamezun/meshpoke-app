@@ -17,7 +17,7 @@ void main() {
       routes: [
         GoRoute(
           path: '/map',
-          builder: (_, __) => ShellScreen(child: const SizedBox()),
+          builder: (_, _) => ShellScreen(child: const SizedBox()),
         ),
       ],
       initialLocation: '/map',

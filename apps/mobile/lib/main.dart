@@ -20,20 +20,20 @@ final referralProvider = StateProvider<String?>((ref) => null);
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (_, __) => const SignInScreen()),
-      GoRoute(path: '/onboard/dob', builder: (_, __) => const DobScreen()),
-      GoRoute(path: '/onboard/phone', builder: (_, __) => const PhoneScreen()),
+      GoRoute(path: '/', builder: (_, _) => const SignInScreen()),
+      GoRoute(path: '/onboard/dob', builder: (_, _) => const DobScreen()),
+      GoRoute(path: '/onboard/phone', builder: (_, _) => const PhoneScreen()),
       GoRoute(
         path: '/map',
-        builder: (_, __) => const ShellScreen(child: MapScreen()),
+        builder: (_, _) => const ShellScreen(child: MapScreen()),
       ),
       GoRoute(
         path: '/spots',
-        builder: (_, __) => const ShellScreen(child: SpotsScreen()),
+        builder: (_, _) => const ShellScreen(child: SpotsScreen()),
       ),
       GoRoute(
         path: '/rooms',
-        builder: (_, __) => const ShellScreen(child: RoomsScreen()),
+        builder: (_, _) => const ShellScreen(child: RoomsScreen()),
       ),
       GoRoute(
         path: '/rooms/:id',
@@ -41,15 +41,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/inbox',
-        builder: (_, __) => const ShellScreen(child: InboxScreen()),
+        builder: (_, _) => const ShellScreen(child: InboxScreen()),
       ),
       GoRoute(
         path: '/profile',
-        builder: (_, __) => const ShellScreen(child: ProfileScreen()),
+        builder: (_, _) => const ShellScreen(child: ProfileScreen()),
       ),
       GoRoute(
         path: '/profile/edit',
-        builder: (_, __) => const ProfileEditScreen(),
+        builder: (_, _) => const ProfileEditScreen(),
       ),
       GoRoute(
         path: '/spot/:id',
@@ -59,8 +59,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/venue/:id',
         builder: (_, s) => VenuePageScreen(venueId: s.pathParameters['id']!),
       ),
-      GoRoute(path: '/venue/add', builder: (_, __) => const AddPlaceScreen()),
-      GoRoute(path: '/about', builder: (_, __) => const AboutScreen()),
+      GoRoute(path: '/venue/add', builder: (_, _) => const AddPlaceScreen()),
+      GoRoute(path: '/about', builder: (_, _) => const AboutScreen()),
       GoRoute(
         path: '/r/:code',
         builder: (context, state) {
