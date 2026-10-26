@@ -88,7 +88,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M2 Auth & accounts | 0 | 5 | 5 | ✔ |
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
-| M5 Mobile foundation | 0 | 6 | 5 | ◐ |
+| M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 0 | ☐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
@@ -380,11 +380,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Graceful degradation: map error → list view
 **Acceptance:** panning Central shows FEHD venues from the seeded import.
 
-### [ ] T5.6 Venue page & add-a-place
+### [x] T5.6 Venue page & add-a-place
 **PRD refs:** §4.2, §5.3 (Venue page) · **Depends:** T5.5, T4.4
-- [ ] Venue page: name, category, address, claimed badge, activity, save/unsave, report
-- [ ] "Add a place" flow: drop pin, name, category, duplicate suggestions
-- [ ] About screen with data attribution (T4.6)
+- [x] Venue page: name, category, address, claimed badge, activity, save/unsave, report
+- [x] "Add a place" flow: drop pin, name, category, duplicate suggestions
+- [x] About screen with data attribution (T4.6)
 **Tests:** duplicate suggestion flow widget test.
 
 ---
@@ -1095,3 +1095,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T5.3 | core/shell.dart NavigationBar (Map/Spots/Rooms/Inbox/Profile, index from GoRouterState path), router adds /map /spots /rooms /inbox /profile + deep links /spot/:id /venue/:id (shell-wrapped, cold-start ready via go_router), 5 placeholder feature screens. 402→upgrade-sheet / 403→verify-sheet global handling lands with first guarded call (M9+); universal links configs (apple-app-site-association, assetlinks.json) deferred to T6.1 web host task where they are actually served. 7 flutter tests green |
 | 2026-10-26 | T5.4 | profile_screen (trust-signal row: member since/spots/unproven, editor card, photos card, hide-photo switch stub, settings) + profile_edit_screen (industry dropdown 10, one-liner 40, keyword chips w/ 1-10 slider, LIVE validation mirroring T1.1 trigger: max 10 + max 3 at 8+, Save disabled on violation). Backend: PUT /me/keywords now accepts string|{keyword,level} union (levels preserved, later-wins dedupe). Photo manager (pick/crop/upload/reorder) needs image_picker + R2 keys — deferred to env-setup milestone, card is the entry point. 9 flutter tests green (keyword add via .last TextField, 4×8+ block, arithmetic mirror incl. 9/3 ok) |
 | 2026-10-26 | T5.5 | map_screen: GoogleMap dark style, when-in-use permission request w/ Enable-location button, camera-idle → 400ms debounce → bbox → viewportProvider (autoDispose family, dio GET /map/viewport), venue markers w/ activity7d info windows, date filter chips (Today/This week default/All), list fallback (mapFailed || useListInTests static flag — native view untestable). map_repository: ViewportData/MapVenue/MapSpot parse + bboxOf. Clustering + marker SIZING by activity7d needs live Maps SDK (dev-machine Android SDK) — deferred to device pass; venue lat/lng parse from geography point lands with real API shape check. 11 flutter tests green |
+| 2026-10-26 | T5.6 | venue_screens.dart: VenuePageScreen (claimed badge, category/address, activity card, save/report), AddPlaceScreen (pin drop → name → 12-category dropdown → POST /venues, 409 duplicates list + "It's different — add anyway" force CTA), AboutScreen w/ DATA.GOV.HK + ALS + HK1980 attributions (T4.6 wiring). Routes /venue/:id (real page replacing map placeholder), /venue/add, /about. 14 flutter tests green — M5 COMPLETE (M0–M5 all ✔). LESSON: dart-format reformats widget trees between edits — always re-read block before next string replace; const-list with non-const loop var needs per-node const |
