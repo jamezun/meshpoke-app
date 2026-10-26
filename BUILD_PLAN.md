@@ -87,7 +87,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M1 Database & shared package | 0 | 5 | 5 | ✔ |
 | M2 Auth & accounts | 0 | 5 | 5 | ✔ |
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
-| M4 Venues & geo | 0 | 6 | 4 | ◐ |
+| M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 0 | ☐ |
 | M6 Web foundation | 0 | 5 | 0 | ☐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
@@ -324,15 +324,15 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `GET /venues/search?q=&district=` (trigram index on display/legal names, EN + ZH)
 **Tests:** dedupe; report threshold; search ranking.
 
-### [ ] T4.5 Venue activity counts (marker size)
+### [x] T4.5 Venue activity counts (marker size)
 **PRD refs:** §4.1 · **Depends:** T4.1
-- [ ] Materialised view or cached query: high-confidence `merchant_checkins` per venue, last 7 days
-- [ ] Included in viewport response as `activity7d`; never member count
+- [x] Materialised view or cached query: high-confidence `merchant_checkins` per venue, last 7 days
+- [x] Included in viewport response as `activity7d`; never member count
 **Tests:** low-confidence check-ins excluded.
 
-### [ ] T4.6 Data attribution
+### [x] T4.6 Data attribution
 **PRD refs:** §4.2, §14 · **Depends:** T4.2
-- [ ] Attribution text constant ("Contains data from DATA.GOV.HK" — verify wording against data.gov.hk terms) exposed via `GET /meta/attributions`
+- [x] Attribution text constant ("Contains data from DATA.GOV.HK" — verify wording against data.gov.hk terms) exposed via `GET /meta/attributions`
 **Acceptance:** text present for web footer and app About (wired in M5/M6).
 
 ---
@@ -1088,3 +1088,5 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T4.2 | +pg-boss +fast-xml-parser. src/venues/fehd.ts: parseFehdXml (isArray+parseTagValue:false → licence nos keep leading zeros; tolerant wrapper), applyFehdImport (upsert ON CONFLICT fehd_licence_no w/ xmax=0 inserted-detect; address changed → geocode_status pending; closure = active FEHD venue w/ licence not in today file → status closed + closed_at; reopen if reappears; districtFilter for launch C&W), fetchFehdXml. migration 0008: venues.closed_at + geocode_status + fehd_district. src/jobs/index.ts: PgBoss named import (no default export!), fehd-import worker + cron 0 2 * * * (10:00 HKT), server.ts starts when ENABLE_JOBS && FEHD_URL. LESSONS: INSERT column list must match VALUES count exactly (misaligned params surfaced as PostGIS parse error); pg-boss v12 exports { PgBoss } named; sed-editing SQL placeholders is error-prone — edit tool instead. Import-run log: job logs JSON result (admin UI later) | 91 tests green |
 | 2026-10-26 | T4.3 | +proj4. src/venues/als.ts: hk1980ToWgs84 (EPSG:2326 towgs84 params), lookupAddress (POST als.gov.hk/lookup form-encoded, Accept json, best score ≥70 else null), geocodePendingVenues (batch w/ 500ms throttle = 2req/s, network error → stays pending, no-match → failed for manual admin pin; writes ST_MakePoint). jobs: als-geocode worker + cron 02:30 UTC. Fixture: Central MTR HK1980 834282,815892 → 114.1576,22.2819 within 20m (LESSON: derive fixture by inverse proj4, not memory) | 94 tests green |
 | 2026-10-26 | T4.4 | routes/venues.ts: POST /venues (phone-verified 403 gate; 12-category zod; dedupe = lower(trim(name)) within ST_DWithin 50m → 409 duplicates list; force=true bypass), POST /venues/:id/report (enum wrong_pin/closed/duplicate/other; unique (venue,reporter) idx 0009; 3 distinct → status escalated + admin queue), POST/DELETE /venues/:id/save, GET /venues/search?q=&district= (pg_trgm similarity + ILIKE fallback, district scope optional, rank by score). migrations 0009 (pg_trgm + gin trgm idx + venue_reports_once_idx), 0010 (venue_report_status + escalated). LESSON: enum mismatch between route SQL and pgEnum → 500s — always cross-check schema enums | 100 tests green |
+| 2026-10-26 | T4.5 | migration 0011 materialised view venue_activity_7d (high-confidence merchant_checkins only, unique idx for CONCURRENTLY) refreshed in als-geocode job daily; viewport venues now include activity7d (COALESCE 0) — never member count. Test: 2 high + 1 low check-in → activity7d=2 | M4 complete |
+| 2026-10-26 | T4.6 | GET /v1/meta/attributions (public): DATA.GOV.HK + 資料一線通 wording, FEHD, ALS Lands Dept, HK1980 SMO texts | wired into M5/M6 footers later | 102 tests green |
