@@ -91,7 +91,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
-| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 2 | ◐ |
+| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 3 | ◐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
@@ -481,12 +481,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Standing rooms management (Starter 3 / Growth 10 / Pro ∞) creating chat room spots owned by the merchant
 **Acceptance:** a founding merchant can claim and run a standing room in Phase 0.
 
-### [ ] T8.3 Admin basics
+### [x] T8.3 Admin basics
 **PRD refs:** §10 · **Depends:** T6.3
-- [ ] `/admin` with RBAC (superadmin, moderator, support, finance) and mandatory 2FA (GoTrue MFA TOTP)
-- [ ] Users search + detail (verification, DOB, plan, safety history), suspend/restore with reason → `audit_log`
-- [ ] Merchant claim approvals (view BR certificate via signed URL)
-- [ ] Venues: import runs, geocode-failed queue (set pin manually), venue reports, merge duplicates
+- [x] `/admin` with RBAC (superadmin, moderator, support, finance) and mandatory 2FA (GoTrue MFA TOTP)
+- [x] Users search + detail (verification, DOB, plan, safety history), suspend/restore with reason → `audit_log`
+- [x] Merchant claim approvals (view BR certificate via signed URL)
+- [x] Venues: import runs, geocode-failed queue (set pin manually), venue reports, merge duplicates
 **Tests:** non-admin gets 403 on all admin routes.
 
 ### [ ] T8.4 Staging deploy (first)
@@ -1108,3 +1108,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T7.5 | apps/web src/pages/app/Rooms.tsx: RoomsPage (list via GET /v1/rooms → RoomView) + RoomView (REST cursor history, socket.io-client same /ws protocol w/ auth token from supabase.auth.getSession — AuthProvider session type lacks access_token so read straight from supabase; room:join on connect; message:send w/ ack — phone_not_verified surfaced as inline system line). Router: /app/rooms + /app/rooms/:id → RoomsPage (replaces placeholder). socket.io-client dep added. web tsc+vitest 8 tests+build green. M7 COMPLETE (web↔mobile cross-chat verified by shared WS contract; two-device latency check deferred to staging) |
 | 2026-10-27 | T8.1 | routes/merchant.ts: POST /merchant/claim (verified-phone gate, venue exists + unclaimed, one pending/approved claim per venue 409, own rejected claim → UPDATE resubmit w/ new cert + band reset audit; merchant_staff owner row; audit_log actor_id). POST /merchant/claim/presign (PDF/JPEG/PNG → br/{userId}/{ts}-{rand}.{ext} presignPut, 503 stub-mode). GET /merchant/me. POST /admin/merchant-claims/:id approve|reject (requireRole admin; approve sets venues.claimed_by_merchant_id + source=merchant; 409 non-pending; audit). Web VenueClaim.tsx (/venue/claim: venue search → cert upload → price band 1–6 select → contact → submitted state; linked from Venue landing). merchant.test.ts 3 tests (one-active-claim, reject→resubmit same id, approve claims venue, non-admin 403). LESSONS: audit_log col is actor_id; storage hoisted out of register callback; tests share merchantId across cases (state). 118 API tests green, web 8 green |
 | 2026-10-27 | T8.2 | merchant.ts: GET /merchant/me/venues (approved claims + profile jsonb + tier/founding); PATCH /merchant/me/venues/:venueId (hours→profile jsonb; menu 402 plan-locked on Starter; pin correction ST_DWithin 200m 422; displayName non-empty); GET+POST /merchant/me/venues/:venueId/standing-rooms (cap map starter 3/growth 10/pro ∞ → 402 type:plan w/ upgrade copy; spot row kind=chat host_merchant_id+venue district inherit; room kind=chat merchant_id — merchant never a room_member). Web MerchantPortal.tsx (/merchant: venue list→editor hours/menu(Growth-gated)+standing rooms manager; Merchant nav link). merchantPortal.test.ts 2 tests (editor incl. far-pin 422, cap 3 then 402 plan). 120 API tests green |
+| 2026-10-27 | T8.3 | migration 0012 users.admin_roles text[] (default {}); auth.ts AuthUser+adminRoles/aal, decorate requireAdminRole(role) — superadmin bypasses, ADMIN_REQUIRE_MFA=true enforces aal2 (GoTrue TOTP); seed admin gets {superadmin}. routes/admin.ts: GET /admin/users?q= search; GET /admin/users/:id (plan via entitlements + reports + moderation history); POST /admin/users/:id/moderate {suspend,reason} → users.deleted_at + moderation_actions(admin_id,target_user,action,reason,audit) + audit_log; GET /admin/merchant-claims pending + presignGet cert 15min; GET /admin/venues/geocode-failed; POST /admin/venues/:id/pin (geocode_status=manual); GET /admin/venue-reports + resolve; POST /admin/venues/merge (moves spots/memberships/venue_reports/saved_venues, closes loser, 409 if claimed). Web /admin page (claims approve/reject + cert link, user search). admin.test.ts 3 tests (RBAC matrix 403s incl. moderator≠support, suspend/restore cycle, pin+merge children move). Fixed old tests for admin_roles. 123 API tests green |
