@@ -273,12 +273,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Signed GET URL generator (10 min)
 **Tests:** EXIF stripped; 7th photo rejected.
 
-### [ ] T3.3 Photo visibility resolver
+### [x] T3.3 Photo visibility resolver
 **PRD refs:** §3.1 (resolver table) · **Depends:** T3.2, T1.2
-- [ ] `canSeePhoto(viewerId, subjectId, context)` and `resolveProfileView(viewerId, subjectId, context)` returning sketch-only / primary-photo / full
-- [ ] Contexts: `map`, `spot_card`, `queue`, `inbox`, `chat_room`, `event_room`, `event_done`, `profile`
-- [ ] Respect blocks, `hide_photo_in_rooms`, connections, attendance statuses (attendance table exists from T1.2; populated later)
-- [ ] `GET /users/{id}?context=&contextId=`
+- [x] `canSeePhoto(viewerId, subjectId, context)` and `resolveProfileView(viewerId, subjectId, context)` returning sketch-only / primary-photo / full
+- [x] Contexts: `map`, `spot_card`, `queue`, `inbox`, `chat_room`, `event_room`, `event_done`, `profile`
+- [x] Respect blocks, `hide_photo_in_rooms`, connections, attendance statuses (attendance table exists from T1.2; populated later)
+- [x] `GET /users/{id}?context=&contextId=`
 **Tests:** a full matrix test (every context × relationship) — this test is a launch gate.
 
 ### [ ] T3.4 Vibe match
@@ -1082,3 +1082,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T2.5 | src/entitlements.ts: getPlan (entitlements row, lifetime NULL expiry active, expired→free), getCaps→TIER_CAPS, assertCap→CapError{capType,limit} (caller maps 402). routes/caps.ts GET /me/caps: plan + per-cap {limit,used} (∞→null) — usage SQL: hosted spots forming|confirmed, active rooms via rm.left_at IS NULL + decay, poke_balances.weekly_used. apps/api dep @meshpoke/shared workspace:*. Tests: 4. LESSON: raw-SQL usage counters must match actual columns — room_members has left_at not state | 46 tests green |
 | 2026-10-26 | T3.1 | shared/keywords.ts: KEYWORD_SUGGESTIONS (~50) + normalizeKeyword (trim/lower/collapse + alias fold: boardgames→board games, hike→hiking, rnd→running, it→tech, cantonese/mandarin→language exchange). routes/keywords.ts: GET /me/keywords, PUT replace-set (delete+insert tx preserving levels; pre-validate ≤10 post-normalize/dedupe; DB trigger mapped to friendly 422). NOTE: level-8 cap = keyword LEVEL not char length — my first impl conflated; 4-high state unreachable by construction (trigger blocks both insert & level-raise), test proves via SQL UPDATE backstop | 50 tests green |
 | 2026-10-26 | T3.2 | deps +@aws-sdk/client-s3 +s3-request-presigner +sharp. storage.ts (S3Client R2-compatible, presignPut/Get 10min, get/put/del). routes/photos.ts: POST /me/photos (content-type allowlist, 6-max, lowest-slot reuse), POST /me/photos/confirm (download → sharp rotate/auto-orient strips EXIF → 1080 full + 320 thumb jpeg → re-upload → slots in profiles.photos jsonb), GET /me/photos signed URLs, DELETE /me/photos/:n, PUT /me/photos/order (first=primary). Env-gated: no R2_ENDPOINT → routes not registered (dev stub). Tests: 5 (EXIF+resize proof, full flow, 7th 422 + slot reuse, type/size/garbage/409, reorder) | 55 tests green |
+| 2026-10-26 | T3.3 | src/photoAccess.ts resolveProfileView: map→none ALWAYS, spot_card/queue/inbox→sketch, chat_room→primary (sketch if hide_photo_in_rooms; full if connected), event_room→primary (full if connected), event_done→full iff both attended same spot (SQL join attendance), profile→sketch/full by connection, blocks both directions→none (404). routes/users.ts GET /users/:id?context=&contextId= (sketch layer: name/industry/oneliner/keywords/phone_verified; primary photo signed URL; full adds prompts/socials/all photos). TESTS: 24-case full matrix (every context×relationship incl. blocked-overrides-all + hide flag + API shape) — LAUNCH GATE. LESSON: spots col = host_user_id (host_user_id/host_merchant_id, not created_by); least($1::uuid) casts needed | 79 tests green |
