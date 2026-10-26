@@ -9,6 +9,9 @@ import VenueLandingPage from './pages/Venue';
 import VenuePricingPage from './pages/VenuePricing';
 import SupportPage from './pages/Support';
 import { TermsPage, PrivacyPage } from './pages/Legal';
+import { LoginPage } from './auth/Login';
+import { SignupPage } from './auth/Signup';
+import { PhoneVerifyPage } from './auth/PhoneVerify';
 
 export function createRouter(opts: { memory?: boolean; initial?: string } = {}) {
   const routes = [
@@ -22,6 +25,9 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/support', element: <SupportPage /> },
     { path: '/terms', element: <TermsPage /> },
     { path: '/privacy', element: <PrivacyPage /> },
+    { path: '/login', element: <LoginPage /> },
+    { path: '/signup', element: <SignupPage /> },
+    { path: '/verify-phone', element: <PhoneVerifyPage /> },
     { path: '/app/*', element: <AppLayout /> },
   ];
   const router = opts.memory ? createMemoryRouter(routes, { initialEntries: [opts.initial ?? '/'] }) : createBrowserRouter(routes);

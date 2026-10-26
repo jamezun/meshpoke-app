@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { RequireAuth } from '../auth/AuthProvider';
 
 const nav = [
   ['Inbox', '/app/inbox'], ['Spots', '/app/spots'], ['Rooms', '/app/rooms'],
@@ -7,6 +8,7 @@ const nav = [
 
 export function AppLayout() {
   return (
+    <RequireAuth>
     <div className="min-h-screen">
       <nav className="border-b border-zinc-800 px-6 py-3">
         {nav.map(([label, to]) => (
@@ -15,5 +17,6 @@ export function AppLayout() {
       </nav>
       <Outlet />
     </div>
+    </RequireAuth>
   );
 }
