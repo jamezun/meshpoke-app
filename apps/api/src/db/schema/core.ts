@@ -33,6 +33,7 @@ export const users = pgTable('users', {
   phoneHash: varchar('phone_hash', { length: 64 }), // HMAC-SHA256 for uniqueness lookups
   phoneVerifiedAt: timestamp('phone_verified_at', { withTimezone: true }),
   livenessState: livenessStateEnum('liveness_state').notNull().default('none'),
+  isAdmin: boolean('is_admin').notNull().default(false),
   referralCode: varchar('referral_code', { length: 12 }).notNull(),
   referredBy: uuid('referred_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

@@ -54,8 +54,8 @@ async function main() {
   // ── admin user ──
   const adminId = crypto.randomUUID();
   await pool.query(
-    `INSERT INTO users (id, email, auth_provider, display_name, date_of_birth, referral_code, liveness_state)
-     VALUES ($1, $2, 'email', 'Admin', '1990-01-01', 'ADMIN00001', 'verified')
+    `INSERT INTO users (id, email, auth_provider, display_name, date_of_birth, referral_code, liveness_state, is_admin)
+     VALUES ($1, $2, 'email', 'Admin', '1990-01-01', 'ADMIN00001', 'verified', true)
      ON CONFLICT (email) DO NOTHING`,
     [adminId, ADMIN_EMAIL],
   );
