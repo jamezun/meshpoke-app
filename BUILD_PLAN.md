@@ -265,12 +265,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Keyword suggestions list (`packages/shared/keywords.ts`) for autocomplete
 **Tests:** validation cases.
 
-### [ ] T3.2 Photos (R2)
+### [x] T3.2 Photos (R2)
 **PRD refs:** §3.1, §15 (Security) · **Depends:** T2.2
-- [ ] `POST /me/photos` → presigned PUT URL (R2, private bucket), max 6, image types only, 8 MB limit
-- [ ] `POST /me/photos/confirm`, `DELETE /me/photos/{i}`, reorder endpoint (first = primary)
-- [ ] Image processing job: strip EXIF (location!), resize to 1080 + 320 thumbnail
-- [ ] Signed GET URL generator (10 min)
+- [x] `POST /me/photos` → presigned PUT URL (R2, private bucket), max 6, image types only, 8 MB limit
+- [x] `POST /me/photos/confirm`, `DELETE /me/photos/{i}`, reorder endpoint (first = primary)
+- [x] Image processing job: strip EXIF (location!), resize to 1080 + 320 thumbnail
+- [x] Signed GET URL generator (10 min)
 **Tests:** EXIF stripped; 7th photo rejected.
 
 ### [ ] T3.3 Photo visibility resolver
@@ -1081,3 +1081,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T2.4 | routes/dataOwner.ts: DELETE /me (deleted_at soft + GoTrue adminSignOutAll + auth cache DEL), GET /me/export (account w/o PII ciphertext, profile, keywords, pokes SENT only — received excluded, messages authored, memberships, subs). jobs/anonymize-deleted.ts (30d scrub: name→Deleted user, email→deleted+id@meshpoke.invalid, phone cols NULL, referral_code→DEL+id8 — NOT NULL so not NULL; idempotent via anonymized_at; `pnpm anonymize` cron entrypoint; tests pass dbUrl). migration 0006 anonymized_at. Tests: 4. LESSON: drizzle renders eq(undefined-col, v) as bare `where = $1` at RUNTIME while tsc catches typos — always typecheck before test-debug | 42 tests green |
 | 2026-10-26 | T2.5 | src/entitlements.ts: getPlan (entitlements row, lifetime NULL expiry active, expired→free), getCaps→TIER_CAPS, assertCap→CapError{capType,limit} (caller maps 402). routes/caps.ts GET /me/caps: plan + per-cap {limit,used} (∞→null) — usage SQL: hosted spots forming|confirmed, active rooms via rm.left_at IS NULL + decay, poke_balances.weekly_used. apps/api dep @meshpoke/shared workspace:*. Tests: 4. LESSON: raw-SQL usage counters must match actual columns — room_members has left_at not state | 46 tests green |
 | 2026-10-26 | T3.1 | shared/keywords.ts: KEYWORD_SUGGESTIONS (~50) + normalizeKeyword (trim/lower/collapse + alias fold: boardgames→board games, hike→hiking, rnd→running, it→tech, cantonese/mandarin→language exchange). routes/keywords.ts: GET /me/keywords, PUT replace-set (delete+insert tx preserving levels; pre-validate ≤10 post-normalize/dedupe; DB trigger mapped to friendly 422). NOTE: level-8 cap = keyword LEVEL not char length — my first impl conflated; 4-high state unreachable by construction (trigger blocks both insert & level-raise), test proves via SQL UPDATE backstop | 50 tests green |
+| 2026-10-26 | T3.2 | deps +@aws-sdk/client-s3 +s3-request-presigner +sharp. storage.ts (S3Client R2-compatible, presignPut/Get 10min, get/put/del). routes/photos.ts: POST /me/photos (content-type allowlist, 6-max, lowest-slot reuse), POST /me/photos/confirm (download → sharp rotate/auto-orient strips EXIF → 1080 full + 320 thumb jpeg → re-upload → slots in profiles.photos jsonb), GET /me/photos signed URLs, DELETE /me/photos/:n, PUT /me/photos/order (first=primary). Env-gated: no R2_ENDPOINT → routes not registered (dev stub). Tests: 5 (EXIF+resize proof, full flow, 7th 422 + slot reuse, type/size/garbage/409, reorder) | 55 tests green |
