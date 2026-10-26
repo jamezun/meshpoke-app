@@ -90,7 +90,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
-| M7 Chat rooms & realtime | 0 | 5 | 3 | ◐ |
+| M7 Chat rooms & realtime | 0 | 5 | 4 | ◐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
@@ -453,10 +453,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Per-user message rate limit (e.g. 20/min)
 **Tests:** link in message from unverified rejected.
 
-### [ ] T7.4 Mobile rooms
+### [x] T7.4 Mobile rooms
 **PRD refs:** §5.3 (Room) · **Depends:** T7.2, T5.3
-- [ ] Rooms tab list (unread badges), room screen (messages, member rail with photo rules, read-only banner for unverified)
-- [ ] Socket.io client with reconnect and offline queue
+- [x] Rooms tab list (unread badges), room screen (messages, member rail with photo rules, read-only banner for unverified)
+- [x] Socket.io client with reconnect and offline queue
 **Acceptance:** message round-trip between two devices < 1 s on local network.
 
 ### [ ] T7.5 Web rooms
@@ -1104,3 +1104,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T7.1 | routes/realtime.ts: Socket.io on /ws (same HTTP server), jose JWT handshake, @socket.io/redis-adapter (stream-adapter pkg DOES NOT EXIST in npm — correct name redis-adapter), room:join w/ DB membership check (room_members) returning {ok,verified,presence}, room:leave, typing, message:send (1-2000 chars, membership + liveness=verified server-enforced → phone_not_verified fail, insert messages, io.to broadcast, ack w/ id) — delivered:ack + REST catch-up GET /rooms/:id/messages lands T7.2 alongside room routes. realtime.test.ts: REAL WS clients against listening server (app.listen 0) — handshake reject, two-client exchange + outsider join denied + unverified blocked from posting, persistence. LESSONS: io.to(room) reaches only joined sockets (join s2 BEFORE sending); users insert needs email/auth_provider/display_name/date_of_birth/referral_code; enum none not unverified; room_members insert needs param pairs not $1,$1 reuse. 107 API tests green |
 | 2026-10-27 | T7.2 | routes/rooms.ts: GET /rooms (list w/ last message + member count), POST /rooms/:id/join (chat+event active count vs TIER_CAPS.chatRooms → 402 problem; DM join 403; upsert sets left_at null), leave, GET /rooms/:id/messages (member-only, cursor pagination reverse→asc), GET /rooms/:id/members (member-only, resolveProfileView chat_room → photoAccess level, photos only when full), POST /spots kind:chat (liveness verified gate 403, hosting_capacity 1/3/5 earned → 402 problem, CTE creates spot+room+host member). City rooms seeded since T1.4. rooms.test.ts 3 tests (unverified join-read-only + hosting 403, chat spot creation host role, free cap 402 at 6th join — actual detail "5 rooms"). LESSONS: app.authenticate must be decorated BEFORE registering routes that reference it (app.ts order fixed); spots.max_headcount NOT NULL w/ CHECK (chat spots use 500); room_members has left_at not state. 110 API tests green |
 | 2026-10-27 | T7.3 | src/safety.ts: LINK_RE (https?://|www.), HANDLE_RE (@handle) → messageGuard (link+unverified → link_not_allowed; flags jsonb persisted on messages: link-detected/handle-detected — client renders interstitial on flag), checkMsgRate (Redis INCR per user per minute, 20/min, TTL 120s). Wired into realtime.ts message:send before insert (rate_limited fail ack). DM link-lock deferred to T13.2 as planned. safety.test.ts 5 tests. 115 API tests green |
+| 2026-10-27 | T7.4 | lib/core/chat_socket.dart (socket_io_client 2.0.3+1: websocket transport, /ws path, setAuth token, reconnect 2s, broadcast streams for messages/presence/typing/connection/failed; sendMessage queues offline + flush on reconnect; emitWithAck ack-fail → failed stream). rooms_screen.dart rebuilt on apiClientProvider+Supabase session (NOT the invented api/authSession helpers — actual pattern is Dio provider w/ GoTrue interceptor; spots/inbox still placeholders): RoomsScreen (list w/ district title, last message, member count, pull-refresh), RoomScreen (history load, live messages, member drawer w/ photoAccess full/hidden, offline + read-only banners, typing debounce 2s; /me phoneVerified gates composer). /rooms/:id route added. LESSONS: OptionBuilder has setReconnectionDelay (no Ms suffix); socket.emit takes [data] single arg → multi-arg server handlers need List payload. flutter test 14 green; dart analyze 0 errors (17 pre-existing infos). <1s round-trip acceptance deferred to two-device staging (server acks verified in T7.1 tests) |
