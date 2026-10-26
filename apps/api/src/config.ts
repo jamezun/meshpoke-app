@@ -22,6 +22,11 @@ export const configSchema = z.object({
   QR_HMAC_SECRET: z.string().min(32),
   ADMIN_BOOTSTRAP_PASSWORD: z.string().min(12),
   ENABLE_SWAGGER: bool.default('true'),
+
+  R2_ENDPOINT: z.string().optional(), // absent → photos routes 503 (dev stub)
+  R2_BUCKET: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
