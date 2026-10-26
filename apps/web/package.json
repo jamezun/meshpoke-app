@@ -8,7 +8,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "serve": "node server.mjs",
+    "test:server": "node --test server.test.mjs"
   },
   "dependencies": {
     "@meshpoke/shared": "workspace:*",

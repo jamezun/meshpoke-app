@@ -21,6 +21,7 @@ import { registerUsers } from './routes/users.js';
 import { registerMap } from './routes/map.js';
 import { registerVenues } from './routes/venues.js';
 import { registerMeta } from './routes/meta.js';
+import { registerShare } from './routes/share.js';
 import { storageFromEnv } from './storage.js';
 import { GoTrueClient } from './gotrue.js';
 import { initSentry } from './observability.js';
@@ -142,6 +143,7 @@ export async function buildApp(opts: BuildAppOptions) {
       registerMap(instance, config.DATABASE_URL);
       registerVenues(instance, config.DATABASE_URL);
       registerMeta(instance);
+      registerShare(instance, config.DATABASE_URL);
       const storage = storageFromEnv(process.env);
       if (storage) {
         registerPhotos(instance, config.DATABASE_URL, storage);
