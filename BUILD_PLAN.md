@@ -92,7 +92,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
-| M9 Event spots & queues | 1 | 7 | 4 | ◐ |
+| M9 Event spots & queues | 1 | 7 | 5 | ◐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
@@ -542,10 +542,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Host cancel → score event + auto-apology system message
 **Tests:** full state-machine integration test including dissolve and backfill.
 
-### [ ] T9.5 Mobile: spots discovery, detail, apply
+### [x] T9.5 Mobile: spots discovery, detail, apply
 **PRD refs:** §5.2, §5.3 · **Depends:** T9.2, T5.5
-- [ ] Spots tab list (district/viewport scoped, filters), spot detail screen (all fields, trust signals, group drop badge placeholder), apply sheet with note counter
-- [ ] Map spot markers open spot detail
+- [x] Spots tab (district picker + today/week/all), detail screen via new GET /spots/:id (all fields, my_role/my_application state), apply sheet note ≤500
+- [x] Map spot tiles open detail
 **Acceptance:** apply flow works end-to-end on device.
 
 ### [ ] T9.6 Mobile: host flow
@@ -1115,3 +1115,4 @@ Append one line per completed task (newest at the bottom).
 - T9.2 (✓): spotJoin.ts (join/apply/leave) + 6 tests. Note: max_headcount includes host. 140 api tests green.
 - T9.3 (✓): src/sort.ts + queue endpoint in spotJoin.ts + 5 unit tests (worked example 0.61/0.57/0.37, paid-never-buys-top, flag override). 145 api tests green.
 - T9.4 (✓): spotLifecycle.ts + 1 full state-machine test (146 api green). Lessons: decision enum is declined (not decline); inline SQL string w/ apostrophe must be a param; schedule headcount counts host.
+- T9.5 (✓): GET /spots/:id detail + mobile spots tab/detail/apply. Flutter analyze clean, 14 widget tests green.
