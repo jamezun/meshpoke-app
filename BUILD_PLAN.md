@@ -259,10 +259,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M3 Profiles, keywords, photos
 
-### [ ] T3.1 Keywords API
+### [x] T3.1 Keywords API
 **PRD refs:** §3.1 · **Depends:** T2.2
-- [ ] `PUT /me/keywords` (replace set; normalise lowercase/trim; validate max 10, max 3 at ≥ 8 → 422 with reason)
-- [ ] Keyword suggestions list (`packages/shared/keywords.ts`) for autocomplete
+- [x] `PUT /me/keywords` (replace set; normalise lowercase/trim; validate max 10, max 3 at ≥ 8 → 422 with reason)
+- [x] Keyword suggestions list (`packages/shared/keywords.ts`) for autocomplete
 **Tests:** validation cases.
 
 ### [ ] T3.2 Photos (R2)
@@ -1080,3 +1080,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T2.3 | gotrue.ts client (sendOtp/adminGetUser/adminSignOutAll, raw fetch); routes/phone.ts: POST /me/phone/otp (validate ^\+852\d{8}$, Redis INCR 3/h per user + 10/h per IP — IP looser for HK NAT, proxy to GoTrue), POST /me/phone/confirm (GoTrue phone_confirmed_at check 409, 852 re-validate, piiHash dup 409, encryptPii store + phone_verified_at, auth cache DEL). auth cache invalidation on onboard + phone-confirm. Tests: 4 (happy, unconfirmed/foreign 409/422, dup phone 409, 429). LESSONS: pii.ts reads process.env directly — test/setup.ts seeds PII key; per-IP 3/h blocks NAT offices | 38 tests green |
 | 2026-10-26 | T2.4 | routes/dataOwner.ts: DELETE /me (deleted_at soft + GoTrue adminSignOutAll + auth cache DEL), GET /me/export (account w/o PII ciphertext, profile, keywords, pokes SENT only — received excluded, messages authored, memberships, subs). jobs/anonymize-deleted.ts (30d scrub: name→Deleted user, email→deleted+id@meshpoke.invalid, phone cols NULL, referral_code→DEL+id8 — NOT NULL so not NULL; idempotent via anonymized_at; `pnpm anonymize` cron entrypoint; tests pass dbUrl). migration 0006 anonymized_at. Tests: 4. LESSON: drizzle renders eq(undefined-col, v) as bare `where = $1` at RUNTIME while tsc catches typos — always typecheck before test-debug | 42 tests green |
 | 2026-10-26 | T2.5 | src/entitlements.ts: getPlan (entitlements row, lifetime NULL expiry active, expired→free), getCaps→TIER_CAPS, assertCap→CapError{capType,limit} (caller maps 402). routes/caps.ts GET /me/caps: plan + per-cap {limit,used} (∞→null) — usage SQL: hosted spots forming|confirmed, active rooms via rm.left_at IS NULL + decay, poke_balances.weekly_used. apps/api dep @meshpoke/shared workspace:*. Tests: 4. LESSON: raw-SQL usage counters must match actual columns — room_members has left_at not state | 46 tests green |
+| 2026-10-26 | T3.1 | shared/keywords.ts: KEYWORD_SUGGESTIONS (~50) + normalizeKeyword (trim/lower/collapse + alias fold: boardgames→board games, hike→hiking, rnd→running, it→tech, cantonese/mandarin→language exchange). routes/keywords.ts: GET /me/keywords, PUT replace-set (delete+insert tx preserving levels; pre-validate ≤10 post-normalize/dedupe; DB trigger mapped to friendly 422). NOTE: level-8 cap = keyword LEVEL not char length — my first impl conflated; 4-high state unreachable by construction (trigger blocks both insert & level-raise), test proves via SQL UPDATE backstop | 50 tests green |
