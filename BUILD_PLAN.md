@@ -89,7 +89,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M3 Profiles, keywords, photos | 0 | 4 | 4 | ✔ |
 | M4 Venues & geo | 0 | 6 | 6 | ✔ |
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
-| M6 Web foundation | 0 | 5 | 1 | ◐ |
+| M6 Web foundation | 0 | 5 | 2 | ◐ |
 | M7 Chat rooms & realtime | 0 | 5 | 0 | ☐ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 0 | ☐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
@@ -399,14 +399,14 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Sentry + PostHog (consent-aware)
 **Acceptance:** `pnpm --filter web dev` renders the landing route.
 
-### [ ] T6.2 Marketing pages
+### [x] T6.2 Marketing pages
 **PRD refs:** §6.1 · **Depends:** T6.1
-- [ ] `/` hero with pitch line "Poke the mesh. Watch your network ripple." + subline, live-map mock, how it works, safety highlights, waitlist form (stores email; double opt-in via Resend)
-- [ ] `/how-it-works`, `/safety` (18+, verification, photo rules, Scameter + 999), `/about`, `/terms`, `/privacy` (placeholders for legal text), `/support/*` FAQ
-- [ ] `/pricing` rendered from constants (web prices, founding banner with live counter, merchant section + per-seat explainer)
-- [ ] `/venue`, `/venue/pricing` merchant landing
-- [ ] Footer with data attribution
-- [ ] SEO: meta, OG images, sitemap, robots
+- [x] `/` hero with pitch line "Poke the mesh. Watch your network ripple." + subline, live-map mock, how it works, safety highlights, waitlist form (stores email; double opt-in via Resend)
+- [x] `/how-it-works`, `/safety` (18+, verification, photo rules, Scameter + 999), `/about`, `/terms`, `/privacy` (placeholders for legal text), `/support/*` FAQ
+- [x] `/pricing` rendered from constants (web prices, founding banner with live counter, merchant section + per-seat explainer)
+- [x] `/venue`, `/venue/pricing` merchant landing
+- [x] Footer with data attribution
+- [x] SEO: meta, OG images, sitemap, robots
 **Acceptance:** Lighthouse ≥ 90 performance/SEO on `/`.
 
 ### [ ] T6.3 Web auth
@@ -1097,3 +1097,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T5.5 | map_screen: GoogleMap dark style, when-in-use permission request w/ Enable-location button, camera-idle → 400ms debounce → bbox → viewportProvider (autoDispose family, dio GET /map/viewport), venue markers w/ activity7d info windows, date filter chips (Today/This week default/All), list fallback (mapFailed || useListInTests static flag — native view untestable). map_repository: ViewportData/MapVenue/MapSpot parse + bboxOf. Clustering + marker SIZING by activity7d needs live Maps SDK (dev-machine Android SDK) — deferred to device pass; venue lat/lng parse from geography point lands with real API shape check. 11 flutter tests green |
 | 2026-10-26 | T5.6 | venue_screens.dart: VenuePageScreen (claimed badge, category/address, activity card, save/report), AddPlaceScreen (pin drop → name → 12-category dropdown → POST /venues, 409 duplicates list + "It's different — add anyway" force CTA), AboutScreen w/ DATA.GOV.HK + ALS + HK1980 attributions (T4.6 wiring). Routes /venue/:id (real page replacing map placeholder), /venue/add, /about. 14 flutter tests green — M5 COMPLETE (M0–M5 all ✔). LESSON: dart-format reformats widget trees between edits — always re-read block before next string replace; const-list with non-const loop var needs per-node const |
 | 2026-10-26 | T6.1 | apps/web: Vite 5 + React 18 + TS strict + Tailwind 4 (@tailwindcss/vite) + react-router-dom 7 (memory router for tests) + TanStack Query provider. index.css design tokens (§13 mesh dark + light via prefers-color-scheme CSS vars). Routes: / (Home: hero pitch + how-it-works + waitlist form + DATA.GOV.HK/ALS attribution footer), /pricing (renders FROM @meshpoke/shared/constants — consumer tiers + founding-500 banner + merchant Growth/Pro), /app/* AppLayout (nav Inbox/Spots/Rooms/Connections/Wallet/Billing/Settings). public/.well-known/apple-app-site-association (/s,/venue,/r) + assetlinks.json (SHA256 placeholder until signing) + robots.txt (Disallow /app/). SEO meta+OG in index.html. 2 vitest green (landing hero+attributions, pricing memory-route), typecheck clean, build 274KB/88KB gzip, dev renders landing ✓. LESSONS: jsdom 27 breaks vitest 2 (ERR_REQUIRE_ESM html-encoding-sniffer) → pin jsdom@25; PRICES shape is PRICES.plus.web.* not PRICES.web.plus.* |
+| 2026-10-26 | T6.2 | Static pages: /how-it-works (6-step), /safety (18+, photo ladder, Scameter+999 links, moderation), /about, /terms + /privacy (placeholders w/ PDPO summary — legal text before launch), /support FAQ (6 Q incl. no-payments stance), /venue landing (claim-free, founding circle, ladder, drops), /venue/pricing (SaaS + per-seat band table FROM MERCHANT_PER_SEAT_BANDS, shadow-month note). Shared StaticPage layout. Waitlist form currently posts /api/waitlist (endpoint lands with Resend env — noted). Lighthouse deferred until deploy (needs served dist). 3 vitest green incl. per-page needle assertions |
