@@ -117,3 +117,7 @@ $$ LANGUAGE plpgsql;--> statement-breakpoint
 CREATE TRIGGER keywords_caps_trigger
 BEFORE INSERT OR UPDATE OF level ON keywords
 FOR EACH ROW EXECUTE FUNCTION keywords_caps();
+
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "venues_location_gist" ON "venues" USING GIST ("location");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "districts_boundary_gist" ON "districts" USING GIST ("boundary");
