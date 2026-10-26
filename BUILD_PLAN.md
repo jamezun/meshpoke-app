@@ -562,9 +562,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M10 Attendance & Show-up Score
 
-### [ ] T10.1 "I'm here" GPS
+### [x] T10.1 "I'm here" GPS
 **PRD refs:** §3.5 (Live), §4.3 · **Depends:** T9.4
-- [ ] `POST /spots/{id}/im-here {lat,lng,accuracy_m}` during `live` only; GPS overlap via `ST_DWithin(venue, point, 100 + accuracy)`; sets `verified_gps`; coordinates not stored
+- [x] `POST /spots/{id}/im-here {lat,lng,accuracy_m}` during `live` only; GPS overlap via `ST_DWithin(venue, point, 100 + accuracy)`; sets `verified_gps` (attendance upsert); coordinates not stored
 **Tests:** inside/outside/accuracy-edge cases.
 
 ### [ ] T10.2 Attendance lifecycle
@@ -1118,3 +1118,4 @@ Append one line per completed task (newest at the bottom).
 - T9.5 (✓): GET /spots/:id detail + mobile spots tab/detail/apply. Flutter analyze clean, 14 widget tests green.
 - T9.7 (✓): share_plus button; endpoint+SSR already from T6.5. M9 COMPLETE (7/7).
 - T9.6 (✓): mobile host flow complete. Two-device acceptance deferred to staging (state-machine proven in T9.4 API test). M9 7/7 confirmed real.
+- T10.1 (✓): im-here route + test (inside/outside/accuracy-edge/non-live/non-member; attendance has no lat/lng cols). 147 api tests green.
