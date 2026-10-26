@@ -20,7 +20,7 @@ export const venueCategoryEnum = pgEnum('venue_category', [
 export const venueStatusEnum = pgEnum('venue_status', ['active', 'closed', 'hidden']);
 export const pinTierEnum = pgEnum('pin_tier', ['standard', 'rich', 'branded']);
 export const venueReportKindEnum = pgEnum('venue_report_kind', ['wrong_pin', 'closed', 'duplicate', 'other']);
-export const venueReportStatusEnum = pgEnum('venue_report_status', ['open', 'resolved', 'dismissed']);
+export const venueReportStatusEnum = pgEnum('venue_report_status', ['open', 'escalated', 'resolved', 'dismissed']);
 
 // ── identity ────────────────────────────────────────────────────
 export const users = pgTable('users', {
@@ -113,7 +113,7 @@ export const venueReports = pgTable('venue_reports', {
   details: varchar('details', { length: 500 }),
   status: venueReportStatusEnum('status').notNull().default('open'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => [uniqueIndex('venue_reports_once_idx').on(t.venueId, t.reporterId)]);
 
 export const savedVenues = pgTable('saved_venues', {
   userId: uuid('user_id').notNull(),
