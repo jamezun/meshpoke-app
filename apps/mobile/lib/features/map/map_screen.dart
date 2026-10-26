@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'map_repository.dart';
+import '../spots/spot_detail_screen.dart';
 
 /// Map home (PRD §4.1/§5.3): dark Google map, when-in-use location, viewport fetch
 /// on camera idle (debounced), venue markers sized by activity7d, spot chips by state,
@@ -166,6 +167,9 @@ class _VenueList extends StatelessWidget {
             leading: const Icon(Icons.groups),
             title: Text(s.name),
             subtitle: Text(s.state),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => SpotDetailScreen(spotId: s.id)),
+            ),
           ),
         for (final v in d.venues)
           ListTile(

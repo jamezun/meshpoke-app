@@ -118,6 +118,25 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     return { status: 'pending' };
   });
 
+  // T9.5 spot detail (auth): all fields + my membership/application state + venue name
+  app.get<{ Params: { id: string } }>('/spots/:id', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const userId = req.user!.id;
+    const res = await db.execute(sql`
+      select s.id, s.kind, s.template, s.name, s.state, s.join_mode, s.required_keywords, s.min_score,
+             s.price_range, s.min_headcount, s.max_headcount, s.overbook_buffer, s.starts_at, s.ends_at,
+             s.confirm_deadline, s.district_id, d.name_en as district, s.venue_id, v.display_name as venue_name,
+             (select count(*)::int from spot_members m where m.spot_id = s.id and m.state = 'active' and m.role in ('host','member')) as member_count,
+             (select m2.role from spot_members m2 where m2.spot_id = s.id and m2.user_id = ${userId} and m2.state = 'active') as my_role,
+             (select a.status from applications a where a.spot_id = s.id and a.user_id = ${userId} and a.status = 'pending') as my_application
+        from spots s
+        left join districts d on d.id = s.district_id
+        left join venues v on v.id = s.venue_id
+       where s.id = ${req.params.id}::uuid`);
+    const spot = rows(res);
+    if (spot.length === 0) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
+    return spot[0];
+  });
+
   // T9.3 queue view: sorted-never-hidden (Recommended default), counts per status,
   // express badge for plus/pro; FIFO within ties. Creator sees sketches only (T3.3).
   app.get<{ Params: { id: string }; Querystring: { sort?: string } }>('/spots/:id/queue', { preHandler: [app.authenticate] }, async (req, reply) => {
