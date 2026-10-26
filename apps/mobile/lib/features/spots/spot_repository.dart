@@ -71,6 +71,7 @@ class SpotDetail {
   final String? district;
   final int memberCount;
   final String? myRole;
+  final List<Map<String, dynamic>> members;
   final String? myApplication;
   SpotDetail({
     required this.id,
@@ -89,6 +90,7 @@ class SpotDetail {
     this.district,
     required this.memberCount,
     this.myRole,
+    this.members = const [],
     this.myApplication,
   });
 

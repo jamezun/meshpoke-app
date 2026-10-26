@@ -134,7 +134,12 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
        where s.id = ${req.params.id}::uuid`);
     const spot = rows(res);
     if (spot.length === 0) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
-    return spot[0];
+    // members as sketches (name only — photo ladder intact; T10.4 roll-call/report-absent)
+    const members = rows(await db.execute(sql`
+      select m.user_id as userId, u.display_name as displayName, m.role
+        from spot_members m join users u on u.id = m.user_id
+       where m.spot_id = ${req.params.id}::uuid and m.state = 'active' and m.role in ('host','member')`));
+    return { ...spot[0], members };
   });
 
   // T9.3 queue view: sorted-never-hidden (Recommended default), counts per status,

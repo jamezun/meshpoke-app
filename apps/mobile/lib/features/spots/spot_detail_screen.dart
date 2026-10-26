@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meshpoke/core/api_client.dart';
 import 'spot_repository.dart';
 import 'host_queue_screen.dart';
+import 'live_spot_screen.dart';
 
 /// T9.5 spot detail + join (open) / apply (application, note ≤500) + leave.
 class SpotDetailScreen extends ConsumerStatefulWidget {
@@ -144,6 +145,14 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
       return FilledButton(
         onPressed: () => s.joinMode == 'open' ? _act('join') : _applySheet(),
         child: Text(s.joinMode == 'open' ? 'Join' : 'Apply'),
+      );
+    }
+    if ((s.state == 'live' || s.state == 'done') && (s.myRole != null || s.myApplication == null)) {
+      return FilledButton.tonal(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => LiveSpotScreen(spotId: s.id)),
+        ),
+        child: Text(s.state == 'live' ? "I'm here / roll-call" : 'After-event'),
       );
     }
     return const SizedBox.shrink();
