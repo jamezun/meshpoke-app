@@ -92,7 +92,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
-| M9 Event spots & queues | 1 | 7 | 3 | ◐ |
+| M9 Event spots & queues | 1 | 7 | 4 | ◐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
@@ -533,13 +533,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `GET /spots/:id/queue?sort=recommended|fifo` (host-only) with counts per status, express badge (plus/pro), vibe = applicant keywords vs spot required keywords
 **Tests:** **worked example test (Amy 0.61, Cara 0.57, Ben 0.37 in that order)**; tie ordering; weights override via flag.
 
-### [ ] T9.4 Decisions, date-on-fill, confirm, bail
+### [x] T9.4 Decisions, date-on-fill, confirm, bail
 **PRD refs:** §3.5 (Date-on-fill) · **Depends:** T9.3
-- [ ] `POST /applications/{id}/decision` with reason presets (constants) + free text
-- [ ] When accepted count ≥ min headcount, host can `POST /spots/{id}/schedule {starts_at, venue_id, group_drop_id?}` → state `confirmed`, `confirm_deadline = now + 48h`
-- [ ] `POST /spots/{id}/confirm`, `POST /spots/{id}/bail` (within grace: no penalty; after: `late_cancel` score event; waitlist backfill)
-- [ ] Jobs: dissolve at deadline if not all confirmed (configurable rule: dissolve if confirmed < min headcount), `confirmed → live → done` transitions by time
-- [ ] Host cancel → score event + auto-apology system message
+- [x] `POST /applications/:id/decision` — presets (min_score/keywords/full/vibe/other) + note appended to decline_reason
+- [x] `POST /spots/:id/schedule {starts_at, venue_id, group_drop_id?}` → `confirmed` + 48h deadline (min headcount incl. host gate)
+- [x] `POST /spots/:id/confirm`, `/bail` (grace → free; late → `late_cancel` -0.15; waitlist backfill FIFO), host `/cancel` (host_cancel -0.2 + system apology)
+- [x] `POST /v1/internal/spot-sweep` (admin): dissolve if confirmed < min at deadline; confirmed→live at starts_at; live→done +12h
+- [x] Host cancel → score event + auto-apology system message
 **Tests:** full state-machine integration test including dissolve and backfill.
 
 ### [ ] T9.5 Mobile: spots discovery, detail, apply
@@ -1114,3 +1114,4 @@ Append one line per completed task (newest at the bottom).
 - T9.1 (✓): POST /v1/spots/events + 7 tests (validation, liveness 403, hosting cap, plan event caps). 134 api tests green. Lesson: drizzle sql`` raw JS array → SQL tuple (); use sql.param() for text[].
 - T9.2 (✓): spotJoin.ts (join/apply/leave) + 6 tests. Note: max_headcount includes host. 140 api tests green.
 - T9.3 (✓): src/sort.ts + queue endpoint in spotJoin.ts + 5 unit tests (worked example 0.61/0.57/0.37, paid-never-buys-top, flag override). 145 api tests green.
+- T9.4 (✓): spotLifecycle.ts + 1 full state-machine test (146 api green). Lessons: decision enum is declined (not decline); inline SQL string w/ apostrophe must be a param; schedule headcount counts host.
