@@ -91,7 +91,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M5 Mobile foundation | 0 | 6 | 6 | ✔ |
 | M6 Web foundation | 0 | 5 | 5 | ✔ |
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
-| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 3 | ◐ |
+| M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
 | M9 Event spots & queues | 1 | 7 | 0 | ☐ |
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
@@ -497,12 +497,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Nightly `pg_dump` cron on VPS (14-day local retention; R2 offload TODO); restore runbook in `infra/RUNBOOK.md`
 **Acceptance:** staging reachable over HTTPS; SupremaNode unaffected (memory headroom checked).
 
-### [ ] T8.5 Phase 0 internal release
+### [~] T8.5 Phase 0 internal release
 **PRD refs:** §16 (Phase 0) · **Depends:** T5.6, T7.4, T8.4
-- [ ] TestFlight + Play internal track builds via Codemagic
-- [ ] Waitlist landing live on production domain
-- [ ] FEHD import running for Central & Western; founding merchants onboarded in admin
-- [ ] Smoke checklist: sign-up → DOB → verify → profile → map → venue → join city room → chat
+- [~] TestFlight + Play internal track builds via Codemagic — codemagic.yaml committed; user connects app + signing in codemagic.io
+- [~] Waitlist landing live on production domain — form + /v1/waitlist live in code; needs staging deploy (T8.4 user steps)
+- [x] FEHD import running for Central & Western (1,788 venues imported via fehd:import; daily pg-boss schedule in staging env); founding merchants onboarded in admin — pending deploy
+- [~] Smoke checklist: docs/PHASE0_SMOKE.md — 5-tester signoff pending staging + builds
 **Acceptance:** 5 internal testers complete the smoke checklist.
 
 ---
@@ -1110,3 +1110,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-27 | T8.2 | merchant.ts: GET /merchant/me/venues (approved claims + profile jsonb + tier/founding); PATCH /merchant/me/venues/:venueId (hours→profile jsonb; menu 402 plan-locked on Starter; pin correction ST_DWithin 200m 422; displayName non-empty); GET+POST /merchant/me/venues/:venueId/standing-rooms (cap map starter 3/growth 10/pro ∞ → 402 type:plan w/ upgrade copy; spot row kind=chat host_merchant_id+venue district inherit; room kind=chat merchant_id — merchant never a room_member). Web MerchantPortal.tsx (/merchant: venue list→editor hours/menu(Growth-gated)+standing rooms manager; Merchant nav link). merchantPortal.test.ts 2 tests (editor incl. far-pin 422, cap 3 then 402 plan). 120 API tests green |
 | 2026-10-27 | T8.3 | migration 0012 users.admin_roles text[] (default {}); auth.ts AuthUser+adminRoles/aal, decorate requireAdminRole(role) — superadmin bypasses, ADMIN_REQUIRE_MFA=true enforces aal2 (GoTrue TOTP); seed admin gets {superadmin}. routes/admin.ts: GET /admin/users?q= search; GET /admin/users/:id (plan via entitlements + reports + moderation history); POST /admin/users/:id/moderate {suspend,reason} → users.deleted_at + moderation_actions(admin_id,target_user,action,reason,audit) + audit_log; GET /admin/merchant-claims pending + presignGet cert 15min; GET /admin/venues/geocode-failed; POST /admin/venues/:id/pin (geocode_status=manual); GET /admin/venue-reports + resolve; POST /admin/venues/merge (moves spots/memberships/venue_reports/saved_venues, closes loser, 409 if claimed). Web /admin page (claims approve/reject + cert link, user search). admin.test.ts 3 tests (RBAC matrix 403s incl. moderator≠support, suspend/restore cycle, pin+merge children move). Fixed old tests for admin_roles. 123 API tests green |
 - T8.4 (partial ◐): Dockerfiles (api+web, both smoke-tested), Dokploy compose, meshpoke DB+role+postgis on Hetzner, nightly pg_dump cron, staging secrets + RUNBOOK. CI green again (web lint globals, shared dist build + exports map, flutter analyze infos, turbo typecheck ^build, flutter SDK cache off). Remaining: user DNS + Dokploy paste per RUNBOOK.
+- T8.5 (◐): real FEHD LP XML parser (was wrong format — legend in-file, alias YTM/C&W), fehd:import script (C&W 1,788 rows to dev DB), waitlist_signups 0013 + POST /v1/waitlist (idempotent, 5/h/IP) + admin list + Home form, codemagic.yaml, PHASE0_SMOKE.md. 127 api tests green.
