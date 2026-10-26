@@ -64,7 +64,7 @@ async function insertUserWithRetry(tx: Tx, row: { id: string; email: string; aut
   throw new Error('referral code collision loop');
 }
 
-export function registerMe(app: FastifyInstance, dbUrl: string) {
+export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key: string): Promise<unknown> }) {
   const db = getDb(dbUrl);
 
   app.post('/me/onboard', { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -100,9 +100,13 @@ export function registerMe(app: FastifyInstance, dbUrl: string) {
         return code;
       });
     } catch (e) {
-      if (String(e).includes('users_pkey')) return reply.code(200).send({ status: 'already-onboarded' });
+      if (String(e).includes('users_pkey')) {
+        await redis.del(`auth:user:${req.user!.id}`);
+        return reply.code(200).send({ status: 'already-onboarded' });
+      }
       throw e;
     }
+    await redis.del(`auth:user:${req.user!.id}`); // kill cached onboarded:false
     return reply.code(201).send({ status: 'onboarded' });
   });
 
