@@ -220,11 +220,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M2 Auth & accounts
 
-### [ ] T2.1 GoTrue integration & JWT middleware
+### [x] T2.1 GoTrue integration & JWT middleware
 **PRD refs:** §2.2 (Auth), §12.1 · **Depends:** T1.5
-- [ ] Fastify `authenticate` decorator verifying GoTrue JWT (HS256 shared secret; JWKS support behind config)
-- [ ] `request.user` = `{id, phoneVerified, role}` loaded from `users` (cached 60 s in Redis)
-- [ ] Guards: `requireAuth`, `requirePhoneVerified` (→ 403 verify), `requireRole(admin roles)`
+- [x] Fastify `authenticate` decorator verifying GoTrue JWT (HS256 shared secret; JWKS support behind config)
+- [x] `request.user` = `{id, phoneVerified, role}` loaded from `users` (cached 60 s in Redis)
+- [x] Guards: `requireAuth`, `requirePhoneVerified` (→ 403 verify), `requireRole(admin roles)`
 **Tests:** valid/expired/forged tokens; guard responses.
 
 ### [ ] T2.2 Onboarding: DOB gate + user row
@@ -1075,3 +1075,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T1.3 | schema/merchant.ts (16 tables incl seat_charges unique checkin_id, drop_claims unique, founding_counters, invoices) + schema/platform.ts (10 tables: activity, prefs, mutes, proximity_log 1/day pk, push tokens, blocks, reports, moderation, safety_ratings private, audit_log); migration 0002; schema-merchant.test.ts 4 tests (full migrate <30s, 26 tables, uniqueness) | subscriptions.channel/product as varchar w/ app-level enum validation (drizzle enum churn not worth it) |
 | 2026-10-26 | T1.4 | infra/seed/districts.geojson (18 HK districts w/ zh names, normalized MultiPolygon, source+licence in SOURCES.md — swap to CSDI official before launch); db/seed.ts idempotent (districts upsert, city room per district, founding_counters consumer_500/merchant_50, admin user); SPOT_TEMPLATES (11 + default hours) in constants.ts + Dart; migration 0003 users_email unique; seed.test.ts 3 tests | github southparkstan123/hong-kong-geojson had Polygon+GeometryCollection+MultiPolygon mixed — normalized; zh names standard public |
 | 2026-10-26 | T1.5 | db/client.ts (getPool/getDb/withTx/lockRow/claimSlot — drizzle sql-template based, raw {sql,params} objects break execute), pagination.ts (keyset cursor base64url ts|id, row-value comparison), db/pii.ts (AES-256-GCM v1 envelope + HMAC piiHash) + users.phone_hash unique (0004); tests: PII roundtrip/tamper/determinism, cursor, 40-concurrent-claimSlot exact-25 no-oversell, withTx rollback | 26 tests green |
+| 2026-10-26 | T2.1 | src/auth.ts: authenticate decorator (jose jwtVerify HS256, sub→users row, Redis auth:user:<id> 60s cache w/ graceful fallback), requirePhoneVerified→403, requireRole(admin)→403; users.is_admin bool (0005, seed admin updated); wired in app.ts after routes. Tests: 3 (401 no/expired/forged token, 200 valid+claims; phone+admin guards; ghost sub 401). Mini Fastify instance in test (cannot add routes to listening app). jose exports jwtVerify NOT verify | 29 api tests green |
