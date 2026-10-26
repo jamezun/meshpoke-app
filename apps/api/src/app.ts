@@ -13,6 +13,7 @@ import { healthRoutes } from './routes/health.js';
 import { registerAuth } from './auth.js';
 import { registerMe } from './routes/me.js';
 import { registerPhone } from './routes/phone.js';
+import { registerDataOwner } from './routes/dataOwner.js';
 import { GoTrueClient } from './gotrue.js';
 import { initSentry } from './observability.js';
 
@@ -127,6 +128,7 @@ export async function buildApp(opts: BuildAppOptions) {
     (instance) => {
       registerMe(instance, config.DATABASE_URL, app.redis);
       registerPhone(instance, config.DATABASE_URL, app.redis, gotrue);
+      registerDataOwner(instance, config.DATABASE_URL, app.redis, gotrue);
     },
     { prefix: '/v1' },
   );

@@ -43,6 +43,13 @@
       "when": 1793000018114,
       "tag": "0005_windy_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793001453250,
+      "tag": "0006_silky_scourge",
+      "breakpoints": true
     }
   ]
 }

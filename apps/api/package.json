@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "bash scripts/db-generate.sh",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "anonymize": "tsx src/jobs/anonymize-deleted.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
