@@ -85,7 +85,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
 | M1 Database & shared package | 0 | 5 | 5 | ✔ |
-| M2 Auth & accounts | 0 | 5 | 4 | ◐ |
+| M2 Auth & accounts | 0 | 5 | 5 | ✔ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
 | M5 Mobile foundation | 0 | 6 | 0 | ☐ |
@@ -248,11 +248,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `GET /me/export`: JSON of the user's own data (profile, keywords, pokes sent, messages authored, memberships, subscriptions)
 **Tests:** deleted user disappears from viewport/member lists; export contains only own data.
 
-### [ ] T2.5 Caps & entitlements read model (stub)
+### [x] T2.5 Caps & entitlements read model (stub)
 **PRD refs:** §3.10, §8.1 · **Depends:** T2.2
-- [ ] `entitlements` service: `getPlan(userId)` → `free|plus|pro` (default free), `getCaps(plan)` from constants
-- [ ] `GET /me/caps` returning limits and current usage per cap type
-- [ ] `assertCap(userId, capType)` helper throwing 402
+- [x] `entitlements` service: `getPlan(userId)` → `free|plus|pro` (default free), `getCaps(plan)` from constants
+- [x] `GET /me/caps` returning limits and current usage per cap type
+- [x] `assertCap(userId, capType)` helper throwing 402
 **Tests:** usage counts per cap type; 402 shape.
 
 ---
@@ -1079,3 +1079,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T2.2 | routes/me.ts: POST /me/onboard (calendar-date HKT 18+ gate — no Duration math; referral resolve w/ self-ref block; referral_code MP+6 CJO-free alphabet w/ collision retry; users+profiles row in tx; idempotent + race-safe), GET /me (join profiles), PATCH /me (display_name/industry enum 10/role_oneliner 40/hide_photo). AuthUser.onboarded flag — authenticate no longer 401s pre-onboard users (chicken-and-egg fix; cached 60s). shared package exports ./time ./constants. Tests: 5 (17y364d→422/18y0d→201 — dobFor offset +1 = 18th birthday tomorrow, first sign was backwards; idempotent onboard; referral link + self-ignore; PATCH validation) | 34 tests green |
 | 2026-10-26 | T2.3 | gotrue.ts client (sendOtp/adminGetUser/adminSignOutAll, raw fetch); routes/phone.ts: POST /me/phone/otp (validate ^\+852\d{8}$, Redis INCR 3/h per user + 10/h per IP — IP looser for HK NAT, proxy to GoTrue), POST /me/phone/confirm (GoTrue phone_confirmed_at check 409, 852 re-validate, piiHash dup 409, encryptPii store + phone_verified_at, auth cache DEL). auth cache invalidation on onboard + phone-confirm. Tests: 4 (happy, unconfirmed/foreign 409/422, dup phone 409, 429). LESSONS: pii.ts reads process.env directly — test/setup.ts seeds PII key; per-IP 3/h blocks NAT offices | 38 tests green |
 | 2026-10-26 | T2.4 | routes/dataOwner.ts: DELETE /me (deleted_at soft + GoTrue adminSignOutAll + auth cache DEL), GET /me/export (account w/o PII ciphertext, profile, keywords, pokes SENT only — received excluded, messages authored, memberships, subs). jobs/anonymize-deleted.ts (30d scrub: name→Deleted user, email→deleted+id@meshpoke.invalid, phone cols NULL, referral_code→DEL+id8 — NOT NULL so not NULL; idempotent via anonymized_at; `pnpm anonymize` cron entrypoint; tests pass dbUrl). migration 0006 anonymized_at. Tests: 4. LESSON: drizzle renders eq(undefined-col, v) as bare `where = $1` at RUNTIME while tsc catches typos — always typecheck before test-debug | 42 tests green |
+| 2026-10-26 | T2.5 | src/entitlements.ts: getPlan (entitlements row, lifetime NULL expiry active, expired→free), getCaps→TIER_CAPS, assertCap→CapError{capType,limit} (caller maps 402). routes/caps.ts GET /me/caps: plan + per-cap {limit,used} (∞→null) — usage SQL: hosted spots forming|confirmed, active rooms via rm.left_at IS NULL + decay, poke_balances.weekly_used. apps/api dep @meshpoke/shared workspace:*. Tests: 4. LESSON: raw-SQL usage counters must match actual columns — room_members has left_at not state | 46 tests green |
