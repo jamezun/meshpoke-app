@@ -84,7 +84,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | Milestone | Phase | Tasks | Done | Status |
 | --- | --- | --- | --- | --- |
 | M0 Foundations | 0 | 6 | 6 | ✓ |
-| M1 Database & shared package | 0 | 5 | 0 | ☐ |
+| M1 Database & shared package | 0 | 5 | 1 | ◐ |
 | M2 Auth & accounts | 0 | 5 | 0 | ☐ |
 | M3 Profiles, keywords, photos | 0 | 4 | 0 | ☐ |
 | M4 Venues & geo | 0 | 6 | 0 | ☐ |
@@ -178,12 +178,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M1 Database & shared package
 
-### [ ] T1.1 Core schema: identity, profile, geography
+### [x] T1.1 Core schema: identity, profile, geography
 **PRD refs:** §11.1 (Identity, Profile, Geography) · **Depends:** T0.3, T0.6
-- [ ] Drizzle schema files: `users`, `profiles`, `keywords`, `districts`, `venues`, `venue_reports`, `saved_venues`
-- [ ] PostGIS custom types (`geography(Point,4326)`, `geography(MultiPolygon,4326)`)
-- [ ] Keyword trigger (max 10 per user, max 3 with level ≥ 8) as SQL migration
-- [ ] Migration generated and applied
+- [x] Drizzle schema files: `users`, `profiles`, `keywords`, `districts`, `venues`, `venue_reports`, `saved_venues`
+- [x] PostGIS custom types (`geography(Point,4326)`, `geography(MultiPolygon,4326)`)
+- [x] Keyword trigger (max 10 per user, max 3 with level ≥ 8) as SQL migration
+- [x] Migration generated and applied
 **Tests:** migration applies on a fresh container; keyword trigger rejects the 11th keyword and the 4th level-8.
 **Acceptance:** `pnpm db:migrate` is idempotent.
 
@@ -1070,3 +1070,4 @@ Append one line per completed task (newest at the bottom).
 | 2026-10-26 | T0.4 | Generated clients: packages/api-client (openapi-typescript + openapi-fetch wrapper w/ bearer hook); Dart dart-dio SDK at apps/mobile/meshpoke_api (pubName=meshpoke_api) via openapi-generator Docker image (no local Java); single pnpm api:openapi chains spec + TS + Dart | Dart SDK consumed as path dep when apps/mobile pubspec lands (T5.1); regenerate needs docker |
 | 2026-10-26 | T0.5 | GitHub Actions CI (.github/workflows/ci.yml): node job (pnpm cache, typecheck/lint/test w/ Testcontainers/build) + flutter placeholder job; green on main run 40282383354 | hashFiles() is step-level only (job-level if broke workflow); CI caught ioredis default-import vs NodeNext — named import; ubuntu-latest→26 migration notice |
 | 2026-10-26 | T0.6 | packages/shared: constants.ts (all business numbers — tiers/caps, web+IAP prices, poke rules, sort weights 0.2/0.5/0.3, spot windows, score, merchant bands/prices/rules, notify, geo, QR), time.ts (HKT fixed UTC+8, mostRecentMondayMidnightHKT, quiet hours), gen-dart.ts → apps/mobile/lib/core/constants.g.dart; 14 vitest green | Infinity encodes unlimited in TS; Dart gets double.infinity; gen script root = ../../.. from scripts dir |
+| 2026-10-26 | T1.1 | Drizzle schema core.ts (users, profiles, keywords w/ citext, districts, venues, venue_reports, saved_venues) + geo.ts customTypes + migration 0000 (postgis+citext extensions, keyword caps trigger 10/3-level-8); schema-core.test.ts 4 tests; db:generate strips quoted geography typmods (drizzle-kit bug workaround) | drizzle-kit quotes customType dataType names — "geography(Point,4326)" broken, sed fix in scripts/db-generate.sh; users.id has NO FK to auth.users (tests run without auth schema) |
