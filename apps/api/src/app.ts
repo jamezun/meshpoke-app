@@ -23,6 +23,7 @@ import { registerVenues } from './routes/venues.js';
 import { registerMeta } from './routes/meta.js';
 import { registerShare } from './routes/share.js';
 import { registerRealtime } from './routes/realtime.js';
+import { registerRooms } from './routes/rooms.js';
 import { storageFromEnv } from './storage.js';
 import { GoTrueClient } from './gotrue.js';
 import { initSentry } from './observability.js';
@@ -135,6 +136,7 @@ export async function buildApp(opts: BuildAppOptions) {
   // Socket.io rides the same HTTP server (path /ws); needs a real listener — skipped in unit tests via LIGHT_API=1? no: attach anyway, inject doesn't hit ws.
   await registerRealtime(app, config.DATABASE_URL, config.REDIS_URL, config.GOTRUE_JWT_SECRET);
   registerAuth(app, config.DATABASE_URL, app.redis, config.GOTRUE_JWT_SECRET);
+  await app.register(async (r) => registerRooms(r, config.DATABASE_URL), { prefix: '/v1' });
   const gotrue = new GoTrueClient(config);
   await app.register(
     (instance) => {
