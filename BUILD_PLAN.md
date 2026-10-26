@@ -641,11 +641,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M12 Crews & rebook
 
-### [ ] T12.1 Crew API
+### [x] T12.1 Crew API
 **PRD refs:** §3.7 · **Depends:** T10.2
-- [ ] `POST /spots/{id}/crew {keep}` (attendees only); crew created on first keeper; crew room
-- [ ] Crew cap check (active crews); `PATCH /crews/{id}` WhatsApp URL; leave
-- [ ] Dormancy job (60d no rebook) → not counted in caps; reactivation on rebook
+- [x] POST /v1/spots/:id/crew {keep:true} (attendees attended|forgiven only); first keeper creates crew + crew room; joiners attach
+- [x] Cap: activeCrews by tier (TIER_CAPS), dormant crews excluded; PATCH /v1/crews/:id whatsappUrl (member); POST /v1/crews/:id/leave
+- [x] POST /v1/internal/crew-sweep: dormant_at set at 60d no rebook (freed from caps); reactivation on rebook in T12.2
 **Tests:** cap counts exclude dormant crews.
 
 ### [ ] T12.2 Rebook with date poll
@@ -1128,3 +1128,4 @@ Append one line per completed task (newest at the bottom).
 - T11.3 (✓): dmLock.test 2 green; ws gate wired in realtime.ts message:send. 165 api tests.
 - T11.4 (✓): poke_repository + poke_screens; analyze clean, 14 tests green. Device poke→back→message pending TestFlight.
 - T11.5 (✓): web parity for inbox flows (DM chat reuses RoomsPage). 8 web tests green. M11 5/5 ✔
+- T12.1 (✓): crews.test 2 green (crew create/join/leave/whatsapp; cap excludes dormant after sweep). 167 api tests.
