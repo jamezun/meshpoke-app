@@ -130,8 +130,11 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     }
     // waitlist backfill: promote first waitlisted member if a seat freed in a confirmed/forming spot
     const next = rows(await db.execute(sql`
-      select m.user_id from spot_members m where m.spot_id = ${s.id}::uuid and m.role = 'waitlist' and m.state = 'active'
-       order by m.joined_at asc limit 1`));
+      select m.user_id from spot_members m
+        left join entitlements e on e.user_id = m.user_id and (e.expires_at is null or e.expires_at > now())
+       where m.spot_id = ${s.id}::uuid and m.role = 'waitlist' and m.state = 'active'
+       order by case coalesce(e.plan, 'free') when 'pro' then 3 when 'plus' then 2 else 1 end desc, m.joined_at asc
+       limit 1`));
     if (next.length > 0) {
       await db.execute(sql`update spot_members set role = 'member', confirm_state = 'pending' where spot_id = ${s.id}::uuid and user_id = ${next[0].user_id}`);
       await db.execute(sql`insert into room_members (room_id, user_id) select r.id, ${next[0].user_id} from rooms r where r.spot_id = ${s.id}::uuid on conflict do nothing`);

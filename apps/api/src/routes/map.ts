@@ -7,6 +7,7 @@
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { requireAdvancedFilters } from './filterGate.js';
 
 export function registerMap(app: FastifyInstance, dbUrl: string) {
   const db = getDb(dbUrl);
@@ -25,8 +26,15 @@ export function registerMap(app: FastifyInstance, dbUrl: string) {
 
   app.get('/districts/:id/spots', { preHandler: [app.authenticate] }, async (req, reply) => {
     const { id } = req.params as { id: string };
-    const q = req.query as { time?: string };
+    const q = req.query as { time?: string; keywords?: string };
     const time = ['today', 'week', 'all'].includes(q.time ?? '') ? q.time! : 'week';
+    // advanced keyword filter: Plus/Pro or filter_pass grant
+    let kw: string[] | null = null;
+    if (q.keywords) {
+      if (!(await requireAdvancedFilters(db, req, reply))) return reply;
+      kw = q.keywords.split(',').map((k) => k.trim().toLowerCase()).filter(Boolean).slice(0, 10);
+    }
+    const kwParam = sql.param(kw);
 
     // never global: unknown district → 404; also no client-supplied offset paging past scope
     const exists = await db.execute(sql`SELECT 1 FROM districts WHERE id = ${id}::uuid`);
@@ -42,6 +50,8 @@ export function registerMap(app: FastifyInstance, dbUrl: string) {
       WHERE s.district_id = ${id}::uuid
         AND s.kind = 'event'
         AND s.state IN ('forming', 'confirmed', 'live')
+        AND (${kwParam}::text[] IS NULL OR EXISTS (
+          SELECT 1 FROM unnest(s.required_keywords) rk WHERE lower(rk) = ANY (${kwParam}::text[])))
         AND (${time} = 'all' OR s.starts_at IS NULL OR (
           ${time} = 'today' AND s.starts_at::date = (now() AT TIME ZONE 'Asia/Hong_Kong')::date
           OR ${time} = 'week' AND s.starts_at < (now() AT TIME ZONE 'Asia/Hong_Kong') + interval '7 days'

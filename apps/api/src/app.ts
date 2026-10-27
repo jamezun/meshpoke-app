@@ -129,7 +129,7 @@ export async function buildApp(opts: BuildAppOptions) {
       type: `https://docs.meshpoke.com/errors/${status}`,
       title: err.name || 'InternalServerError',
       status,
-      detail: status >= 500 && config.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+      detail: status >= 500 && config.NODE_ENV === 'production' ? 'Internal server error' : ((err as { cause?: { message?: string } }).cause?.message ?? err.message),
       instance: req.url,
       request_id: req.id,
     });

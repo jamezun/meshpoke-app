@@ -72,7 +72,9 @@ export function registerDrops(app: FastifyInstance, dbUrl: string): void {
              ${b.minGroupSize ?? null}, ${b.sponsored === true}, ${b.startsAt}, ${b.endsAt}, 'active'
         from merchant_accounts where id = ${m[0].id}::uuid
       returning id`));
-    return reply.code(201).send({ dropId: ins[0].id, infoFlag: b.discountPct !== undefined && b.discountPct > 20 });
+    const dropId = ins[0].id as string;
+    const autoClaimed = await autoClaimForSavedVenues(db, dropId, m[0].id as string, b.capacity);
+    return reply.code(201).send({ dropId, autoClaimed, infoFlag: b.discountPct !== undefined && b.discountPct > 20 });
   });
 
   app.patch<{ Params: { id: string } }>('/merchant/drops/:id', {
@@ -204,4 +206,43 @@ export function registerDrops(app: FastifyInstance, dbUrl: string): void {
       update drops set claimed_count = claimed_count + ${n[0].n} where id = ${dropId}::uuid`);
     return reply.code(201).send({ attached: n[0].n });
   });
+}
+
+
+/**
+ * T17.4 drop auto-claim: Plus/Pro users who saved this venue get the drop
+ * auto-claimed (1/wk Plus, 3/wk Pro) — never beyond capacity, never for groups.
+ */
+async function autoClaimForSavedVenues(db: ReturnType<typeof getDb>, dropId: string, merchantId: string, capacity: number | null): Promise<number> {
+  if (capacity !== null && capacity <= 0) return 0;
+  const claimed = await db.execute(sql`
+    with fans as (
+      select sv.user_id, coalesce(e.plan, 'free') as plan
+        from saved_venues sv
+        join venues v on v.id = sv.venue_id
+        join merchant_accounts ma on ma.venue_id = v.id and ma.id = ${merchantId}::uuid
+        left join entitlements e on e.user_id = sv.user_id and (e.expires_at is null or e.expires_at > now())
+       where coalesce(e.plan, 'free') in ('plus', 'pro')
+         and not exists (select 1 from drop_claims c where c.drop_id = ${dropId}::uuid and c.user_id = sv.user_id)
+         and (select count(*) from drop_claims c2
+               join drops d2 on d2.id = c2.drop_id and d2.venue_id = v.id
+              where c2.user_id = sv.user_id and c2.claimed_at > now() - interval '7 days')
+             < case coalesce(e.plan, 'free') when 'pro' then 3 when 'plus' then 1 else 0 end
+    ),
+    inserted as (
+      insert into drop_claims (drop_id, user_id)
+      select ${dropId}::uuid, user_id from (
+        select user_id, row_number() over () as rn from fans
+      ) f
+       where (select count(*) from drop_claims c3 where c3.drop_id = ${dropId}::uuid)
+             + f.rn <= coalesce((select capacity from drops where id = ${dropId}::uuid), 2147483647)
+      on conflict do nothing
+      returning 1
+    )
+    select count(*)::int as n from inserted`);
+  const n = Number(((claimed as unknown as { rows: { n: number }[] }).rows[0] ?? { n: 0 }).n);
+  if (n > 0) {
+    await db.execute(sql`update drops set claimed_count = claimed_count + ${n} where id = ${dropId}::uuid`);
+  }
+  return n;
 }
