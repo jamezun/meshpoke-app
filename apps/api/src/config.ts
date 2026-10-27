@@ -28,6 +28,7 @@ export const configSchema = z.object({
   ENABLE_JOBS: bool.default('false'), // pg-boss schedulers (off in dev/test)
 
   STRIPE_SECRET_KEY: z.string().optional(), // absent → merchant Stripe routes stub
+  REVENUECAT_WEBHOOK_SECRET: z.string().optional(), // absent → RC webhook unsigned (dev)
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
 
   R2_ENDPOINT: z.string().optional(), // absent → photos routes 503 (dev stub)
