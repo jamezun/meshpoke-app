@@ -727,11 +727,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M15 Merchant check-in & drops
 
-### [ ] T15.1 User rotating QR
+### [x] T15.1 User rotating QR
 **PRD refs:** §3.9 (User QR) · **Depends:** T2.3
-- [ ] Token: `base64url(user_id | window | HMAC(secret, user_id|window))`, 30 s window, verify current ±1
-- [ ] `GET /me/qr` (phone-verified) returns payload + seconds remaining; client also posts its location (`POST /me/location-ping` with `purpose=qr`, kept 10 min in Redis only)
-- [ ] Replay protection: Redis set of used tokens (120 s TTL)
+- [x] signQrToken/verifyQrToken in routes/userQr.ts — base64url(user_id|window|HMAC), 30s window, ±1 window tolerance
+- [x] GET /v1/me/qr (403 unverified) payload+secondsRemaining; POST /v1/me/location-ping purpose=qr → Redis EX 600, never DB
+- [x] markQrUsed — SET NX EX 120, second use returns false
 **Tests:** valid, expired, tampered, replayed tokens.
 
 ### [ ] T15.2 Staff scan endpoint
@@ -1138,3 +1138,4 @@ Append one line per completed task (newest at the bottom).
 - T13.5 (✓): flutter analyze 0 + 14 tests, web typecheck/lint/8 tests green. M13 5/5 ✔
 - T14.1+T14.2+T14.3 (✓): activity.test 3 green (feed/cursor/read, outbox gates, emitters). 172 api tests.
 - T14.4 (✓): mobile activity_screens.dart (bell/feed/settings, analyze 0, 14 tests) + web Activity.tsx (8 tests) — flutter analyze 0, api 172.
+- T15.1 (✓): userQr.test 3 green (sign/verify/expired/tampered/malformed, phone gate, Redis-only ping, replay NX). 175 api tests.
