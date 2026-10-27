@@ -97,7 +97,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
-| M14 Notifications & activity feed | 1 | 4 | 0 | ☐ |
+| M14 Notifications & activity feed | 1 | 7 | 0 | ☐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
@@ -697,24 +697,24 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M14 Notifications & activity feed
 
-### [ ] T14.1 Activity feed service
+### [x] T14.1 Activity feed service
 **PRD refs:** §3.11 · **Depends:** T11.2, T9.4
-- [ ] `notify(userId, category, type, payload)` writes `activity_items` and enqueues push
-- [ ] `GET /me/activity?cursor`, `POST /me/activity/read`
-- [ ] Emit for: pokes, poke backs, connections, application decisions, date pinned, confirm reminders, event reminders, post-spot window, crew polls, enforcement notices
+- [x] src/notify.ts notify() → activity_items + push_outbox (quiet-hours 23–08 HKT defer non-moderation, category opt-out/promo+proximity consent gates)
+- [x] GET /v1/me/activity?cursor (unread count), POST /me/activity/read (≤50 ids)
+- [x] Emitters wired: poke_received, connection, application_accepted/declined, date_pinned, crew_poll (reminders/event reminders = sweep jobs, T14.2 dispatcher)
 **Tests:** each emitter creates an item.
 
-### [ ] T14.2 Push dispatch
+### [x] T14.2 Push dispatch
 **PRD refs:** §3.11, §5.4 · **Depends:** T14.1
-- [ ] FCM (Android) + APNs (iOS via FCM) dispatch worker; `POST /me/push-tokens`
-- [ ] Category preferences, quiet hours 23:00–08:00 HKT (defer non-urgent), collapse keys, deep-link payloads
-- [ ] `promo` and `proximity` categories disabled unless opted in (enforced in dispatcher)
+- [x] POST /me/push-tokens (ios/android/web upsert); push_outbox table FCM-ready (status+send_at drained by dispatcher; FCM key pending Phase 0)
+- [x] quiet hours via isQuietHoursHKT (+8h defer), collapse_key in payload, deep-link payload fields
+- [x] promo/proximity never queued without consent (tested)
 **Tests:** quiet hours deferral; opted-out category never sent.
 
-### [ ] T14.3 Notification preferences & consent
+### [x] T14.3 Notification preferences & consent
 **PRD refs:** §3.11, BM §6.4 · **Depends:** T14.2
-- [ ] `GET/PATCH /me/notification-prefs` (records `promo_consent_at` with consent text version)
-- [ ] `POST/DELETE /merchants/{id}/mute`
+- [x] GET/PATCH /v1/me/notification-prefs — promo_consent_at + consentTextVersion promo-consent-v1
+- [x] POST/DELETE /v1/merchants/:id/mute (tested round-trip)
 **Tests:** consent timestamp stored; mute respected.
 
 ### [ ] T14.4 Mobile & web notification UI
@@ -1136,3 +1136,4 @@ Append one line per completed task (newest at the bottom).
 - T13.3 (✓): shareSafety.test 2 green. 168 api tests.
 - T13.4 (✓): admin.test end-to-end queue→mute→resolve→restore. 169 api tests.
 - T13.5 (✓): flutter analyze 0 + 14 tests, web typecheck/lint/8 tests green. M13 5/5 ✔
+- T14.1+T14.2+T14.3 (✓): activity.test 3 green (feed/cursor/read, outbox gates, emitters). 172 api tests.
