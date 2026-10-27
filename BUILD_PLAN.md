@@ -105,7 +105,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M19 Phase 1 hardening & launch | 3 | 7 | 3 | ◐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
 | M21 Scale features | 8 | 8 | 8 | ✔ |
-| M22 Expand backlog | 4 | 6 | 0 | ☐ |
+| M22 Expand backlog | 7 | 6 | 0 | ◐ |
 
 ---
 
@@ -1032,7 +1032,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M22 Expand backlog
 
-- [ ] **T22.1 Annual plans (non-founding)** — Plus 788/yr, Pro 1,288/yr on web + IAP.
+- [x] **T22.1 Annual plans (non-founding)** — Plus 788/yr, Pro 1,288/yr on web + IAP.
 - [ ] **T22.2 Liveness verification** — vendor SDK, `liveness_state`, gate for poke/join/DM, non-HK numbers. Trigger-gated (BM §6.3).
 - [ ] **T22.3 Automated band cross-checks** — post-visit spend question, 30-day median reassignment with notice.
 - [ ] **T22.4 Traditional Chinese (zh-HK)** — translate ARB/JSON strings; Cantonese-friendly register.
@@ -1171,3 +1171,4 @@ Append one line per completed task (newest at the bottom).
 - T21.6 (✓ server): purpose=proximity pings check 100m pro-merchant venue w/ active membership, no mute, proximity_log pk caps 1/day, notify() enforces proximity opt-in; tests non-joined-never + daily cap. Native geofence plugin + bg-location manifest deferred to device build (STORE_LISTING.md has usage strings).
 - T21.7 (✓): automations.ts (birthday/winback sweeps + event-invite, idempotent coupons); migration 0017 share_birth_month default off; me.ts PATCH accepts share_birth_month; automations.test.ts 2 green; cachedPool error-swallow fixes teardown race.
 - T21.8 (✓): GET /admin/finance/overview (consumer+merchant MRR, seat revenue by event_type, one-off purchases, invoice seat reconciliation); district-2 enable steps in RUNBOOK (FEHD_DISTRICTS scoped import; city rooms pre-exist). adminFinance.test.ts 4 green.
+- T22.1 (✓): plus_annual 788/888 + pro_annual 1288/1388 (web/IAP, 365d) in PRODUCTS + PRICES + RC_INTERNAL + Dart constants.g.dart; products.test.ts updated 17 SKUs. IAP delta covers store commission.
