@@ -115,6 +115,27 @@ export function registerMerchantBilling(app: FastifyInstance, dbUrl: string, con
     return { invoiced, stub: !stripe };
   });
 
+  // T16.4 merchant invoice + seat-charge views
+  app.get('/merchant/billing/invoices', { preHandler: [app.authenticate] }, async (req, reply) => {
+    if (!req.user) return reply.code(401).send({ title: 'Unauthorized' });
+    const m = await findMerchant(req.user.id);
+    if (!m) return reply.code(404).send({ title: 'No approved merchant account' });
+    const list = rows(await db.execute(sql`
+      select id, period, seat_amount, shadow_amount, total
+        from invoices where merchant_id = ${m.id}::uuid order by period desc limit 24`));
+    return { invoices: list.map((i) => ({ id: i.id, period: i.period, seatAmount: i.seat_amount, shadowAmount: i.shadow_amount, total: i.total })) };
+  });
+
+  app.get('/merchant/billing/seat-charges', { preHandler: [app.authenticate] }, async (req, reply) => {
+    if (!req.user) return reply.code(401).send({ title: 'Unauthorized' });
+    const m = await findMerchant(req.user.id);
+    if (!m) return reply.code(404).send({ title: 'No approved merchant account' });
+    const list = rows(await db.execute(sql`
+      select id, event_type, amount, shadow, created_at, invoice_id, disputed_at
+        from seat_charges where merchant_id = ${m.id}::uuid order by created_at desc limit 100`));
+    return { charges: list.map((c) => ({ id: c.id, eventType: c.event_type, amount: c.amount, shadow: c.shadow, createdAt: c.created_at, invoiceId: c.invoice_id, disputedAt: c.disputed_at })) };
+  });
+
   // T16.4 dispute a seat charge (7 days from charge)
   app.post('/merchant/seat-charges/:id/dispute', { preHandler: [app.authenticate] }, async (req, reply) => {
     const { id } = req.params as { id: string };

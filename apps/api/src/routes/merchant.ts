@@ -81,7 +81,7 @@ export function registerMerchant(app: FastifyInstance, dbUrl: string, storage: S
   app.get('/merchant/me', { preHandler: [app.authenticate] }, async (req) => {
     const res = await db.execute(sql`
       select ma.id, ma.venue_id, v.display_name, ma.claim_status::text as claim_status,
-             ma.tier::text as tier, ma.founding, ma.price_band
+             ma.tier::text as tier, ma.founding, ma.founding_free_until, ma.price_band
         from merchant_accounts ma
         join venues v on v.id = ma.venue_id
        where ma.owner_user_id = ${req.user!.id}

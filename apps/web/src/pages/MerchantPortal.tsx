@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../auth/supabase';
 import { DropsBuilder } from './DropsBuilder';
+import { BillingSection } from './Billing';
 
 type Venue = { id: string; display_name: string; category: string; profile?: { hours?: string; menu?: string } | null; tier: string; founding: boolean; location?: string };
 
@@ -116,6 +117,7 @@ export function MerchantPortalPage() {
 
       <h2 className="font-semibold mt-8 mb-2">Drops</h2>
       <DropsBuilder />
+      <BillingSection />
 
       {msg && <p className="text-sm text-green-700 mt-4">{msg}</p>}
       {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
