@@ -136,6 +136,24 @@ export function registerDrops(app: FastifyInstance, dbUrl: string): void {
     return { drops: list };
   });
 
+  // T18.3: my wallet — claimed drops w/ redemption status
+  app.get('/me/wallet/drops', { preHandler: [app.authenticate] }, async (req) => {
+    const mine = rows(await db.execute(sql`
+      select c.id as claim_id, d.id as drop_id, d.title, d.offer_text, d.kind, d.ends_at,
+             v.display_name as venue_name, c.claimed_at, c.redeemed_at
+        from drop_claims c
+        join drops d on d.id = c.drop_id
+        join venues v on v.id = d.venue_id
+       where c.user_id = ${req.user!.id}::uuid
+       order by c.claimed_at desc limit 100`));
+    return { drops: mine.map((r) => ({
+      claimId: r.claim_id, dropId: r.drop_id, title: r.title, offerText: r.offer_text,
+      kind: r.kind, venueName: r.venue_name, claimedAt: r.claimed_at, redeemedAt: r.redeemed_at,
+      expiresAt: r.ends_at,
+      status: r.redeemed_at ? 'redeemed' : new Date(String(r.ends_at)).getTime() < Date.now() ? 'expired' : 'claimed',
+    })) };
+  });
+
   app.post<{ Params: { id: string } }>('/drops/:id/claim', {
     preHandler: app.authenticate,
   }, async (req, reply) => {

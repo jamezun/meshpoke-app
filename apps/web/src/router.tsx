@@ -23,6 +23,7 @@ import { PhoneVerifyPage } from './auth/PhoneVerify';
 import { BillingPage } from './pages/app/Billing.js';
 import { SpotsPage } from './pages/app/Spots.js';
 import { HostConsole } from './pages/app/HostConsole.js';
+import { WalletPage } from './pages/app/Wallet.js';
 import { ReferralLanding } from './pages/ReferralLanding.js';
 import { SettingsPage } from './layouts/AppLayout';
 import { AppPage } from './pages/app/Placeholder';
@@ -57,6 +58,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
         { path: 'activity', element: <ActivityPage /> },
         { path: 'spots', element: <SpotsPage /> },
         { path: 'host', element: <HostConsole /> },
+        { path: 'wallet', element: <WalletPage /> },
         { path: 'crews', element: <CrewsPage /> },
         { path: 'rooms', element: <RoomsPage /> },
         { path: 'rooms/:id', element: <RoomsPage /> },

@@ -218,6 +218,17 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     return { spots: mine };
   });
 
+  // T18.3: spots I attended (people-you-met picker)
+  app.get('/me/spots/attended', { preHandler: [app.authenticate] }, async (req) => {
+    const mine = rows(await db.execute(sql`
+      select s.id, s.name, s.starts_at
+        from attendance a join spots s on s.id = a.spot_id
+       where a.user_id = ${req.user!.id}::uuid and a.status in ('attended','forgiven')
+         and s.state = 'done'
+       order by s.starts_at desc nulls last limit 20`));
+    return { spots: mine };
+  });
+
   // T18.2: host removes a member (logged + reportable)
   app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/remove-member', { preHandler: [app.authenticate] }, async (req, reply) => {
     const b = req.body as { userId?: string; reason?: string };
