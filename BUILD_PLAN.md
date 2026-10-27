@@ -892,9 +892,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Admin metrics page: rebook rate, formation funnel, attendance rate, **free vs paid acceptance (fairness gate)**, check-ins per venue, conversion
 **Acceptance:** dashboard shows live staging data.
 
-### [ ] T19.2 Load & resilience testing
+### [x] T19.2 Load & resilience testing
 **PRD refs:** §15, §17 (Load) · **Depends:** T19.1
-- [ ] k6 scripts: viewport bursts, WS fan-out, drop claim contention, scan bursts
+- [x] k6 scripts: viewport bursts, WS fan-out, drop claim contention, scan bursts
 - [ ] Verify memory limits on the shared box under load; tune pool sizes
 **Acceptance:** NFR targets met (server-time p95) at Phase 1 scale.
 
