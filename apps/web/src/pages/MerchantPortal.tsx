@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAccessToken } from '../auth/supabase';
 import { DropsBuilder } from './DropsBuilder';
+import { LadderBuilder } from './LadderBuilder';
 import { BillingSection } from './Billing';
 
 type Venue = { id: string; display_name: string; category: string; profile?: { hours?: string; menu?: string } | null; tier: string; founding: boolean; location?: string };
@@ -115,6 +116,7 @@ export function MerchantPortalPage() {
       <Link to="/merchant/scanner" className="inline-block bg-neutral-900 text-white rounded px-4 py-2 text-sm font-medium">Open scanner</Link>
 
       <h2 className="font-semibold mt-8 mb-2">Drops</h2>
+      <LadderBuilder />
       <DropsBuilder />
       <BillingSection />
 
