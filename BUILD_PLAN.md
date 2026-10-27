@@ -100,7 +100,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
 | M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
-| M17 Consumer billing, entitlements, referrals | 1 | 6 | 1 | ☐ |
+| M17 Consumer billing, entitlements, referrals | 1 | 6 | 2 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
 | M19 Phase 1 hardening & launch | 1 | 7 | 0 | ☐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
@@ -824,12 +824,12 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Downgrade never kicks users out of existing rooms/spots (only blocks new joins)
 **Tests:** overlap cases (pass during subscription, expiry, refund).
 
-### [ ] T17.2 Web checkout (Stripe)
+### [x] T17.2 Web checkout (Stripe)
 **PRD refs:** §8.2, §12.9 · **Depends:** T17.1
-- [ ] `POST /billing/checkout {product, coupon?}` → Stripe Checkout (subscriptions for monthly/3m/6m/annual; one-time for passes and packs)
-- [ ] Founding: atomic `consumer_500` reservation at checkout session creation (released on expiry), founding annual web-only
-- [ ] `POST /billing/portal` → Stripe customer portal (cancel = instant at period end)
-- [ ] Webhooks → subscriptions/grants/credits → recompute entitlement; receipt email via Resend
+- [x] `POST /billing/checkout {product, coupon?}` → Stripe Checkout (subscriptions for monthly/3m/6m/annual; one-time for passes and packs)
+- [x] Founding: atomic `consumer_500` reservation at checkout session creation (released on expiry), founding annual web-only
+- [x] `POST /billing/portal` → Stripe customer portal (cancel = instant at period end)
+- [x] Webhooks → subscriptions/grants/credits → recompute entitlement; receipt email via Resend
 **Tests:** founding counter never exceeds 500 under concurrency; webhook fixtures.
 
 ### [ ] T17.3 In-app purchases (RevenueCat)
@@ -1147,3 +1147,4 @@ Append one line per completed task (newest at the bottom).
 - T16.3 (✓): merchantBilling.ts — Stripe SaaS (setup-intent card, subscribe Growth/Pro monthly w/ founding auto-price, cancel → Starter, webhook sig-verified) + monthly invoice-run job (aggregate unbilled non-shadow seat_charges → invoice + Stripe invoice items) + seat dispute 7d. Stub mode without STRIPE_SECRET_KEY (dev/test). LESSON: drizzle db.execute with params = extended protocol = ONE statement only; split multi-statement.
 - T16.4 (✓): web BillingSection (invoices table w/ waived shadow column, seat-charges w/ dispute button, founding free-until card) + GET /merchant/billing/invoices + /seat-charges; /merchant/me now returns founding_free_until. 184 api tests + 8 web green. M16 4/4 ✔.
 - T17.1 (✓): packages/shared/src/products.ts (15 SKUs derived from PRICES, web/IAP split, founding annual web-only) + apps/api/src/billing/consumer.ts recomputeEntitlement (active subs + host_reward_pro/pass7 grants → highest plan, furthest end, upsert entitlements; refunds/expired skipped; downgrade never touches room/spot memberships). 3 api tests + 2 shared tests. 187 api total.
+- T17.2 (✓): src/billing/checkout.ts — POST /billing/checkout (Stripe Checkout, founding atomic reservation via update...returning, stub mode fulfils instantly), /billing/portal, /webhooks/stripe-consumer (completed/renewal/refund + founding release). users.stripe_customer_id migration 0016. 189 api tests.
