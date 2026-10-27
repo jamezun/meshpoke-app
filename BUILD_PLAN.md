@@ -994,9 +994,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Poke packs (5/15) → credits; 7-day filter pass grant; advanced keyword filters UI
 **Acceptance:** credits spent after weekly allowance.
 
-### [ ] T21.3 Host-reward Pro days
+### [x] T21.3 Host-reward Pro days
 **PRD refs:** BM §5.7 · **Depends:** T21.1, T10.2
-- [ ] Qualifying spot check at attendance finalisation (min headcount, ≥80% attended, avg rating ≥4) → 2-day `host_reward_pro` grant; cap 7 days/month; expire 60 days
+- [x] Qualifying spot check at attendance finalisation (min headcount, ≥80% attended, avg rating ≥4) → 2-day `host_reward_pro` grant; cap 7 days/month; expire 60 days
 **Tests:** cap and expiry.
 
 ### [ ] T21.4 Sponsored amplification
@@ -1165,3 +1165,4 @@ Append one line per completed task (newest at the bottom).
 - T20.7 (✓): GET /venues/:id (venue+claimed ladder+myMembership); venue_page_screen.dart (join/waitlist/level/progress bar/ladder); wallet coupons mobile+web. Device join→3-scans→level-up deferred to staging (engine proven in ladder.test.ts).
 - T21.1 (✓): Pro products web+IAP+RC (mp_* SKU map fix), founding shares consumer_500, 7d pass, tier 1.0, caps — all already wired via T17 engine
 - T21.2 (✓): poke packs→credits + filter-pass grants (web+RC) already wired; keyword filter UI added mobile Spots tab + web Spots page (Plus-gated)
+- T21.3 (✓): finalise hook grants host_reward_pro 2d (qualify: attended≥min, ratio≥0.8, ratings≥4 or none), cap 7d/30d, notify+recomputeEntitlement; tests cap+no-qualify.
