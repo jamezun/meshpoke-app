@@ -97,7 +97,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
-| M14 Notifications & activity feed | 4 | 7 | 4 | ◐ |
+| M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
@@ -717,7 +717,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] POST/DELETE /v1/merchants/:id/mute (tested round-trip)
 **Tests:** consent timestamp stored; mute respected.
 
-### [ ] T14.4 Mobile & web notification UI
+### [x] T14.4 Mobile & web notification UI
 **PRD refs:** §5.3 (Activity feed, Settings) · **Depends:** T14.3
 - [ ] Bell with unread count, activity feed with category filters, deep links
 - [ ] Settings: categories, promo consent sheet (explicit wording), muted merchants list; web settings parity
@@ -1137,3 +1137,4 @@ Append one line per completed task (newest at the bottom).
 - T13.4 (✓): admin.test end-to-end queue→mute→resolve→restore. 169 api tests.
 - T13.5 (✓): flutter analyze 0 + 14 tests, web typecheck/lint/8 tests green. M13 5/5 ✔
 - T14.1+T14.2+T14.3 (✓): activity.test 3 green (feed/cursor/read, outbox gates, emitters). 172 api tests.
+- T14.4 (✓): mobile activity_screens.dart (bell/feed/settings, analyze 0, 14 tests) + web Activity.tsx (8 tests) — flutter analyze 0, api 172.
