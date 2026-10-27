@@ -24,9 +24,9 @@ export function LoginPage() {
   const adult = useMemo(() => isAdultDob(dob), [dob]);
 
   // already signed in → straight in (mount only)
+  // mount-only redirect; deps intentionally empty
   useEffect(() => {
     supabase?.auth.getSession().then(({ data }) => { if (data.session) nav(afterAuth); });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function google() {

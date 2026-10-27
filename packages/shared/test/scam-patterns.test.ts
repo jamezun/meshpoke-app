@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { scanOutgoing, scanIncoming, scameterUrl } from '../src/scam-patterns.js';
 
 test('T13.2 scam fixtures: flagged', () => {

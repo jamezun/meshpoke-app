@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { PRODUCTS, productById, monthlyEquivalent } from '../src/products.js';
 
 test('catalogue: 17 SKUs, web+IAP prices wired from constants', () => {

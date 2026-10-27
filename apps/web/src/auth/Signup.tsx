@@ -1,5 +1,3 @@
-import { LoginPage } from './Login';
-
 export function isAdultDob(dob: string, today = new Date()): boolean {
   // HKT calendar check, mirrors API onboard gate (T2.2): string compare on YYYY-MM-DD.
   const t = new Date(today.getTime() + 8 * 3600_000).toISOString().slice(0, 10);

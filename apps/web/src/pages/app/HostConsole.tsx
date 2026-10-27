@@ -51,7 +51,7 @@ export function HostConsole() {
       setMembers(d.members);
     } catch (e) { setMsg(String(e)); }
   };
-  useEffect(() => { if (sel) open(sel); /* eslint-disable-next-line */ }, [sort]);
+  useEffect(() => { if (sel) open(sel); }, [sort]);
 
   const decide = async (appId: string, decision: 'accept' | 'decline', reason?: string) => {
     try {
