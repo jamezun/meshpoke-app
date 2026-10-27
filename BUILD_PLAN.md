@@ -93,17 +93,17 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M7 Chat rooms & realtime | 0 | 5 | 5 | ✔ |
 | M8 Merchant claim, admin basics, Phase 0 release | 0 | 5 | 4 | ◐ |
 | M9 Event spots & queues | 1 | 7 | 7 | ✔ |
-| M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
-| M11 Pokes & connections | 1 | 5 | 0 | ☐ |
-| M12 Crews & rebook | 1 | 3 | 0 | ☐ |
-| M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
-| M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
-| M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
-| M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
+| M10 Attendance & Show-up Score | 5 | 5 | 5 | ✔ |
+| M11 Pokes & connections | 5 | 5 | 5 | ✔ |
+| M12 Crews & rebook | 3 | 3 | 3 | ✔ |
+| M13 Safety & moderation | 5 | 5 | 5 | ✔ |
+| M14 Notifications & activity feed | 4 | 4 | 4 | ✔ |
+| M15 Merchant check-in & drops | 6 | 6 | 6 | ✔ |
+| M16 Merchant billing & founding programme | 5 | 5 | 5 | ✔ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 6 | ✔ |
-| M18 Authenticated web & host console | 1 | 4 | 3 | ☐ |
-| M19 Phase 1 hardening & launch | 3 | 7 | 3 | ◐ |
-| M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
+| M18 Authenticated web & host console | 4 | 4 | 4 | ✔ |
+| M19 Phase 1 hardening & launch | 5 | 7 | 3 | ◐ |
+| M20 Memberships & ladders | 7 | 7 | 7 | ✔ |
 | M21 Scale features | 8 | 8 | 8 | ✔ |
 | M22 Expand backlog | 7 | 6 | 0 | ◐ |
 
@@ -877,7 +877,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Read-only wallet (memberships later, claimed drops), People-you-met with free pokes
 **Acceptance:** parity checks.
 
-### [ ] T18.4 Web QA pass
+### [x] T18.4 Web QA pass
 **PRD refs:** §17 · **Depends:** T18.1–T18.3
 - [x] Playwright suites for member flow, host flow, billing, settings
 **Acceptance:** suites green in CI.
@@ -1172,3 +1172,4 @@ Append one line per completed task (newest at the bottom).
 - T21.7 (✓): automations.ts (birthday/winback sweeps + event-invite, idempotent coupons); migration 0017 share_birth_month default off; me.ts PATCH accepts share_birth_month; automations.test.ts 2 green; cachedPool error-swallow fixes teardown race.
 - T21.8 (✓): GET /admin/finance/overview (consumer+merchant MRR, seat revenue by event_type, one-off purchases, invoice seat reconciliation); district-2 enable steps in RUNBOOK (FEHD_DISTRICTS scoped import; city rooms pre-exist). adminFinance.test.ts 4 green.
 - T22.1 (✓): plus_annual 788/888 + pro_annual 1288/1388 (web/IAP, 365d) in PRODUCTS + PRICES + RC_INTERNAL + Dart constants.g.dart; products.test.ts updated 17 SKUs. IAP delta covers store commission.
+- Audit: rebuilt dashboard M10–M22 rows from actual task headings (were corrupt); T18.4 heading tick fixed (tick commit 004ad97 had only ticked the item). Remaining open items are user-gated (T19.4–T19.7 legal/deploy/field-test/launch) or Year-2 backlog (T22.2–T22.6).
