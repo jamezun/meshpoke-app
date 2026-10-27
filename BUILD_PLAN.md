@@ -97,7 +97,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
-| M14 Notifications & activity feed | 1 | 7 | 0 | ☐ |
+| M14 Notifications & activity feed | 4 | 7 | 4 | ◐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
