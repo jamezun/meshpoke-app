@@ -808,9 +808,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Dispute a seat (7 days) → admin queue
 **Acceptance:** merchant sees an accurate shadow invoice in month 1.
 
-### [ ] T16.5 Admin merchant finance
+### [x] T16.5 Admin merchant finance
 **PRD refs:** §10 · **Depends:** T16.4, T8.3
-- [ ] Founding roster, disputes (accept → credit note / reject), per-seat ledger browser, billing health, band audit workspace (quarterly checklist per venue: declared band, evidence notes, change band with notice)
+- [x] Founding roster, disputes (accept → credit note / reject), per-seat ledger browser, billing health, band audit workspace (quarterly checklist per venue: declared band, evidence notes, change band with notice)
 **Acceptance:** finance role can resolve a dispute end-to-end.
 
 ---
@@ -1160,3 +1160,4 @@ Append one line per completed task (newest at the bottom).
 - T19.2 k6 scripts (viewport/drop_stampede/ws_fanout/scan_burst + README, thresholds=PRD §17; staging run blocked on deploy). T19.3 per-route rate limits + authz sweep test + zod v4.6.7/fastify-type-provider-zod 5 (audit clean; 198 api tests).
 - T20.1–T20.4 ladder/memberships/level-engine/attribution built+tested (202 api tests). LadderBuilder UI + wallet UX next.
 - T20.5 coupons & CRM: issue/wallet/QR-redeem/milestone/aggregate-vs-full/CSV ✓ (203 api tests green)
+- T16.5 (✓): admin finance workspace (founding roster, disputes credit-note/reject w/ invoice adjust, ledger browser, health, band audit) + Admin.tsx FinanceSection. 206 api tests green.
