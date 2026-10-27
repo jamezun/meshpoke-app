@@ -33,14 +33,22 @@ submissions are **user actions** — see CHECKLIST at the bottom.
 | Product ID | Store | Price (HKD) |
 |---|---|---|
 | `mp_plus_monthly` | both | 148 |
+| `mp_plus_7d` | both (non-renewing) | 68 |
 | `mp_plus_3mo` | both | 328 |
 | `mp_plus_6mo` | both | 558 |
+| `mp_plus_annual` | both | 888 |
+| `mp_plus_founding_monthly` | both | 98 |
 | `mp_pro_monthly` | both | 228 |
+| `mp_pro_7d` | both (non-renewing) | 108 |
 | `mp_pro_3mo` | both | 558 |
 | `mp_pro_6mo` | both | 898 |
-| `mp_pokepack_5` | both (consumable) | 48 |
-| `mp_pokepack_15` | both (consumable) | 98 |
-| `mp_filterpass_7d` | both (non-renewing) | 28 |
+| `mp_pro_annual` | both | 1,388 |
+| `mp_pro_founding_monthly` | both | 168 |
+| `mp_poke_pack_5` | both (consumable) | 48 |
+| `mp_poke_pack_15` | both (consumable) | 98 |
+| `mp_filter_pass_7d` | both (non-renewing) | 28 |
+
+⚠ SKU IDs must match `RC_INTERNAL` in `apps/api/src/billing/revenuecat.ts` exactly (`mp_poke_pack_5`, not `mp_pokepack_5`). Founding monthly is IAP-allowed; **founding annual stays web-only** (App Store 3.1.1).
 
 (Store prices are the IAP column from shared `PRICES`; founding + annual stay **web-only** — App Store 3.1.1.)
 
