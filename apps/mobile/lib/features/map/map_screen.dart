@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'map_repository.dart';
 import '../activity/activity_screens.dart';
+import '../qr/venue_drops_sheet.dart';
 import '../spots/spot_detail_screen.dart';
 
 /// Map home (PRD §4.1/§5.3): dark Google map, when-in-use location, viewport fetch
@@ -181,6 +182,10 @@ class _VenueList extends StatelessWidget {
               v.activity7d > 0
                   ? '${v.activity7d} check-ins this week'
                   : (v.category ?? ''),
+            ),
+            onTap: () => showModalBottomSheet(
+              context: context,
+              builder: (_) => VenueDropsSheet(venueId: v.id, venueName: v.name),
             ),
           ),
       ],

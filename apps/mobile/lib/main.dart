@@ -13,6 +13,7 @@ import 'package:meshpoke/features/rooms/rooms_screen.dart';
 import 'package:meshpoke/features/pokes/poke_screens.dart' show InboxScreen;
 import 'package:meshpoke/features/crews/crew_screens.dart';
 import 'package:meshpoke/features/activity/activity_screens.dart';
+import 'package:meshpoke/features/qr/qr_screens.dart';
 import 'package:meshpoke/features/profile/profile_screen.dart';
 import 'package:meshpoke/features/profile/profile_edit_screen.dart';
 
@@ -40,6 +41,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/rooms/:id',
         builder: (_, s) => RoomScreen(roomId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/my-qr',
+        builder: (_, _) => const MyQrScreen(),
+      ),
+      GoRoute(
+        path: '/wallet',
+        builder: (_, _) => const WalletScreen(),
       ),
       GoRoute(
         path: '/activity',
