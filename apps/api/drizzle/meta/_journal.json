@@ -111,6 +111,13 @@
       "version": "7",
       "when": 1793072128592,
       "tag": "0015_push_outbox"
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1764000000000,
+      "tag": "0016_consumer_stripe_customer",
+      "checksum": "abc123def456"
     }
   ]
 }

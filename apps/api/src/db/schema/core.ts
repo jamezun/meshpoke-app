@@ -36,6 +36,7 @@ export const users = pgTable('users', {
   isAdmin: boolean('is_admin').notNull().default(false),
   adminRoles: text('admin_roles').array().notNull().default(sql`'{}'`),
   referralCode: varchar('referral_code', { length: 12 }).notNull(),
+  stripeCustomerId: varchar('stripe_customer_id', { length: 120 }),
   referredBy: uuid('referred_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
