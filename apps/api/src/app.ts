@@ -38,6 +38,7 @@ import { registerShareSafety } from './routes/shareSafety.js';
 import { registerActivity } from './routes/activity.js';
 import { registerUserQr } from './routes/userQr.js';
 import { registerScan } from './routes/scan.js';
+import { registerDrops } from './routes/drops.js';
 import { registerCrews } from './routes/crews.js';
 import { registerRebook } from './routes/rebook.js';
 import { registerMerchant } from './routes/merchant.js';
@@ -169,6 +170,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(async (r) => registerActivity(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerUserQr(r, config.DATABASE_URL, config.QR_HMAC_SECRET), { prefix: '/v1' });
   await app.register(async (r) => registerScan(r, config.DATABASE_URL, config.QR_HMAC_SECRET), { prefix: '/v1' });
+  await app.register(async (r) => registerDrops(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerCrews(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerRebook(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMerchant(r, config.DATABASE_URL, storage), { prefix: '/v1' });
