@@ -961,10 +961,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] In `onCheckin`: member_visit high-confidence within `attribution_until` and `attribution_visits_billed < 3` → `new_member_visit` seat charge, increment counter
 **Tests:** 4th visit not billed; visit on day 61 not billed; low-confidence not billed.
 
-### [ ] T20.5 Coupons & CRM
+### [x] T20.5 Coupons & CRM
 **PRD refs:** §6.3 (Members CRM) · **Depends:** T20.3
-- [ ] Member coupons unlock at venue threshold (default 50, configurable); issue + redeem via scan
-- [ ] CRM: aggregate (Starter), full member list with level, visits, last visit (Growth), export CSV (Pro)
+- [x] Member coupons unlock at venue threshold (default 50, configurable); issue + redeem via scan
+- [x] CRM: aggregate (Starter), full member list with level, visits, last visit (Growth), export CSV (Pro)
 **Tests:** threshold unlock; export only on Pro.
 
 ### [ ] T20.6 Merchant ladder builder UI
@@ -1159,3 +1159,4 @@ Append one line per completed task (newest at the bottom).
 - T19.1 analytics: capture() direct-HTTP PostHog (no-op w/o key) + 10 funnel events + sort-weights flag via decide API + GET /admin/metrics (funnel/attendance/rebook/fairness/top-venues/conversion/pokes) + web Admin MetricsSection + RBAC test. 196 api tests.
 - T19.2 k6 scripts (viewport/drop_stampede/ws_fanout/scan_burst + README, thresholds=PRD §17; staging run blocked on deploy). T19.3 per-route rate limits + authz sweep test + zod v4.6.7/fastify-type-provider-zod 5 (audit clean; 198 api tests).
 - T20.1–T20.4 ladder/memberships/level-engine/attribution built+tested (202 api tests). LadderBuilder UI + wallet UX next.
+- T20.5 coupons & CRM: issue/wallet/QR-redeem/milestone/aggregate-vs-full/CSV ✓ (203 api tests green)
