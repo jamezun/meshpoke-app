@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meshpoke/core/theme.dart';
 import 'package:meshpoke/features/auth/dob_screen.dart';
 import 'package:meshpoke/features/auth/phone_screen.dart';
 import 'package:meshpoke/features/auth/sign_in_screen.dart';
+import 'package:meshpoke/features/auth/email_screen.dart';
 import 'package:meshpoke/core/shell.dart';
 import 'package:meshpoke/features/map/map_screen.dart';
 import 'package:meshpoke/features/map/venue_screens.dart';
@@ -26,6 +28,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', builder: (_, _) => const SignInScreen()),
       GoRoute(path: '/onboard/dob', builder: (_, _) => const DobScreen()),
+      GoRoute(path: '/onboard/email', builder: (_, s) => EmailAuthScreen(dob: s.extra as String?)),
+      GoRoute(path: '/signin/email', builder: (_, _) => const EmailAuthScreen(mode: 'signin')),
       GoRoute(path: '/onboard/phone', builder: (_, _) => const PhoneScreen()),
       GoRoute(
         path: '/map',
@@ -113,4 +117,15 @@ class MeshPokeApp extends ConsumerWidget {
       routerConfig: ref.watch(routerProvider),
     );
   }
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Build-time env via --dart-define (Codemagic/local). Defaults point at the
+  // local e2e auth stand-in so the app boots; real builds always define both.
+  await Supabase.initialize(
+    url: const String.fromEnvironment('SUPABASE_URL', defaultValue: 'http://localhost:9999'),
+    publishableKey: const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'e2e-anon-key'),
+  );
+  runApp(const ProviderScope(child: MeshPokeApp()));
 }

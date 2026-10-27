@@ -47,7 +47,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/terms', element: <TermsPage /> },
     { path: '/privacy', element: <PrivacyPage /> },
     { path: '/login', element: <LoginPage /> },
-    { path: '/signup', element: <SignupPage /> },
+    { path: '/signup', element: <SignupPage /> },  // renders LoginPage; ?mode=signup set below
     { path: '/verify-phone', element: <PhoneVerifyPage /> },
     {
       path: '/app',

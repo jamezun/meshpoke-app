@@ -77,7 +77,7 @@ class _DobScreenState extends State<DobScreen> {
                   );
                   return;
                 }
-                context.go('/onboard/phone');
+                context.go('/onboard/email', extra: '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}');
               },
               child: const Text('Continue'),
             ),

@@ -21,7 +21,11 @@ workflows:
       flutter: stable
       groups:
         - android_signing   # optional until keystore uploaded
-    scripts:
+    environment variables:
+    # set in Codemagic UI (encrypted) or workflow env
+    SUPABASE_URL: $SUPABASE_URL
+    SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+  scripts:
       - name: Pub get
         working_directory: apps/mobile
         script: flutter pub get
@@ -35,19 +39,23 @@ workflows:
         working_directory: apps/mobile
         script: |
           if [ -n "$CM_KEYSTORE" ]; then
-            flutter build appbundle --release
+            flutter build appbundle --release \
+              --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
           else
             echo "no signing group — unsigned debug build"
-            flutter build apk --debug
+            flutter build apk --debug \
+              --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
           fi
       - name: Build iOS (TestFlight)
         working_directory: apps/mobile
         script: |
           if [ -n "$APP_STORE_CONNECT_PRIVATE_KEY" ]; then
-            flutter build ipa --release --export-options-plist=/dev/null
+            flutter build ipa --release --export-options-plist=/dev/null \
+              --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
           else
             echo "no ASC key — unsigned build"
-            flutter build ios --debug --no-codesign
+            flutter build ios --debug --no-codesign \
+              --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
           fi
     artifacts:
       - apps/mobile/build/**/outputs/**/*.aab
