@@ -55,8 +55,9 @@ class ChatSocket {
   void sendTyping(String roomId, bool isTyping) => _io?.emit('typing', [roomId, isTyping]);
 
   /// Send now if connected, else queue. [onAck] gets the server ack.
-  void sendMessage(String roomId, String body, {String? clientMsgId, void Function(Map<String, dynamic>)? onAck}) {
-    final payload = {'roomId': roomId, 'body': body, 'clientMsgId': clientMsgId};
+  /// [confirmed] = user passed the T13.2 scam/contact interstitial.
+  void sendMessage(String roomId, String body, {String? clientMsgId, bool confirmed = false, void Function(Map<String, dynamic>)? onAck}) {
+    final payload = <String, dynamic>{'roomId': roomId, 'body': body, 'clientMsgId': ?clientMsgId, 'confirmed': confirmed};
     if (connected) {
       _io?.emitWithAck('message:send', payload, ack: (a) {
         final m = Map<String, dynamic>.from(a as Map);

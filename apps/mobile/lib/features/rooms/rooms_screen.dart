@@ -147,7 +147,78 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
     final body = _controller.text.trim();
     if (body.isEmpty) return;
     _controller.clear();
-    _socket?.sendMessage(widget.roomId, body);
+    _socket?.sendMessage(widget.roomId, body, onAck: (a) {
+      if (a['error'] == 'confirm_required') _showScamInterstitial(body);
+    });
+  }
+
+  // T13.2: scam/contact content — interstitial, then resend confirmed
+  Future<void> _showScamInterstitial(String body) async {
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Before you send'),
+        content: const Text(
+          'This message looks like it contains links or contact details. '
+          'Never share money, investment offers, or move to another app with someone you just met.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Send anyway')),
+        ],
+      ),
+    );
+    if (go == true) _socket?.sendMessage(widget.roomId, body, confirmed: true);
+  }
+
+  // T13.5: report/block from member list
+  Future<void> _memberActions(String userId, String name) async {
+    final dio = ref.read(apiClientProvider);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(leading: const Icon(Icons.flag), title: const Text('Report'),
+              onTap: () => Navigator.pop(ctx, 'report')),
+          ListTile(leading: const Icon(Icons.block), title: const Text('Block'),
+              onTap: () => Navigator.pop(ctx, 'block')),
+        ]),
+      ),
+    );
+    if (action == 'report') {
+      if (!mounted) return;
+      final reason = await _askText('Report $name', 'What happened?');
+      if (reason == null || reason.trim().length < 3) return;
+      try {
+        await dio.post('/reports', data: {'targetType': 'user', 'targetId': userId, 'reason': reason.trim()});
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reported — thank you')));
+      } on Exception catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Report failed: $e')));
+      }
+    } else if (action == 'block') {
+      try {
+        await dio.post('/blocks/$userId');
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Blocked — you will not see each other')));
+        _loadMembers();
+      } on Exception catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Block failed: $e')));
+      }
+    }
+  }
+
+  Future<String?> _askText(String title, String hint) {
+    final ctrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: TextField(controller: ctrl, autofocus: true, decoration: InputDecoration(hintText: hint)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: const Text('OK')),
+        ],
+      ),
+    );
   }
 
   @override
@@ -171,6 +242,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
             for (final m in _members)
               ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.person)),
+                onLongPress: () => _memberActions(m['id'] as String? ?? '', m['display_name'] as String? ?? 'Member'),
                 title: Text(m['display_name'] as String? ?? 'Member'),
                 subtitle: Text(
                   m['photoAccess'] == 'full' ? 'Photo visible' : 'Photo hidden',

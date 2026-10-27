@@ -255,6 +255,7 @@ class PeopleYouMetSheet extends ConsumerWidget {
                         'Free poke · met at $spotName',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
+                      onLongPress: () => _rateSheet(context, ref, spotId, person.userId, person.displayName),
                       trailing: FilledButton.tonal(
                         onPressed: () async {
                           final dio = ref.read(apiClientProvider);
@@ -357,4 +358,59 @@ Future<void> showPokeSheet(BuildContext context, WidgetRef ref, String toUserId,
       ),
     ),
   );
+}
+
+
+/// T13.5: private post-spot safety rating (1–5 + flag) — feeds moderation.
+Future<void> _rateSheet(BuildContext context, WidgetRef ref, String spotId, String userId, String name) async {
+  final ctrl = TextEditingController();
+  final flagged = ValueNotifier<bool>(false);
+  final go = await showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) => Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(padding: const EdgeInsets.all(12), child: Text('How was $name?', style: Theme.of(ctx).textTheme.titleMedium)),
+            Wrap(
+              spacing: 8,
+              children: [for (final r in [1, 2, 3, 4, 5])
+                ChoiceChip(label: Text('$r'), selected: ctrl.text == '$r' && r == 5 ? false : ctrl.text == '$r' && r == int.tryParse(ctrl.text),
+                  onSelected: (_) => setSheet(() => ctrl.text = '$r'))],
+            ),
+            SwitchListTile(
+              value: flagged.value,
+              onChanged: (v) => setSheet(() => flagged.value = v),
+              title: const Text('Flag for safety review'),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Submit'),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    ),
+  );
+  if (go != true) return;
+  final rating = int.tryParse(ctrl.text);
+  if (rating == null) return;
+  final dio = ref.read(apiClientProvider);
+  try {
+    await dio.post('/spots/$spotId/safety-rating', data: {
+      'ratedUserId': userId, 'rating': rating, if (flagged.value) 'flag': true,
+    });
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thanks — private, always')));
+    }
+  } on Exception catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rating failed: $e')));
+    }
+  }
 }

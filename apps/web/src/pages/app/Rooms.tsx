@@ -78,13 +78,20 @@ function RoomView({ roomId, onBack }: { roomId: string; onBack: () => void }) {
     return () => { socket.disconnect(); };
   }, [roomId, token]);
 
-  const send = () => {
+  const send = (confirmed = false) => {
     const body = draft.trim();
     if (!body || !socketRef.current) return;
     setDraft('');
-    socketRef.current.emit('message:send', { roomId, body }, (ack: { ok: boolean; error?: string }) => {
-      if (!ack?.ok && ack?.error === 'phone_not_verified') {
+    socketRef.current.emit('message:send', { roomId, body, confirmed }, (ack: { ok: boolean; error?: string }) => {
+      if (ack?.ok) return;
+      if (ack?.error === 'phone_not_verified') {
         setMessages((prev) => [...prev, { body: '⚠️ Verify your phone in the app to post.', user_id: 'system' }]);
+      }
+      // T13.2: scam/contact interstitial — confirm, then resend
+      if (ack?.error === 'confirm_required' && window.confirm(
+        'This message looks like it contains links or contact details. Never share money or move to another app with someone you just met.\n\nSend anyway?')) {
+        setDraft(body);
+        setTimeout(() => send(true), 0);
       }
     });
   };
@@ -108,7 +115,7 @@ function RoomView({ roomId, onBack }: { roomId: string; onBack: () => void }) {
           onKeyDown={(e) => e.key === 'Enter' && send()}
           placeholder="Message…"
         />
-        <button className="bg-neutral-900 text-white px-4 rounded text-sm" onClick={send}>Send</button>
+        <button className="bg-neutral-900 text-white px-4 rounded text-sm" onClick={() => send()}>Send</button>
       </div>
     </div>
   );

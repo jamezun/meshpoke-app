@@ -46,7 +46,29 @@ export default function InboxPage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  const pokeBack = async (fromUserId: string) => {
+  const reportUser = async (userId: string) => {
+  const reason = window.prompt('What happened? (min 3 chars)');
+  if (!reason || reason.trim().length < 3) return;
+  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const res = await fetch('/v1/reports', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ targetType: 'user', targetId: userId, reason: reason.trim() }),
+  });
+  window.alert(res.ok ? 'Reported — thank you' : 'Already reported');
+};
+
+const blockUser = async (userId: string) => {
+  if (!window.confirm('Block this user? You will not see each other anywhere.')) return;
+  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  await fetch(`/v1/blocks/${userId}`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}` },
+  });
+  window.location.reload();
+};
+
+const pokeBack = async (fromUserId: string) => {
     try {
       const r = await api<{ pokeBack: boolean }>('/pokes', { method: 'POST', body: JSON.stringify({ to: fromUserId, source: 'inbox' }) });
       setMsg(r.pokeBack ? 'Connected — chat is open.' : 'Poked back.');
@@ -90,6 +112,10 @@ export default function InboxPage() {
                   </div>
                 </div>
                 <button className="text-sm px-3 py-1 rounded-full bg-neutral-900 text-white" onClick={() => pokeBack(p.fromUserId)}>Poke back · Free</button>
+                <button className="text-sm px-2 py-1 rounded-full bg-neutral-100" title="Report"
+                  onClick={() => reportUser(p.fromUserId)}>⚠️</button>
+                <button className="text-sm px-2 py-1 rounded-full bg-neutral-100" title="Block"
+                  onClick={() => blockUser(p.fromUserId)}>🚫</button>
               </li>
             ))}
           </ul>

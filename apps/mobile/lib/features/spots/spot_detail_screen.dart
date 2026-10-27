@@ -41,6 +41,18 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
     }
   }
 
+  // T13.3: share-my-spot — venue/time/count only (safety link, share_plus)
+  Future<void> _shareMySpot() async {
+    try {
+      final dio = ref.read(apiClientProvider);
+      final res = await dio.post('/spots/${widget.spotId}/share-my-spot');
+      final url = 'https://www.meshpoke.com${res.data['url']}';
+      await Share.share(url, subject: 'My MeshPoke spot');
+    } catch (e) {
+      if (mounted) setState(() => _error = '$e');
+    }
+  }
+
   Future<void> _applySheet() async {
     final note = await showDialog<String>(
       context: context,
@@ -148,12 +160,20 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
       );
     }
     if ((s.state == 'live' || s.state == 'done') && (s.myRole != null || s.myApplication == null)) {
-      return FilledButton.tonal(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => LiveSpotScreen(spotId: s.id)),
+      return Column(children: [
+        FilledButton.tonal(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => LiveSpotScreen(spotId: s.id)),
+          ),
+          child: Text(s.state == 'live' ? "I'm here / roll-call" : 'After-event'),
         ),
-        child: Text(s.state == 'live' ? "I'm here / roll-call" : 'After-event'),
-      );
+        if (s.myRole != null)
+          TextButton.icon(
+            icon: const Icon(Icons.share_location_outlined),
+            label: const Text('Share my spot'),
+            onPressed: _shareMySpot,
+          ),
+      ]);
     }
     return const SizedBox.shrink();
   }
