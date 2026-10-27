@@ -23,9 +23,13 @@
     "./constants": "./dist/constants.js",
     "./keywords": "./dist/keywords.js",
     "./time": "./dist/time.js",
-    "./scam-patterns": {"types": "./dist/scam-patterns.d.ts", "import": "./dist/scam-patterns.js"},
+    "./scam-patterns": {
+      "types": "./dist/scam-patterns.d.ts",
+      "import": "./dist/scam-patterns.js"
+    },
     "./vibe": "./dist/vibe.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./products": "./dist/products.js"
   },
   "files": [
     "dist"
