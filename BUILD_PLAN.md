@@ -984,14 +984,14 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M21 Scale features
 
-### [ ] T21.1 Pro consumer tier & Pro pass
+### [x] T21.1 Pro consumer tier & Pro pass
 **PRD refs:** §8.1 · **Depends:** M17
-- [ ] Enable Pro products (web + IAP), Pro 7-day pass, founding Pro (counter shared with consumer_500), tier value 1.0, Pro caps
+- [x] Enable Pro products (web + IAP), Pro 7-day pass, founding Pro (counter shared with consumer_500), tier value 1.0, Pro caps
 **Acceptance:** Pro purchase flows on both channels.
 
-### [ ] T21.2 Packs & filter pass
+### [x] T21.2 Packs & filter pass
 **PRD refs:** §8.1 · **Depends:** M17
-- [ ] Poke packs (5/15) → credits; 7-day filter pass grant; advanced keyword filters UI
+- [x] Poke packs (5/15) → credits; 7-day filter pass grant; advanced keyword filters UI
 **Acceptance:** credits spent after weekly allowance.
 
 ### [ ] T21.3 Host-reward Pro days
@@ -1163,3 +1163,5 @@ Append one line per completed task (newest at the bottom).
 - T16.5 (✓): admin finance workspace (founding roster, disputes credit-note/reject w/ invoice adjust, ledger browser, health, band audit) + Admin.tsx FinanceSection. 206 api tests green.
 - T20.6 (✓): LadderBuilder.tsx in merchant portal (template picker, level editor w/ add/remove, inactivity select 30/60/90, client-side reduction warning → API 30d protection, >20% info, member-view preview).
 - T20.7 (✓): GET /venues/:id (venue+claimed ladder+myMembership); venue_page_screen.dart (join/waitlist/level/progress bar/ladder); wallet coupons mobile+web. Device join→3-scans→level-up deferred to staging (engine proven in ladder.test.ts).
+- T21.1 (✓): Pro products web+IAP+RC (mp_* SKU map fix), founding shares consumer_500, 7d pass, tier 1.0, caps — all already wired via T17 engine
+- T21.2 (✓): poke packs→credits + filter-pass grants (web+RC) already wired; keyword filter UI added mobile Spots tab + web Spots page (Plus-gated)
