@@ -27,6 +27,9 @@ export const configSchema = z.object({
   FEHD_DISTRICTS: z.string().optional(), // comma filter e.g. 'CENTRAL AND WESTERN'
   ENABLE_JOBS: bool.default('false'), // pg-boss schedulers (off in dev/test)
 
+  STRIPE_SECRET_KEY: z.string().optional(), // absent → merchant Stripe routes stub
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+
   R2_ENDPOINT: z.string().optional(), // absent → photos routes 503 (dev stub)
   R2_BUCKET: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),

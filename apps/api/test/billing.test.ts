@@ -3,6 +3,7 @@ import { SignJWT } from 'jose';
 import { Pool } from 'pg';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import type { Db } from '../src/db/client.js';
 import { join } from 'node:path';
 import * as schema from '../src/db/schema/index.js';
 import { buildApp } from '../src/app.js';
@@ -17,7 +18,7 @@ const infra = useInfra();
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 let pool: Pool;
-let db: ReturnType<typeof drizzle>;
+let db: Db;
 const users: Record<string, { id: string; tok: string }> = {};
 
 async function mkUser(name: string, accountAgeDays = 30): Promise<string> {
@@ -49,7 +50,7 @@ beforeAll(async () => {
     SENTRY_DSN: undefined, ENABLE_JOBS: false, ENABLE_SWAGGER: false,
   } });
   pool = new Pool({ connectionString: i.dbUrl });
-  db = drizzle(pool, { schema });
+  db = drizzle(pool, { schema }) as Db;
   await migrate(db, { migrationsFolder: join(import.meta.dirname, '../drizzle') });
   await seedDistricts(pool);
   const ownerId = await mkUser('mowner');
@@ -85,12 +86,12 @@ test('seat charges: drop_seat happy path, account-age gate, idempotency, band fe
   // guestA: old enough → charged
   const a = await scan('guestA');
   expect(a.status).toBe(200);
-  expect(a.body.charge).toMatchObject({ charged: true, shadow: false });
-  expect(a.body.charge.amount).toBe(6); // band 120 seats → 6 HKD
+  expect(a.body.charge as Record<string, unknown>).toMatchObject({ charged: true, shadow: false });
+  expect((a.body.charge as Record<string, unknown>).amount).toBe(6); // band 2 → 6 HKD
 
   // guestB: account 2 days old → never charged
   const b = await scan('guestB');
-  expect(b.body.charge).toMatchObject({ charged: false, amount: null });
+  expect(b.body.charge as Record<string, unknown>).toMatchObject({ charged: false, amount: null });
 
   // idempotent: re-running onCheckin for same checkin adds nothing
   const cid = (await pool.query(`select id from merchant_checkins where user_id = $1 order by created_at desc limit 1`, [users.guestA.id])).rows[0].id;
@@ -109,7 +110,7 @@ test('seat charges: drop_seat happy path, account-age gate, idempotency, band fe
     values ($1::uuid, $2::uuid, 'individual', 'S1', 'Sponsored offer', 50, true, now() - interval '1 hour', now() + interval '1 hour', 'active')`, [sdropId, VENUE]);
   await pool.query(`insert into drop_claims (drop_id, user_id) values ($1::uuid, $2::uuid)`, [sdropId, users.guestC.id]);
   const c = await scan('guestC');
-  expect(c.body.charge).toMatchObject({ charged: true, amount: 9 }); // 6 × 1.5
+  expect(c.body.charge as Record<string, unknown>).toMatchObject({ charged: true, amount: 9 }); // 6 × 1.5
 });
 
 test('founding clock: first drop activation sets 3-month free window; month-1 seats are shadow', async () => {

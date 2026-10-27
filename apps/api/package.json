@@ -24,12 +24,12 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9.14.0",
     "pino-pretty": "^11.2.0",
+    "socket.io-client": "^4.8.1",
     "testcontainers": "^10.10.0",
     "tsx": "^4.19.0",
     "typescript": "~5.6.3",
     "typescript-eslint": "^8.14.0",
-    "vitest": "^2.1.0",
-    "socket.io-client": "^4.8.1"
+    "vitest": "^2.1.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
@@ -39,7 +39,9 @@
     "@fastify/rate-limit": "^10.1.0",
     "@fastify/sensible": "^6.0.0",
     "@fastify/swagger": "^9.4.0",
+    "@fastify/swagger-ui": "^6.1.2",
     "@meshpoke/shared": "workspace:*",
+    "@socket.io/redis-adapter": "^8.3.0",
     "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.4",
     "fast-xml-parser": "^5.11.2",
@@ -52,9 +54,8 @@
     "pino": "^9.5.0",
     "proj4": "^2.22.0",
     "sharp": "^0.35.5",
-    "zod": "^3.23.8",
     "socket.io": "^4.8.1",
-    "@socket.io/redis-adapter": "^8.3.0",
-    "@fastify/swagger-ui": "^6.1.2"
+    "stripe": "^23.0.1",
+    "zod": "^3.23.8"
   }
 }
