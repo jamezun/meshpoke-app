@@ -50,10 +50,81 @@ export function registerAdmin(app: FastifyInstance, dbUrl: string, storage: Stor
       if (target.id === req.user!.id) return problem(reply, 422, 'Cannot moderate yourself');
       await db.execute(sql`update users set deleted_at = ${suspend ? sql`now()` : null} where id = ${target.id}::uuid`);
       await db.execute(sql`insert into moderation_actions (admin_id, target_user, action, reason, audit)
-        values (${req.user!.id}::uuid, ${target.id}::uuid, ${suspend ? 'suspend' : 'warn'}, ${reason.slice(0, 200)}, ${JSON.stringify({ type: suspend ? 'suspend' : 'restore' })}::jsonb)`);
+        values (${req.user!.id}::uuid, ${target.id}::uuid, ${suspend ? 'suspend' : 'restore'}, ${reason.slice(0, 200)}, ${JSON.stringify({ type: suspend ? 'suspend' : 'restore' })}::jsonb)`);
       await db.execute(sql`insert into audit_log (actor_id, action, target, meta)
         values (${req.user!.id}, ${suspend ? 'admin.user.suspend' : 'admin.user.restore'}, 'user:' || ${target.id}::text, ${JSON.stringify({ reason })}::jsonb)`);
       return { ok: true, suspended: suspend };
+    },
+  );
+
+  // ── T13.4 moderation queue ─────────────────────────────────────
+  // Queue: open reports w/ content preview + currently muted/suspended users
+  app.get('/admin/moderation/queue', { preHandler: [app.authenticate, app.requireAdminRole('moderator')] }, async () => {
+    const openReports = asRows<Record<string, unknown>>(await db.execute(sql`
+      select r.id, r.target_type, r.target_id, r.reason, r.details, r.status, r.created_at,
+             ru.display_name as reporter,
+             (select display_name from users tu where tu.id = r.target_id) as target_user,
+             case r.target_type
+               when 'message' then (select left(body, 140) from messages m where m.id = r.target_id)
+               when 'spot' then (select name from spots sp where sp.id = r.target_id)
+               when 'venue' then (select display_name from venues v where v.id = r.target_id)
+             end as preview
+        from reports r join users ru on ru.id = r.reporter_id
+       where r.status = 'open'
+       order by r.created_at desc limit 200`));
+    const mutedUsers = asRows<Record<string, unknown>>(await db.execute(sql`
+      select distinct on (ma.target_user) ma.target_user, ma.action, ma.reason, ma.created_at,
+             u.display_name, u.deleted_at
+        from moderation_actions ma join users u on u.id = ma.target_user
+       order by ma.target_user, ma.created_at desc`));
+    return { reports: openReports, muted: mutedUsers.filter((m) => m.action === 'mute' || m.action === 'suspend') };
+  });
+
+  // Action a user: warn|mute|suspend|restore (+ appeal note goes to audit)
+  app.post<{ Params: { userId: string }; Body: { action: string; reason: string; appealNote?: string } }>(
+    '/admin/moderation/:userId/action',
+    { preHandler: [app.authenticate, app.requireAdminRole('moderator')] },
+    async (req, reply) => {
+      const { action, reason, appealNote } = req.body ?? {};
+      if (!['warn', 'mute', 'suspend', 'restore'].includes(action)) return problem(reply, 422, 'Invalid action');
+      if (!reason?.trim()) return problem(reply, 422, 'Reason required');
+      const target = asRows<{ id: string }>(await db.execute(sql`select id from users where id = ${req.params.userId}::uuid`))[0];
+      if (!target) return problem(reply, 404, 'User not found');
+      if (target.id === req.user!.id) return problem(reply, 422, 'Cannot moderate yourself');
+
+      if (action === 'suspend') {
+        await db.execute(sql`update users set deleted_at = now() where id = ${target.id}::uuid`);
+      } else if (action === 'restore') {
+        await db.execute(sql`update users set deleted_at = null where id = ${target.id}::uuid`);
+      }
+      await db.execute(sql`
+        insert into moderation_actions (admin_id, target_user, action, reason, audit)
+        values (${req.user!.id}::uuid, ${target.id}::uuid, ${action}, ${reason.slice(0, 200)},
+                ${JSON.stringify({ ...(appealNote ? { appealNote } : {}) })}::jsonb)`);
+      await db.execute(sql`
+        insert into audit_log (actor_id, action, target, meta)
+        values (${req.user!.id}::uuid, ${'admin.moderation.' + action}, ${'user:' + target.id},
+                ${JSON.stringify({ reason, ...(appealNote ? { appealNote } : {}) })}::jsonb)`);
+      return { ok: true, action };
+    },
+  );
+
+  // Resolve a report (dismiss or acted)
+  app.post<{ Params: { id: string }; Body: { resolution: string; note?: string } }>(
+    '/admin/reports/:id/resolve',
+    { preHandler: [app.authenticate, app.requireAdminRole('moderator')] },
+    async (req, reply) => {
+      const { resolution } = req.body ?? {};
+      if (!['dismissed', 'actioned'].includes(resolution)) return problem(reply, 422, 'Invalid resolution');
+      const res = await db.execute(sql`
+        update reports set status = ${resolution === 'dismissed' ? 'dismissed' : 'actioned'}
+         where id = ${req.params.id}::uuid and status = 'open' returning id`);
+      if (asRows(res).length === 0) return problem(reply, 404, 'Report not open');
+      await db.execute(sql`
+        insert into audit_log (actor_id, action, target, meta)
+        values (${req.user!.id}::uuid, 'admin.report.resolve', ${'report:' + req.params.id},
+                ${JSON.stringify({ resolution, ...(req.body?.note ? { note: req.body.note } : {}) })}::jsonb)`);
+      return { ok: true };
     },
   );
 

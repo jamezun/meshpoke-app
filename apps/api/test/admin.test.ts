@@ -117,3 +117,59 @@ describe('T8.3 admin RBAC + basics', () => {
     expect(closed.rows[0].status).toBe('closed');
   });
 });
+
+describe('T13.4 moderation queue', () => {
+  it('moderator actions a report end-to-end: queue → mute → resolve → restore', async () => {
+    // three reporters file reports on victim → auto-mute fires (T13.1)
+    for (let i = 0; i < 3; i++) {
+      const rid = crypto.randomUUID();
+      await pool.query(
+        `insert into users (id, email, auth_provider, display_name, date_of_birth, referral_code, liveness_state)
+         values ($1::uuid, $2, 'email', $3, '1990-01-01', left($1::text,8), 'verified')`,
+        [rid, `${rid}@t.test`, 'R' + i]);
+      const rt = await token(rid);
+      const r = await app.inject({ method: 'POST', url: '/v1/reports',
+        headers: { authorization: `Bearer ${rt}` },
+        payload: { targetType: 'user', targetId: victimId, reason: 'scam link in dm' } });
+      expect(r.statusCode).toBe(201);
+    }
+
+    // queue shows open reports + auto-muted victim
+    const q = await app.inject({ method: 'GET', url: '/v1/admin/moderation/queue',
+      headers: { authorization: `Bearer ${modTok}` } });
+    expect(q.statusCode).toBe(200);
+    const queue = q.json();
+    expect(queue.reports.length).toBeGreaterThanOrEqual(3);
+    expect(queue.muted.some((m: { target_user: string }) => m.target_user === victimId)).toBe(true);
+
+    // moderator formalises the mute with reason + appeal note
+    const act = await app.inject({ method: 'POST', url: `/v1/admin/moderation/${victimId}/action`,
+      headers: { authorization: `Bearer ${modTok}` },
+      payload: { action: 'mute', reason: '3 scam reports confirmed', appealNote: 'user may appeal via support@' } });
+    expect(act.statusCode).toBe(200);
+    expect(act.json().action).toBe('mute');
+
+    // resolve one of the reports
+    const repId = queue.reports.find((r: { target_id: string }) => r.target_id === victimId).id;
+    const res = await app.inject({ method: 'POST', url: `/v1/admin/reports/${repId}/resolve`,
+      headers: { authorization: `Bearer ${modTok}` }, payload: { resolution: 'actioned', note: 'muted' } });
+    expect(res.statusCode).toBe(200);
+
+    // audit trail exists
+    const audit = await pool.query(
+      `select count(*)::int as n from audit_log where action = 'admin.moderation.mute' and target = $1`, ['user:' + victimId]);
+    expect(audit.rows[0].n).toBe(1);
+
+    // restore lifts the mute and un-suspends
+    const restore = await app.inject({ method: 'POST', url: `/v1/admin/moderation/${victimId}/action`,
+      headers: { authorization: `Bearer ${superTok}` }, payload: { action: 'restore', reason: 'appeal accepted' } });
+    expect(restore.statusCode).toBe(200);
+    const u = await pool.query(`select deleted_at from users where id = $1`, [victimId]);
+    expect(u.rows[0].deleted_at).toBe(null);
+
+    // victim cannot be moderated by self, and invalid action 422
+    const bad = await app.inject({ method: 'POST', url: `/v1/admin/moderation/${victimId}/action`,
+      headers: { authorization: `Bearer ${modTok}` }, payload: { action: 'ban', reason: 'x' } });
+    expect(bad.statusCode).toBe(422);
+  });
+});
