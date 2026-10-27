@@ -933,32 +933,32 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M20 Memberships & ladders
 
-### [ ] T20.1 Ladder config API
+### [x] T20.1 Ladder config API
 **PRD refs:** §3.9 (Membership), BM §7.2 · **Depends:** T19.7
-- [ ] Templates (Café, Bar, Restaurant, Fine dining) in constants with default levels
-- [ ] `GET/PUT /merchant/ladder`: levels (position, name, min_visits, min_months, discount_pct (no cap), perk_text), inactivity_days (30/60/90); tier limits (Starter templates only ≤3 levels; Growth/Pro ≤5 custom)
-- [ ] Benefit-reduction detection → existing members keep level; notify members; reduction effective after 30 days (`effective_from`)
-- [ ] Estimate endpoint (discount × band midpoint) + >20% info flag
+- [x] Templates (Café, Bar, Restaurant, Fine dining) in constants with default levels
+- [x] `GET/PUT /merchant/ladder`: levels (position, name, min_visits, min_months, discount_pct (no cap), perk_text), inactivity_days (30/60/90); tier limits (Starter templates only ≤3 levels; Growth/Pro ≤5 custom)
+- [x] Benefit-reduction detection → existing members keep level; notify members; reduction effective after 30 days (`effective_from`)
+- [x] Estimate endpoint (discount × band midpoint) + >20% info flag
 **Tests:** tier limits; reduction protection.
 
-### [ ] T20.2 Memberships API
+### [x] T20.2 Memberships API
 **PRD refs:** §3.9, §3.10 · **Depends:** T20.1
-- [ ] `POST/DELETE /venues/{id}/membership` (phone-verified, user merchant-spot cap, venue cap 25/100/∞ → waitlist)
-- [ ] Founding circle assignment by merchant (2–25, excluded from caps)
-- [ ] Waitlist release: Free 24h claim window; Plus/Pro auto-join saved venues with 2×/3× weight
-- [ ] `attribution_until = joined_at + 60 days`
+- [x] `POST/DELETE /venues/{id}/membership` (phone-verified, user merchant-spot cap, venue cap 25/100/∞ → waitlist)
+- [x] Founding circle assignment by merchant (2–25, excluded from caps)
+- [x] Waitlist release: Free 24h claim window; Plus/Pro auto-join saved venues with 2×/3× weight
+- [x] `attribution_until = joined_at + 60 days`
 **Tests:** caps both sides; waitlist ordering weights.
 
-### [ ] T20.3 Level engine & member visits
+### [x] T20.3 Level engine & member visits
 **PRD refs:** §3.9 · **Depends:** T20.2, T15.2
-- [ ] Member visit scan updates `visits_count`, `last_visit_at`, recomputes level (visits + months thresholds)
-- [ ] Nightly job: inactivity decay (drop one level if no visit within inactivity period), release after 60 days without visit
-- [ ] Level-up notification (venue category)
+- [x] Member visit scan updates `visits_count`, `last_visit_at`, recomputes level (visits + months thresholds)
+- [x] Nightly job: inactivity decay (drop one level if no visit within inactivity period), release after 60 days without visit
+- [x] Level-up notification (venue category)
 **Tests:** level computation table; decay one level; release.
 
-### [ ] T20.4 New-member attribution billing
+### [x] T20.4 New-member attribution billing
 **PRD refs:** §8.3, BM §7.3 · **Depends:** T20.3, T16.1
-- [ ] In `onCheckin`: member_visit high-confidence within `attribution_until` and `attribution_visits_billed < 3` → `new_member_visit` seat charge, increment counter
+- [x] In `onCheckin`: member_visit high-confidence within `attribution_until` and `attribution_visits_billed < 3` → `new_member_visit` seat charge, increment counter
 **Tests:** 4th visit not billed; visit on day 61 not billed; low-confidence not billed.
 
 ### [ ] T20.5 Coupons & CRM
@@ -1158,3 +1158,4 @@ Append one line per completed task (newest at the bottom).
 - T18.4 e2e: compose.e2e.yml (postgis+redis 15432/16379), seed via direct SQL, GoTrue stand-in auth server (CORS/prefix/JSON fixes), Playwright setup+4 suites 6/6 green, CI e2e job; root causes fixed: main.tsx missing AuthProvider, supabase getSession headless stall (getAccessToken), PATCH prefs 500, queue displayName, IPv6 listen. b6d2a63
 - T19.1 analytics: capture() direct-HTTP PostHog (no-op w/o key) + 10 funnel events + sort-weights flag via decide API + GET /admin/metrics (funnel/attendance/rebook/fairness/top-venues/conversion/pokes) + web Admin MetricsSection + RBAC test. 196 api tests.
 - T19.2 k6 scripts (viewport/drop_stampede/ws_fanout/scan_burst + README, thresholds=PRD §17; staging run blocked on deploy). T19.3 per-route rate limits + authz sweep test + zod v4.6.7/fastify-type-provider-zod 5 (audit clean; 198 api tests).
+- T20.1–T20.4 ladder/memberships/level-engine/attribution built+tested (202 api tests). LadderBuilder UI + wallet UX next.
