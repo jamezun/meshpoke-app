@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { verifyQrToken, markQrUsed, lastLocationPing } from './userQr.js';
+import { onCheckin } from '../billing.js';
 
 const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
 
@@ -125,6 +126,11 @@ export function registerScan(app: FastifyInstance, dbUrl: string, secret: string
       values (${venueId}::uuid, ${guestId}::uuid, ${staffId}::uuid, ${context}, ${resolvedDropId}::uuid, ${resolvedSpotId}::uuid, ${confidence}, ${distanceM})
       returning id`));
 
+    // 5b. billing hook (T16.1): high-confidence billable events → seat_charges
+    const billableEvent = confidence === 'high';
+    let charge: { charged: boolean; shadow: boolean; amount: number | null } = { charged: false, shadow: false, amount: null };
+    if (billableEvent) charge = await onCheckin(db, ins[0].id as string);
+
     // 6. membership visit counting + last-visit touch
     if (context === 'member_visit') {
       await db.execute(sql`
@@ -143,7 +149,8 @@ export function registerScan(app: FastifyInstance, dbUrl: string, secret: string
       guest: { displayName: guest[0]?.display_name, verified: guest[0]?.verified },
       context, dropId: resolvedDropId, spotId: resolvedSpotId,
       confidence, gpsDistanceM: distanceM,
-      billable: confidence === 'high' && (context === 'drop' || context === 'group_drop' || (context === 'member_visit' && Boolean(activeMembership[0]))),
+      charge,
+      billable: billableEvent && (context === 'drop' || context === 'group_drop' || (context === 'member_visit' && Boolean(activeMembership[0]))),
     });
   });
 }
