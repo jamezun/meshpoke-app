@@ -903,11 +903,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Rate limits on all write endpoints; authz tests for every route (owner/merchant/admin); webhook signature tests; signed URL expiry; PII encryption; dependency audit
 **Acceptance:** zero high findings.
 
-### [ ] T19.4 Legal & store prep
+### [~] T19.4 Legal & store prep
 **PRD refs:** §18 · **Depends:** T19.3
-- [ ] ToS, Privacy Policy (PDPO, storage outside HK), consent texts versioned
-- [ ] Apple Small Business Program enrolment; App Store listing (Social Networking, highest age rating, screenshots), privacy manifest; Play listing, Data Safety
-- [ ] IAP products created in both stores and mapped in RevenueCat
+- [x] ToS + Privacy Policy DRAFTS (docs/legal/, PDPO + storage-outside-HK clauses, legal-review TODOs marked)
+- [x] Listing copy + privacy manifest strings + Data safety summary (docs/launch/STORE_LISTING.md); [ ] enrolment + screenshots + submission = user actions
+- [ ] IAP products created in both stores and mapped in RevenueCat (user action; product table in STORE_LISTING.md)
 **Acceptance:** checklist §18 legal + app store items ticked.
 
 ### [ ] T19.5 Production deploy
