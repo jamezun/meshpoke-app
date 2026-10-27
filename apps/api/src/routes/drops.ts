@@ -13,7 +13,9 @@ const TIER_DROPS = { starter: { active: 1, perWeek: 1 }, growth: { active: 3, pe
  * T15.3 drops (individual + group): merchant CRUD w/ tier limits, cost estimate w/ >20% info flag,
  * user claim w/ row-lock capacity, budget-cap auto-pause.
  */
-export function registerDrops(app: FastifyInstance, dbUrl: string): void {
+import { amplifySponsoredDrop } from './promo.js';
+
+export function registerDrops(app: FastifyInstance, dbUrl: string, redisUrl: string): void {
   const db = getDb(dbUrl);
 
   // ── merchant CRUD ──
@@ -45,7 +47,7 @@ export function registerDrops(app: FastifyInstance, dbUrl: string): void {
     }
 
     const m = rows(await db.execute(sql`
-      select ma.id, ma.tier, ma.monthly_budget_cap, ma.price_band,
+      select ma.id, ma.tier, ma.monthly_budget_cap, ma.price_band, ma.venue_id,
              coalesce((select i.seat_amount from invoices i
                         where i.merchant_id = ma.id and i.period = to_char(now(), 'YYYY-MM')), 0) as mtd
         from merchant_accounts ma
@@ -75,7 +77,12 @@ export function registerDrops(app: FastifyInstance, dbUrl: string): void {
       returning id`));
     const dropId = ins[0].id as string;
     const autoClaimed = await autoClaimForSavedVenues(db, dropId, m[0].id as string, b.capacity);
-    return reply.code(201).send({ dropId, autoClaimed, infoFlag: b.discountPct !== undefined && b.discountPct > 20 });
+    // T21.4: sponsored amplification (opted-in push, per-district/day cap)
+    let amplified: { sent: number; capped: boolean } | undefined;
+    if (b.sponsored === true) {
+      amplified = await amplifySponsoredDrop(dbUrl, redisUrl, dropId, m[0].venue_id as string, b.title).catch(() => ({ sent: 0, capped: false }));
+    }
+    return reply.code(201).send({ dropId, autoClaimed, amplified, infoFlag: b.discountPct !== undefined && b.discountPct > 20 });
   });
 
   app.patch<{ Params: { id: string } }>('/merchant/drops/:id', {
