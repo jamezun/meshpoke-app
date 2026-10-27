@@ -45,6 +45,12 @@ export default defineConfig({
       url: 'http://localhost:5199',
       reuseExistingServer: true,
       timeout: 60_000,
+      // .env.local is gitignored — CI checkout has no VITE_SUPABASE_*; inject the e2e stand-in values
+      env: {
+        ...process.env,
+        VITE_SUPABASE_URL: 'http://localhost:9998',
+        VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6Im1lc2hwb2tlLWUyZSIsImlhdCI6MTc5MzA4NTM0OCwiZXhwIjo0OTQ4ODQ1MzQ4fQ.OoAnHbLbKcHnPqVXG66OGTsBcBLZqiC85JzRDdLViH8',
+      } as NodeJS.ProcessEnv,
     },
   ],
 });
