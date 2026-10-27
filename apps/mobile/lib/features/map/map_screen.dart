@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'map_repository.dart';
+import '../activity/activity_screens.dart';
 import '../spots/spot_detail_screen.dart';
 
 /// Map home (PRD §4.1/§5.3): dark Google map, when-in-use location, viewport fetch
@@ -71,6 +72,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       appBar: AppBar(
         title: const Text('MeshPoke'),
         actions: [
+          const ActivityBell(),
           if (_permissionDenied)
             TextButton(
               onPressed: _checkPermission,
