@@ -162,7 +162,8 @@ describe('T20.3 level engine + T20.4 attribution billing', () => {
     await pool.query(`update memberships set visits_count = 3 where user_id = $1::uuid and venue_id = $2::uuid`, [member, venueId]);
 
     // ensure the admin user has superadmin role
-    const adm = await pool.query(`select id from users where is_admin = true order by created_at desc limit 1`);
+    const admId = await mkUser({ admin: true });
+    const adm = { rows: [{ id: admId }] } as unknown as pg.QueryResult<{ id: string }>;
     await pool.query(`update users set admin_roles = '{superadmin}' where id = $1::uuid`, [adm.rows[0].id]);
     const sweep = await app.inject({ method: 'POST', url: '/v1/internal/membership-sweep', headers: { authorization: `Bearer ${await token(adm.rows[0].id)}`, 'content-type': 'application/json' }, payload: '{}' });
     expect(sweep.statusCode).toBe(200);
@@ -182,5 +183,57 @@ describe('T20.3 level engine + T20.4 attribution billing', () => {
       amounts.push(r.amount ?? 0);
     }
     expect(amounts.filter((a) => a > 0)).toHaveLength(3); // 3 billed, 4th blocked by attribution cap
+  });
+
+});
+
+describe('T20.5 coupons & CRM', () => {
+  it('issue + wallet + redeem via signed QR; aggregate vs full vs export by tier', async () => {
+    const member = await mkUser();
+    const memberTok = await token(member);
+    // manual issue
+    const issue = await app.inject({ method: 'POST', url: '/v1/merchant/coupons/issue', headers: { authorization: `Bearer ${merchantTok}`, 'content-type': 'application/json' },
+      payload: JSON.stringify({ userId: member, offer: 'Free cake', validDays: 30 }) });
+    expect(issue.statusCode).toBe(201);
+    const couponId = issue.json().id as string;
+
+    // member wallet sees it
+    const wallet = await app.inject({ method: 'GET', url: '/v1/me/coupons', headers: { authorization: `Bearer ${memberTok}` } });
+    expect(wallet.json().coupons).toHaveLength(1);
+
+    // redeem with a real signed QR (growth venue owner scans)
+    const { signQrToken, qrWindow } = await import('../src/routes/userQr.js');
+    const qr = signQrToken(member, qrWindow(), 'b'.repeat(32));
+    const redeem = await app.inject({ method: 'POST', url: '/v1/merchant/scan/coupon', headers: { authorization: `Bearer ${merchantTok}`, 'content-type': 'application/json' },
+      payload: JSON.stringify({ qrPayload: qr, couponId }) });
+    expect(redeem.statusCode).toBe(200);
+    expect(redeem.json().redeemed).toBe(true);
+    // double redeem blocked
+    const again = await app.inject({ method: 'POST', url: '/v1/merchant/scan/coupon', headers: { authorization: `Bearer ${merchantTok}`, 'content-type': 'application/json' },
+      payload: JSON.stringify({ qrPayload: signQrToken(member, qrWindow(), 'b'.repeat(32)), couponId }) });
+    expect(again.statusCode).toBe(409);
+
+    // CRM: growth tier gets full list
+    const crm = await app.inject({ method: 'GET', url: '/v1/merchant/members', headers: { authorization: `Bearer ${merchantTok}` } });
+    expect(crm.statusCode).toBe(200);
+    expect(crm.json().tier).toBe('growth');
+    expect(Array.isArray(crm.json().members)).toBe(true);
+
+    // CSV export: growth → 402 (Pro only)
+    const csv = await app.inject({ method: 'GET', url: '/v1/merchant/members/export', headers: { authorization: `Bearer ${merchantTok}` } });
+    expect(csv.statusCode).toBe(402);
+
+    // threshold milestone: visits 50 → auto coupon
+    const joined = await joinMembership(member, venueId);
+    expect(joined.statusCode).toBe(201);
+    await pool.query(`update memberships set visits_count = 50 where user_id = $1::uuid and venue_id = $2::uuid`, [member, venueId]);
+    const adm2 = (await pool.query(`select id from users where is_admin = true order by created_at desc limit 1`)).rows[0].id;
+    const chk = await app.inject({ method: 'POST', url: '/v1/internal/coupon-check', headers: { authorization: `Bearer ${await token(adm2)}`, 'content-type': 'application/json' },
+      payload: JSON.stringify({ userId: member, venueId }) });
+    expect(chk.statusCode, 'BODY=' + chk.body).toBe(200);
+    expect(chk.json().issued, 'BODY=' + chk.body).toBe(true);
+    const dupCheck = await app.inject({ method: 'POST', url: '/v1/internal/coupon-check', headers: { authorization: `Bearer ${await token(adm2)}`, 'content-type': 'application/json' },
+      payload: JSON.stringify({ userId: member, venueId }) });
+    expect(dupCheck.json().issued).toBeUndefined();
   });
 });
