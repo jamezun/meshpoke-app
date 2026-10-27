@@ -101,7 +101,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 6 | ✔ |
-| M18 Authenticated web & host console | 1 | 4 | 2 | ☐ |
+| M18 Authenticated web & host console | 1 | 4 | 3 | ☐ |
 | M19 Phase 1 hardening & launch | 1 | 7 | 0 | ☐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
 | M21 Scale features | 3 | 8 | 0 | ☐ |
@@ -872,9 +872,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] My hosted spots, queue review (sorts, accept/decline + reasons), schedule (date + venue search from our venues + group drops), roll-call, member removal with reason
 **Acceptance:** host flow parity with mobile (except venue pin creation).
 
-### [ ] T18.3 Wallet & People-you-met (web)
+### [x] T18.3 Wallet & People-you-met (web)
 **PRD refs:** §6.2 · **Depends:** T11.5, T15.6
-- [ ] Read-only wallet (memberships later, claimed drops), People-you-met with free pokes
+- [x] Read-only wallet (memberships later, claimed drops), People-you-met with free pokes
 **Acceptance:** parity checks.
 
 ### [ ] T18.4 Web QA pass
@@ -1154,3 +1154,4 @@ Append one line per completed task (newest at the bottom).
 - T17.6 (✓): routes/referrals.ts (referralOnPhoneVerified referee+5 only — per PRD §3.4, referrer+5 at first finalised attendance via attendance.ts finalise hook, 10/mo cap, unique referee row = same-phone protection), GET /me/referrals, mobile ReferralScreen + profile entry, web /r/:code landing. referrals.test.ts 2. 195 api tests. M17 6/6 ✔.
 - T18.1 (✓): web Spots.tsx (/app/spots) — district dropdown + today/week/all, spot cards w/ state badges + required keywords, detail modal join (open) / apply w/ note, confirm attendance, leave/bail, members list (blocks filtered server-side). Keys aligned to API snake_case (my_role, join_mode, venue_name...).
 - T18.2 (✓): API GET /me/hosted + POST /spots/:id/remove-member (state removed, room kicked, audit_log spot.member_removed); web HostConsole.tsx (/app/host) — hosted list w/ pending badges, queue recommended|fifo w/ express ⚡ + trust + decline reason presets, schedule (datetime + /venues/search picker), roll-call absent checkboxes, member removal w/ reason prompt.
+- T18.3 (✓): API GET /me/wallet/drops (claimed drops w/ status claimed/redeemed/expired) + GET /me/spots/attended (done spots attended|forgiven); web Wallet.tsx (/app/wallet) — wallet tab + people-you-met tab w/ free-poke window + poke w/ note.
