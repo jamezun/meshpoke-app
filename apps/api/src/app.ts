@@ -40,6 +40,7 @@ import { registerUserQr } from './routes/userQr.js';
 import { registerScan } from './routes/scan.js';
 import { registerDrops } from './routes/drops.js';
 import { registerPromo } from './routes/promo.js';
+import { registerAutomations } from './routes/automations.js';
 import { registerLadder } from './routes/ladder.js';
 import { registerMemberships } from './routes/memberships.js';
 import { registerCrm } from './routes/crm.js';
@@ -181,6 +182,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(async (r) => registerScan(r, config.DATABASE_URL, config.QR_HMAC_SECRET), { prefix: '/v1' });
   await app.register(async (r) => registerDrops(r, config.DATABASE_URL, config.REDIS_URL), { prefix: '/v1' });
   await app.register(async (r) => registerPromo(r, config.DATABASE_URL, config.REDIS_URL), { prefix: '/v1' });
+  await app.register(async (r) => registerAutomations(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerLadder(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMemberships(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerCrm(r, config.DATABASE_URL, config.QR_HMAC_SECRET), { prefix: '/v1' });

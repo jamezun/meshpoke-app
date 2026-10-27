@@ -118,6 +118,13 @@
       "when": 1764000000000,
       "tag": "0016_consumer_stripe_customer",
       "checksum": "abc123def456"
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1770000000000,
+      "tag": "0017_share_birth_month",
+      "checksum": "placeholder"
     }
   ]
 }

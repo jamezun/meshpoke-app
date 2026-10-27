@@ -32,6 +32,7 @@ const patchMeSchema = z.object({
   industry: z.enum(['finance', 'tech', 'design', 'media', 'medical', 'legal', 'education', 'hospitality', 'student', 'other']).optional(),
   role_oneliner: z.string().trim().max(40).optional(),
   hide_photo_in_rooms: z.boolean().optional(),
+  share_birth_month: z.boolean().optional(),
 });
 
 function referralCode(): string {
@@ -127,14 +128,15 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
     if (!parsed.success) {
       return reply.code(422).send({ type: 'about:blank', title: 'Unprocessable Entity', status: 422, errors: parsed.error.issues });
     }
-    const { display_name, industry, role_oneliner, hide_photo_in_rooms } = parsed.data;
+    const { display_name, industry, role_oneliner, hide_photo_in_rooms, share_birth_month } = parsed.data;
     const updated = await withTx(db, async (tx) => {
-      if (display_name !== undefined || industry !== undefined || hide_photo_in_rooms !== undefined) {
+      if (display_name !== undefined || industry !== undefined || hide_photo_in_rooms !== undefined || share_birth_month !== undefined) {
         await tx.update(users).set({ ...(display_name !== undefined ? { displayName: display_name } : {}) }).where(eq(users.id, req.user!.id));
         await tx.update(profiles).set({
           ...(industry !== undefined ? { industry } : {}),
           ...(role_oneliner !== undefined ? { roleOneliner: role_oneliner } : {}),
           ...(hide_photo_in_rooms !== undefined ? { hidePhotoInRooms: hide_photo_in_rooms } : {}),
+          ...(share_birth_month !== undefined ? { shareBirthMonth: share_birth_month } : {}),
         }).where(eq(profiles.userId, req.user!.id));
       }
       return true;

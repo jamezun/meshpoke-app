@@ -14,6 +14,7 @@ let cachedPool: pg.Pool | null = null;
 export function getPool(url: string): pg.Pool {
   if (!cachedPool) {
     cachedPool = new pg.Pool({ connectionString: url, max: 10 });
+    cachedPool.on('error', () => { /* idle client terminated (tests stop containers); swallow */ });
   }
   return cachedPool;
 }

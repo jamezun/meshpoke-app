@@ -7,8 +7,6 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { seedDistricts } from '../src/db/seed.js';
 
 const DB = process.env.E2E_DATABASE_URL ?? 'postgres://postgres:postgres@localhost:15432/meshpoke_e2e';
-const SECRET = process.env.E2E_GOTRUE_JWT_SECRET ?? 'e2e-secret-e2e-secret-e2e-secret-e2e-secret';
-
 const USERS = [
   { email: 'host@e2e.test', name: 'E2E Host', ref: 'E2EHOS01' },
   { email: 'member@e2e.test', name: 'E2E Member', ref: 'E2EMEM01' },

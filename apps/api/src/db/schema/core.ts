@@ -55,6 +55,7 @@ export const profiles = pgTable('profiles', {
   prompts: jsonb('prompts'), // [{ prompt, answer }] max 3
   photos: jsonb('photos'), // private; served via signed URLs
   hidePhotoInRooms: boolean('hide_photo_in_rooms').notNull().default(false),
+  shareBirthMonth: boolean('share_birth_month').notNull().default(false), // T21.7 birthday treat opt-in (default off)
   socials: jsonb('socials'), // { instagram?, linkedin? } revealed only at full-profile moment
   workBadge: workBadgeEnum('work_badge').notNull().default('none'),
 });
