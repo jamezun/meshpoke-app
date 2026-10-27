@@ -967,9 +967,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] CRM: aggregate (Starter), full member list with level, visits, last visit (Growth), export CSV (Pro)
 **Tests:** threshold unlock; export only on Pro.
 
-### [ ] T20.6 Merchant ladder builder UI
+### [x] T20.6 Merchant ladder builder UI
 **PRD refs:** §6.3 (Ladder builder) · **Depends:** T20.1
-- [ ] Template picker → level editor, inactivity period, live member-view preview, >20% info note, reduction warning dialog
+- [x] Template picker → level editor, inactivity period, live member-view preview, >20% info note, reduction warning dialog
 **Acceptance:** usability test: merchant sets up a 4-level ladder in < 5 minutes.
 
 ### [ ] T20.7 Mobile wallet & membership UX
@@ -1161,3 +1161,4 @@ Append one line per completed task (newest at the bottom).
 - T20.1–T20.4 ladder/memberships/level-engine/attribution built+tested (202 api tests). LadderBuilder UI + wallet UX next.
 - T20.5 coupons & CRM: issue/wallet/QR-redeem/milestone/aggregate-vs-full/CSV ✓ (203 api tests green)
 - T16.5 (✓): admin finance workspace (founding roster, disputes credit-note/reject w/ invoice adjust, ledger browser, health, band audit) + Admin.tsx FinanceSection. 206 api tests green.
+- T20.6 (✓): LadderBuilder.tsx in merchant portal (template picker, level editor w/ add/remove, inactivity select 30/60/90, client-side reduction warning → API 30d protection, >20% info, member-view preview).
