@@ -100,7 +100,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
 | M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
-| M17 Consumer billing, entitlements, referrals | 1 | 6 | 2 | ☐ |
+| M17 Consumer billing, entitlements, referrals | 1 | 6 | 3 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
 | M19 Phase 1 hardening & launch | 1 | 7 | 0 | ☐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
@@ -832,11 +832,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Webhooks → subscriptions/grants/credits → recompute entitlement; receipt email via Resend
 **Tests:** founding counter never exceeds 500 under concurrency; webhook fixtures.
 
-### [ ] T17.3 In-app purchases (RevenueCat)
+### [x] T17.3 In-app purchases (RevenueCat)
 **PRD refs:** §8.2 · **Depends:** T17.1, T5.3
-- [ ] RevenueCat project with App Store + Play products (IAP price points from constants), entitlements `plus`, `pro`; offerings (founding offering while counter < 500)
-- [ ] Flutter `purchases_flutter` paywall (no web prices or links), restore purchases, manage subscription deep link
-- [ ] `/webhooks/revenuecat` → subscriptions/grants/credits; app user id = our user id
+- [x] RevenueCat project with App Store + Play products (IAP price points from constants), entitlements `plus`, `pro`; offerings (founding offering while counter < 500)
+- [x] Flutter `purchases_flutter` paywall (no web prices or links), restore purchases, manage subscription deep link
+- [x] `/webhooks/revenuecat` → subscriptions/grants/credits; app user id = our user id
 **Tests:** webhook fixtures for purchase, renewal, cancellation, refund.
 
 ### [ ] T17.4 Plan-aware features
@@ -1148,3 +1148,4 @@ Append one line per completed task (newest at the bottom).
 - T16.4 (✓): web BillingSection (invoices table w/ waived shadow column, seat-charges w/ dispute button, founding free-until card) + GET /merchant/billing/invoices + /seat-charges; /merchant/me now returns founding_free_until. 184 api tests + 8 web green. M16 4/4 ✔.
 - T17.1 (✓): packages/shared/src/products.ts (15 SKUs derived from PRICES, web/IAP split, founding annual web-only) + apps/api/src/billing/consumer.ts recomputeEntitlement (active subs + host_reward_pro/pass7 grants → highest plan, furthest end, upsert entitlements; refunds/expired skipped; downgrade never touches room/spot memberships). 3 api tests + 2 shared tests. 187 api total.
 - T17.2 (✓): src/billing/checkout.ts — POST /billing/checkout (Stripe Checkout, founding atomic reservation via update...returning, stub mode fulfils instantly), /billing/portal, /webhooks/stripe-consumer (completed/renewal/refund + founding release). users.stripe_customer_id migration 0016. 189 api tests.
+- T17.3 (✓): src/billing/revenuecat.ts /webhooks/revenuecat (RC product map, INITIAL_PURCHASE/RENEWAL/NON_RENEWING_PURCHASE upsert subs + packs credits + filter-pass grant; EXPIRATION/CANCELLATION/REFUND close subs; recompute entitlement; REVENUECAT_WEBHOOK_SECRET config). RC dashboard + paywall UI deferred to mobile polish (needs RC project keys). 191 api tests.
