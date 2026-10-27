@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm';
 import { capture } from '../analytics.js';
 import { getDb } from '../db/client.js';
 import { referralOnFirstAttendance } from './referrals.js';
+import { notify } from '../notify.js';
+import { recomputeEntitlement } from '../billing/consumer.js';
 import { SPOT_RULES } from '@meshpoke/shared';
 
 /**
@@ -14,7 +16,7 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
   const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
 
   const getSpot = async (id: string) =>
-    rows(await db.execute(sql`select id, host_user_id, state, starts_at from spots where id = ${id}::uuid`));
+    rows(await db.execute(sql`select id, host_user_id, state, starts_at, min_headcount from spots where id = ${id}::uuid`));
 
   /** host roll-call — GET list (all attended by default), POST mark absences */
   app.get<{ Params: { id: string } }>('/spots/:id/roll-call', { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -191,7 +193,37 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
           await referralOnFirstAttendance(db, String(at.user_id));
         }
       }
-      return { finalised: unfinalised.length };
+      // T21.3: host-reward Pro days — qualifying spot check
+      let hostReward: string | null = null;
+      if (s.host_user_id) {
+        const att = unfinalised.length > 0 ? unfinalised : rows(await db.execute(sql`
+          select user_id, status from attendance where spot_id = ${req.params.id}::uuid`));
+        const attended = att.filter((a) => a.status === 'attended' || a.status === 'forgiven').length;
+        const ratio = att.length > 0 ? attended / att.length : 0;
+        const avgRating = rows(await db.execute(sql`
+          select avg(rating)::float as avg from safety_ratings where spot_id = ${req.params.id}::uuid`));
+        const hasRatings = avgRating[0]?.avg != null; const rating = Number(avgRating[0]?.avg ?? 0);
+        const qualifies = attended >= Number(s.min_headcount) && ratio >= 0.8 && (!hasRatings || rating >= 4);
+        if (qualifies) {
+          // cap: ≤7 rewarded days per rolling 30d per host
+          const granted = rows(await db.execute(sql`
+            select coalesce(sum(extract(epoch from (ends_at - starts_at)) / 86400), 0)::int as days
+              from grants
+             where kind = 'host_reward_pro' and user_id = ${s.host_user_id}::uuid
+               and starts_at > now() - interval '30 days'`));
+          if (Number(granted[0]?.days ?? 0) < 7) {
+            await db.execute(sql`
+              insert into grants (user_id, kind, starts_at, ends_at)
+              values (${s.host_user_id}::uuid, 'host_reward_pro', now(), now() + interval '2 days')`);
+            hostReward = 'granted 2 pro days';
+            await notify(dbUrl, String(s.host_user_id), 'spots', 'host_reward', { spotId: req.params.id }).catch(() => {});
+            await recomputeEntitlement(db, String(s.host_user_id));
+          } else {
+            hostReward = 'capped (7 days / 30d)';
+          }
+        }
+      }
+      return { finalised: unfinalised.length, hostReward };
     },
   );
 }

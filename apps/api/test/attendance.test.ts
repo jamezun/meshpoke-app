@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect, test } from 'vitest';
+import { afterAll, beforeAll, expect, test, it } from 'vitest';
 import { SignJWT } from 'jose';
 import { Pool } from 'pg';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
@@ -131,3 +131,32 @@ test('roll-call defaults attended; host absence flips b; 1 peer report no effect
   const cEvents = events.filter((e) => e.user_id === users.c.id);
   expect(cEvents.every((e) => Number(e.weight) <= 0)).toBe(true);
 });
+
+  // T21.3: host-reward Pro days
+  it('T21.3 grants 2d pro on qualifying finalise, caps at 7d/30d', async () => {
+    const sid = await mkLiveSpot();
+    const f = await app.inject({ method: 'POST', url: `/v1/spots/${sid}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
+    expect(f.statusCode).toBe(200);
+    expect(f.json().hostReward).toContain('granted 2 pro days');
+    const g = await pool.query(`select kind from grants where user_id = $1 and kind = 'host_reward_pro'`, [users.host!.id]);
+    expect(g.rowCount).toBe(1);
+    const e = await pool.query(`select plan from entitlements where user_id = $1`, [users.host!.id]);
+    expect(e.rows[0].plan).toBe('pro');
+    const sid2 = await mkLiveSpot();
+    const f2 = await app.inject({ method: 'POST', url: `/v1/spots/${sid2}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
+    expect(f2.json().hostReward).toContain('granted 2 pro days');
+    for (let k = 0; k < 3; k++) {
+      await pool.query(`insert into grants (user_id, kind, starts_at, ends_at) values ($1, 'host_reward_pro', now(), now() + interval '1 day')`, [users.host!.id]);
+    }
+    const sid3 = await mkLiveSpot();
+    const f3 = await app.inject({ method: 'POST', url: `/v1/spots/${sid3}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
+    expect(f3.json().hostReward).toContain('capped');
+  });
+
+  it('T21.3 no reward when attendance ratio < 80%', async () => {
+    const sid = await mkLiveSpot();
+    await app.inject({ method: 'POST', url: `/v1/spots/${sid}/roll-call`, headers: { authorization: `Bearer ${users.host.tok}` }, payload: { absent: [users.a!.id, users.b!.id] } });
+    const f = await app.inject({ method: 'POST', url: `/v1/spots/${sid}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
+    expect(f.statusCode).toBe(200);
+    expect(f.json().hostReward).toBeNull();
+  });
