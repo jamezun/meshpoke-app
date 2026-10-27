@@ -13,7 +13,7 @@ const infra = useInfra();
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 let pool: Pool;
-let adminTok: string;
+let _adminTok: string;
 const tok: Record<string, string> = {};
 
 async function mkUser(name: string): Promise<string> {
@@ -47,7 +47,7 @@ beforeAll(async () => {
   await pool.query(
     `insert into users (id, email, auth_provider, display_name, date_of_birth, referral_code, liveness_state, is_admin, admin_roles)
      values ($1, 'admin@t.test', 'email', 'Admin', '1990-01-01', 'MPADMIN1', 'verified', true, '{superadmin}')`, [adminId]);
-  adminTok = await new SignJWT({ role: 'admin', admin_roles: ['superadmin'], aal: 'aal2' })
+  _adminTok = await new SignJWT({ role: 'admin', admin_roles: ['superadmin'], aal: 'aal2' })
     .setProtectedHeader({ alg: 'HS256' }).setSubject(adminId).setIssuedAt().setExpirationTime('1h')
     .sign(new TextEncoder().encode(JWT));
 });
