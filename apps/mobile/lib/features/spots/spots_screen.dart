@@ -15,6 +15,22 @@ class SpotsScreen extends ConsumerStatefulWidget {
 class _SpotsScreenState extends ConsumerState<SpotsScreen> {
   String? _districtId;
   String _time = 'week';
+  String? _keyword;
+
+  Widget _keywordFilter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: TextField(
+        decoration: const InputDecoration(
+          prefixIcon: Icon(Icons.tune, size: 18),
+          hintText: 'Filter: hiking, tennis, finance…',
+          isDense: true,
+          border: OutlineInputBorder(),
+        ),
+        onSubmitted: (v) => setState(() => _keyword = v.isEmpty ? null : v),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +41,18 @@ class _SpotsScreenState extends ConsumerState<SpotsScreen> {
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: () async {
             final id = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const HostSpotScreen()));
-            if (id != null && _districtId != null) ref.invalidate(spotsProvider((_districtId!, _time)));
+            if (id != null && _districtId != null) ref.invalidate(spotsProvider((_districtId!, _time, _keyword)));
           }),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+            child: _keywordFilter(),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Row(
               children: [
                 Expanded(
@@ -67,7 +87,7 @@ class _SpotsScreenState extends ConsumerState<SpotsScreen> {
           Expanded(
             child: _districtId == null
                 ? const Center(child: Text('Pick a district to browse spots'))
-                : ref.watch(spotsProvider((_districtId!, _time))).when(
+                : ref.watch(spotsProvider((_districtId!, _time, _keyword))).when(
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Center(child: Text('$e')),
                     data: (spots) => spots.isEmpty

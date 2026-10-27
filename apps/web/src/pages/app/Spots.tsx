@@ -37,14 +37,17 @@ export function SpotsPage() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [note, setNote] = useState('');
   const [msg, setMsg] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [keywordDone, setKeywordDone] = useState('');
 
   const load = async () => {
     if (!district) return;
-    const r = await api<{ spots: Spot[] }>(`/districts/${district}/spots?time=${time}`);
+    const kw = keyword.trim() ? `&keywords=${encodeURIComponent(keyword.trim().toLowerCase().replaceAll(' ', ''))}` : '';
+    const r = await api<{ spots: Spot[] }>(`/districts/${district}/spots?time=${time}${kw}`);
     setSpots(r.spots);
   };
   useEffect(() => { api<{ districts: District[] }>('/districts').then((d) => setDistricts(d.districts)).catch(() => {}); }, []);
-  useEffect(() => { load().catch((e) => setMsg(String(e))); }, [district, time]);
+  useEffect(() => { load().catch((e) => setMsg(String(e))); }, [district, time, keywordDone]);
 
   const open = async (id: string) => {
     setMsg('');
@@ -70,6 +73,8 @@ export function SpotsPage() {
         <select className="rounded-lg border px-3 py-2" value={time} onChange={(e) => setTime(e.target.value)}>
           <option value="today">Today</option><option value="week">This week</option><option value="all">All</option>
         </select>
+        <input className="rounded-lg border px-3 py-2 flex-1" placeholder="Filter: hiking, tennis… (Plus)" value={keyword}
+          onChange={(e) => setKeyword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && setKeywordDone(keyword)} />
       </div>
       {msg && <p className="text-sm text-red-600 break-all">{msg}</p>}
 

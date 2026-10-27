@@ -12,21 +12,15 @@ import { recomputeEntitlement } from './consumer.js';
 
 
 // RevenueCat product identifiers (App Store / Play) → our SKUs
-const RC_PRODUCTS: Record<string, string> = {
-  plus_monthly: 'plus_monthly',
-  plus_7d: 'plus_7d',
-  plus_3mo: 'plus_3mo',
-  plus_6mo: 'plus_6mo',
-  plus_founding_monthly: 'plus_founding_monthly',
-  pro_monthly: 'pro_monthly',
-  pro_7d: 'pro_7d',
-  pro_3mo: 'pro_3mo',
-  pro_6mo: 'pro_6mo',
-  pro_founding_monthly: 'pro_founding_monthly',
-  poke_pack_5: 'poke_pack_5',
-  poke_pack_15: 'poke_pack_15',
-  filter_pass_7d: 'filter_pass_7d',
-};
+const RC_INTERNAL = ['plus_monthly', 'plus_7d', 'plus_3mo', 'plus_6mo', 'plus_founding_monthly',
+  'pro_monthly', 'pro_7d', 'pro_3mo', 'pro_6mo', 'pro_founding_monthly',
+  'poke_pack_5', 'poke_pack_15', 'filter_pass_7d'];
+// store SKUs are mp_<internal> (App Store/Play); accept both forms (T21.1)
+const RC_PRODUCTS: Record<string, string> = {};
+for (const id of RC_INTERNAL) {
+  RC_PRODUCTS[id] = id;
+  RC_PRODUCTS[`mp_${id}`] = id;
+}
 
 export function registerRevenueCat(app: FastifyInstance, dbUrl: string, config: Config): void {
   const db = getDb(dbUrl);

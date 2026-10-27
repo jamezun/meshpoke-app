@@ -48,9 +48,13 @@ class SpotSummary {
 }
 
 final spotsProvider = FutureProvider.autoDispose
-    .family<List<SpotSummary>, (String, String)>((ref, params) async {
+    .family<List<SpotSummary>, (String, String, String?)>((ref, params) async {
       final dio = ref.watch(apiClientProvider);
-      final res = await dio.get('/districts/${params.$1}/spots', queryParameters: {'time': params.$2});
+      final q = <String, dynamic>{'time': params.$2};
+      if (params.$3 != null && params.$3!.trim().isNotEmpty) {
+        q['keywords'] = params.$3!.trim().toLowerCase().replaceAll(' ', '');
+      }
+      final res = await dio.get('/districts/${params.$1}/spots', queryParameters: q);
       return [for (final s in (res.data['spots'] ?? []) as List) SpotSummary.fromJson(s as Map<String, dynamic>)];
     });
 
