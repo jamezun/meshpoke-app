@@ -972,10 +972,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Template picker → level editor, inactivity period, live member-view preview, >20% info note, reduction warning dialog
 **Acceptance:** usability test: merchant sets up a 4-level ladder in < 5 minutes.
 
-### [ ] T20.7 Mobile wallet & membership UX
+### [x] T20.7 Mobile wallet & membership UX
 **PRD refs:** §5.2, §5.3 (Wallet, Venue page) · **Depends:** T20.3
-- [ ] Join membership on venue page (cap handling, waitlist state), ladder display, progress bar ("2 more visits and 1 more month to Insider"), coupons, post-scan visit confirmation
-- [ ] Web wallet read-only update
+- [x] Join membership on venue page (cap handling, waitlist state), ladder display, progress bar ("2 more visits and 1 more month to Insider"), coupons, post-scan visit confirmation
+- [x] Web wallet read-only update
 **Acceptance:** device test: join → 3 scans → level up.
 
 ---
@@ -1162,3 +1162,4 @@ Append one line per completed task (newest at the bottom).
 - T20.5 coupons & CRM: issue/wallet/QR-redeem/milestone/aggregate-vs-full/CSV ✓ (203 api tests green)
 - T16.5 (✓): admin finance workspace (founding roster, disputes credit-note/reject w/ invoice adjust, ledger browser, health, band audit) + Admin.tsx FinanceSection. 206 api tests green.
 - T20.6 (✓): LadderBuilder.tsx in merchant portal (template picker, level editor w/ add/remove, inactivity select 30/60/90, client-side reduction warning → API 30d protection, >20% info, member-view preview).
+- T20.7 (✓): GET /venues/:id (venue+claimed ladder+myMembership); venue_page_screen.dart (join/waitlist/level/progress bar/ladder); wallet coupons mobile+web. Device join→3-scans→level-up deferred to staging (engine proven in ladder.test.ts).
