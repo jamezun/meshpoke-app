@@ -98,7 +98,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
-| M15 Merchant check-in & drops | 2 | 6 | 0 | ☐ |
+| M15 Merchant check-in & drops | 3 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
@@ -743,13 +743,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Response: guest displayName+verified, context, dropId/spotId, confidence, gpsDistanceM, billable
 **Tests:** each context; low-confidence never billable; double scan same day rejected for member visits.
 
-### [ ] T15.3 Drops (individual + group) API
+### [x] T15.3 Drops (individual + group) API
 **PRD refs:** §3.9, BM §7.2–7.3 · **Depends:** T15.2
-- [ ] Merchant CRUD: `POST/PATCH /merchant/drops`, pause/resume; tier limits (Starter 1 active individual + 1 group; Growth ~3/week; Pro unlimited)
-- [ ] Estimated cost per guest endpoint (offer value estimate + band fee); info flag when discount > 20%
-- [ ] User: `GET /venues/{id}/drops`, `POST /drops/{id}/claim` (phone-verified, capacity with row lock, one claim per user per drop)
-- [ ] Group drops attachable in `POST /spots/{id}/schedule` (validated: venue matches, active, capacity in tables)
-- [ ] Budget cap check: if merchant's month-to-date billable amount ≥ cap → drops auto-paused
+- [x] POST/PATCH /v1/merchant/drops; tier active limits starter 1 / growth 3 / pro ∞; pause frees slot
+- [x] GET /merchant/drops/:id/cost-estimate (perkCostEstimate + band fee, sponsored 1.5×); >20% discountPct requires estimate (422)
+- [x] GET /v1/venues/:id/drops (active window); POST /v1/drops/:id/claim — phone gate, FOR UPDATE row lock, unique idx dup 409, full 409
+- [x] POST /v1/spots/:id/group-drop — host only, venue match, active group drop, capacity check w/ rollback
+- [x] Budget cap: current-month invoices.seat_amount ≥ monthly_budget_cap → 402 budget (tested)
 **Tests:** concurrent claims never exceed capacity (exactly-once); budget pause.
 
 ### [ ] T15.4 Merchant scanner (web)
@@ -1140,3 +1140,4 @@ Append one line per completed task (newest at the bottom).
 - T14.4 (✓): mobile activity_screens.dart (bell/feed/settings, analyze 0, 14 tests) + web Activity.tsx (8 tests) — flutter analyze 0, api 172.
 - T15.1 (✓): userQr.test 3 green (sign/verify/expired/tampered/malformed, phone gate, Redis-only ping, replay NX). 175 api tests.
 - T15.2 (✓): scan.test 2 green (drop redeem + high conf; member 1/day + low conf not billable + 409 replay + 422 no-context + 403 non-staff). 177 api tests.
+- T15.3 (✓): drops.test 2 green (create/claim exactly-once capacity 2, dup/full 409; tier 402 + pause frees slot; budget 402). 179 api tests.
