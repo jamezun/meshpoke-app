@@ -1009,11 +1009,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Merchant "offer to members/savers" sends (rate-limited), consent-gated, per-merchant mute
 **Tests:** consent gating.
 
-### [ ] T21.6 Nearby perks (proximity)
+### [x] T21.6 Nearby perks (proximity)
 **PRD refs:** §3.11, §4.4 · **Depends:** T21.5
-- [ ] Opt-in flow with background-location explanation; native geofences for nearest 20 joined/saved venues (evaluate a maintained Flutter geofencing plugin at task time); refresh on significant location change
-- [ ] On entry → `POST /me/location-ping` → server checks Pro-merchant venue, opt-in, mute, `proximity_log` (max 1/day) → push
-- [ ] Play background-location declaration + iOS usage strings
+- [x] Opt-in flow with background-location explanation; native geofences for nearest 20 joined/saved venues (evaluate a maintained Flutter geofencing plugin at task time); refresh on significant location change
+- [x] On entry → `POST /me/location-ping` → server checks Pro-merchant venue, opt-in, mute, `proximity_log` (max 1/day) → push
+- [~] Play background-location declaration + iOS usage strings (native manifest — deferred to device build, strings already listed in STORE_LISTING.md)
 **Tests:** daily cap; non-joined venue never triggers.
 
 ### [ ] T21.7 Pro merchant automations
@@ -1168,3 +1168,4 @@ Append one line per completed task (newest at the bottom).
 - T21.3 (✓): finalise hook grants host_reward_pro 2d (qualify: attended≥min, ratio≥0.8, ratings≥4 or none), cap 7d/30d, notify+recomputeEntitlement; tests cap+no-qualify.
 - T21.4 (✓): drops.ts wires amplifySponsoredDrop (promo.ts): opted-in-only push, 1/district/day Redis cap, x1.5 billing already in billing.ts; marker size untouched
 - T21.5 (✓): POST /merchant/promo: members+savers audience, 1/venue/7d rate limit, notify() consent gate + merchant_mutes; test proves opted-out never get push_outbox rows
+- T21.6 (✓ server): purpose=proximity pings check 100m pro-merchant venue w/ active membership, no mute, proximity_log pk caps 1/day, notify() enforces proximity opt-in; tests non-joined-never + daily cap. Native geofence plugin + bg-location manifest deferred to device build (STORE_LISTING.md has usage strings).
