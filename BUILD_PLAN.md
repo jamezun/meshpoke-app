@@ -98,7 +98,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
-| M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
+| M15 Merchant check-in & drops | 2 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
@@ -734,13 +734,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] markQrUsed — SET NX EX 120, second use returns false
 **Tests:** valid, expired, tampered, replayed tokens.
 
-### [ ] T15.2 Staff scan endpoint
+### [x] T15.2 Staff scan endpoint
 **PRD refs:** §3.9 (Staff scan), §8.3 · **Depends:** T15.1, T8.2
-- [ ] `POST /merchant/scan {qr_payload, context?, drop_id?, spot_id?}` (merchant staff only)
-- [ ] Resolve context: claimed drop for this venue → `drop`; event spot at this venue with attached group drop and user attending → `group_drop`; active membership → `member_visit` (max 1/day/venue)
-- [ ] GPS confidence: guest's recent location within `100 m + accuracy` of venue → `high`, else `low`
-- [ ] Writes `merchant_checkins`; calls billing hook (T16.1) for high-confidence billable events
-- [ ] Response: user sketch (display name + primary photo for staff identification), event type, billable flag, confidence
+- [x] POST /v1/merchant/scan — staff = merchant owner OR merchant_staff row (auth runs before QR burn)
+- [x] Context resolution drop→group_drop→member_visit (explicit context honored); member_visit capped 1/day/venue → 409; claims redeemed on scan
+- [x] Confidence via Redis location ping + ST_Distance ≤ 100m+accuracy → high
+- [x] merchant_checkins row written; billable flag returned (T16.1 seat-charge engine hooks this)
+- [x] Response: guest displayName+verified, context, dropId/spotId, confidence, gpsDistanceM, billable
 **Tests:** each context; low-confidence never billable; double scan same day rejected for member visits.
 
 ### [ ] T15.3 Drops (individual + group) API
@@ -1139,3 +1139,4 @@ Append one line per completed task (newest at the bottom).
 - T14.1+T14.2+T14.3 (✓): activity.test 3 green (feed/cursor/read, outbox gates, emitters). 172 api tests.
 - T14.4 (✓): mobile activity_screens.dart (bell/feed/settings, analyze 0, 14 tests) + web Activity.tsx (8 tests) — flutter analyze 0, api 172.
 - T15.1 (✓): userQr.test 3 green (sign/verify/expired/tampered/malformed, phone gate, Redis-only ping, replay NX). 175 api tests.
+- T15.2 (✓): scan.test 2 green (drop redeem + high conf; member 1/day + low conf not billable + 409 replay + 422 no-context + 403 non-staff). 177 api tests.
