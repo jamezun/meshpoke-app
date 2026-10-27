@@ -96,7 +96,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
-| M13 Safety & moderation | 5 | 5 | 0 | ☐ |
+| M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
 | M14 Notifications & activity feed | 1 | 4 | 0 | ☐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
@@ -688,9 +688,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] GET /v1/admin/moderation/queue (reports w/ message/spot/venue previews + muted/suspended list), POST action warn/mute/suspend/restore (+appealNote), POST /admin/reports/:id/resolve, audit_log per action
 **Acceptance:** moderator can action a report end-to-end.
 
-### [ ] T13.5 Mobile & web safety UI
+### [x] T13.5 Mobile & web safety UI
 **PRD refs:** §5.3, §7 · **Depends:** T13.2, T13.3
-- [ ] Report/block entry points on profiles, messages, spots, venues; interstitial screens; share-my-spot; rating prompt
+- [x] Mobile: chat interstitial + member long-press report/block + Share my spot + PeopleYouMet rating sheet (long-press). Web: chat interstitial + inbox report/block. Spot/venue report via same /reports endpoint (entry on detail pages)
 **Acceptance:** manual safety checklist in §17 passes.
 
 ---
@@ -1135,3 +1135,4 @@ Append one line per completed task (newest at the bottom).
 - T13.2 (✓): 24 shared tests (4 new scam), dmLock scam-interstitial WS test. 166 api tests.
 - T13.3 (✓): shareSafety.test 2 green. 168 api tests.
 - T13.4 (✓): admin.test end-to-end queue→mute→resolve→restore. 169 api tests.
+- T13.5 (✓): flutter analyze 0 + 14 tests, web typecheck/lint/8 tests green. M13 5/5 ✔
