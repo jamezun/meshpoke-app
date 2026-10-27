@@ -96,7 +96,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M10 Attendance & Show-up Score | 1 | 5 | 0 | ☐ |
 | M11 Pokes & connections | 1 | 5 | 0 | ☐ |
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
-| M13 Safety & moderation | 3 | 5 | 0 | ☐ |
+| M13 Safety & moderation | 4 | 5 | 0 | ☐ |
 | M14 Notifications & activity feed | 1 | 4 | 0 | ☐ |
 | M15 Merchant check-in & drops | 1 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
@@ -677,10 +677,10 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] scameterUrl() helper (cyberdefender.hk) for report flow
 **Tests:** fixture messages flagged / not flagged.
 
-### [ ] T13.3 Share-my-spot & safety ratings
+### [x] T13.3 Share-my-spot & safety ratings
 **PRD refs:** §7.2 · **Depends:** T9.4
-- [ ] Share-my-spot: signed public link (venue, time, attendee count; expires 2h after end)
-- [ ] Post-spot private safety rating (1–5 + flag) feeding moderation signals
+- [x] POST /spots/:id/share-my-spot (member-only) → HMAC-signed /share link; GET /v1/public/spot-share (no auth) returns venue/startsAt/attendeeCount only; 410 after template duration + 2h, 403 on bad sig
+- [x] POST /spots/:id/safety-rating (attendees only, no self, once per pair via unique idx, 409 dup); flag=true auto-files a linked report
 **Tests:** link expiry; ratings never exposed via public endpoints.
 
 ### [ ] T13.4 Admin moderation queue
@@ -1133,3 +1133,4 @@ Append one line per completed task (newest at the bottom).
 - T12.3 (✓): flutter analyze clean + 14 tests, web 8 tests. M12 3/3 ✔
 - T13.1 (✓): safety.test 2 green (block matrix, auto-mute single-insert). 165 api tests.
 - T13.2 (✓): 24 shared tests (4 new scam), dmLock scam-interstitial WS test. 166 api tests.
+- T13.3 (✓): shareSafety.test 2 green. 168 api tests.
