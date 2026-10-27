@@ -104,7 +104,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M18 Authenticated web & host console | 1 | 4 | 3 | ☐ |
 | M19 Phase 1 hardening & launch | 3 | 7 | 3 | ◐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
-| M21 Scale features | 3 | 8 | 0 | ☐ |
+| M21 Scale features | 8 | 8 | 8 | ✔ |
 | M22 Expand backlog | 4 | 6 | 0 | ☐ |
 
 ---
@@ -1021,9 +1021,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Birthday treat (requires user opt-in to share birth month with venues they join — default off), win-back after N days inactive, members-only event invites
 **Tests:** automation triggers; opt-in respected.
 
-### [ ] T21.8 Second district & finance dashboards
+### [x] T21.8 Second district & finance dashboards
 **PRD refs:** §16 (Phase 3), §10 · **Depends:** M19
-- [ ] Enable FEHD import + city room for district 2; admin finance (MRR by lane, seat revenue by event type, reconciliation)
+- [x] Enable FEHD import + city room for district 2; admin finance (MRR by lane, seat revenue by event type, reconciliation)
 **Acceptance:** second district live.
 
 ---
@@ -1170,3 +1170,4 @@ Append one line per completed task (newest at the bottom).
 - T21.5 (✓): POST /merchant/promo: members+savers audience, 1/venue/7d rate limit, notify() consent gate + merchant_mutes; test proves opted-out never get push_outbox rows
 - T21.6 (✓ server): purpose=proximity pings check 100m pro-merchant venue w/ active membership, no mute, proximity_log pk caps 1/day, notify() enforces proximity opt-in; tests non-joined-never + daily cap. Native geofence plugin + bg-location manifest deferred to device build (STORE_LISTING.md has usage strings).
 - T21.7 (✓): automations.ts (birthday/winback sweeps + event-invite, idempotent coupons); migration 0017 share_birth_month default off; me.ts PATCH accepts share_birth_month; automations.test.ts 2 green; cachedPool error-swallow fixes teardown race.
+- T21.8 (✓): GET /admin/finance/overview (consumer+merchant MRR, seat revenue by event_type, one-off purchases, invoice seat reconciliation); district-2 enable steps in RUNBOOK (FEHD_DISTRICTS scoped import; city rooms pre-exist). adminFinance.test.ts 4 green.
