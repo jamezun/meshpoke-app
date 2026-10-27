@@ -94,7 +94,7 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: apps/web/playwright-report/
+          path: apps/web/test-results/
           retention-days: 3
       - name: teardown
         if: always()
