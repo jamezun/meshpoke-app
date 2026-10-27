@@ -163,4 +163,37 @@ export function registerAdminFinance(app: FastifyInstance, dbUrl: string) {
     await notify(dbUrl, String(upd[0].owner_user_id), 'moderation', 'moderation', { bandAudit: b.newBand } as never).catch(() => {});
     return { venueId, newBand: b.newBand };
   });
+
+  /** T21.8 finance overview: MRR by lane, seat revenue by event type, invoice reconciliation */
+  app.get('/admin/finance/overview', { preHandler: pre }, async () => {
+    const consumerMrr = rows(await db.execute(sql`
+      select coalesce(sum(price_paid), 0)::int as mrr, count(*)::int as n
+        from subscriptions where status = 'active'`));
+    const merchantMrr = rows(await db.execute(sql`
+      select coalesce(sum(price), 0)::int as mrr, count(*)::int as n
+        from merchant_subscriptions where status = 'active'`));
+    const seatByType = rows(await db.execute(sql`
+      select event_type, coalesce(sum(amount), 0)::int as hkd, count(*)::int as n
+        from seat_charges where shadow = false group by event_type order by 2 desc`));
+    const packs = rows(await db.execute(sql`
+      select product, coalesce(sum(price_paid), 0)::int as hkd, count(*)::int as n
+        from subscriptions where status = 'paid' group by product order by 2 desc`));
+    // reconciliation: invoices.seat_amount vs sum of charged seat_charges linked by invoice_id
+    const recon = rows(await db.execute(sql`
+      select count(*)::int as mismatched
+        from invoices i
+        left join (select invoice_id, coalesce(sum(amount), 0)::int as charged
+                    from seat_charges where invoice_id is not null group by invoice_id) c
+          on c.invoice_id = i.id
+       where i.seat_amount <> coalesce(c.charged, 0)`));
+    return {
+      consumerMrrHkd: consumerMrr[0]?.mrr ?? 0,
+      consumerActive: consumerMrr[0]?.n ?? 0,
+      merchantMrrHkd: merchantMrr[0]?.mrr ?? 0,
+      merchantActive: merchantMrr[0]?.n ?? 0,
+      seatRevenueByType: seatByType,
+      oneOffPurchases: packs,
+      invoiceSeatMismatches: recon[0]?.mismatched ?? 0,
+    };
+  });
 }

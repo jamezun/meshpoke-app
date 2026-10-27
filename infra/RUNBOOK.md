@@ -79,3 +79,8 @@ docker run --rm -v "$DIR:/data:ro" rclone/rclone copy /data r2:meshpoke-backups/
 
 - SupremaNode unaffected: our containers never touch its network except `dokploy-network` (read-only usage of `db` alias) and ~1 GB memory ceiling vs ~3.2 GB free. Check after deploy: `docker stats --no-stream | grep meshpoke`.
 - If `dokploy-network` alias `db` ever collides with another app's `db` alias, switch DATABASE_URL host to the full container name `suprema-node-supabase-sytuei-supabase-db`.
+
+## District 2 enablement (T21.8)
+City rooms exist for all 18 districts (seed). To open district 2 (e.g. Wan Chai):
+1. `FEHD_DISTRICTS='Wan Chai' pnpm --filter @meshpoke/api fehd:import` (scoped import)
+2. Spot creation/district selection needs no switch — users pick any seeded district.

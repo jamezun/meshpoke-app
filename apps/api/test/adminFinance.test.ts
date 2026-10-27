@@ -143,4 +143,15 @@ describe('T16.5 admin merchant finance', () => {
       headers: await H(adminId), payload: JSON.stringify({ resolution: 'rejected' }) });
     expect(again.statusCode).toBe(409);
   });
+it('T21.8 finance overview: lanes + reconciliation zero-mismatch', async () => {
+  const r = await app.inject({ method: 'GET', url: '/v1/admin/finance/overview', headers: await H(adminId) });
+  expect(r.statusCode).toBe(200);
+  const body = r.json();
+  expect(body).toHaveProperty('consumerMrrHkd');
+  expect(body).toHaveProperty('merchantMrrHkd');
+  expect(body).toHaveProperty('seatRevenueByType');
+  expect(body).toHaveProperty('invoiceSeatMismatches');
+  expect(body.invoiceSeatMismatches).toBe(0); // no invoices in test DB
+});
+
 });
