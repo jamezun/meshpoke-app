@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
+import { notify } from '../notify.js';
 import { getPlan } from '../entitlements.js';
 import { TIER_CAPS } from '@meshpoke/shared/constants';
 
@@ -51,6 +52,12 @@ export function registerRebook(app: FastifyInstance, dbUrl: string) {
       returning id, created_at as "createdAt"`));
     // rebook activity counts: reset dormancy marker (reactivation)
     await db.execute(sql`update crews set dormant_at = null where id = ${req.params.id}::uuid`);
+    // T14.1: crew poll → notify other members
+    const crewMates = rowsOf(await db.execute(sql`
+      select user_id from crew_members where crew_id = ${req.params.id}::uuid and user_id <> ${me}::uuid`));
+    for (const m of crewMates) {
+      await notify(dbUrl, String(m.user_id), 'crews', 'crew_poll', { crewId: req.params.id, rebookId: r[0].id });
+    }
     return reply.code(201).send({ rebookId: r[0].id, pollOptions: body.data.pollOptions });
   });
 

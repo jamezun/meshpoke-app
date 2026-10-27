@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
+import { notify } from '../notify.js';
 import { getPlan } from '../entitlements.js';
 import { resolvePokeCost, chargePoke, ensureBalanceReset } from './pokeLedger.js';
 import { trustExpr } from '../trust.js';
@@ -90,6 +91,8 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
     if (theirPending.length > 0) {
       const { connId, roomId } = await createConnection(from, to);
       await db.execute(sql`update pokes set status = 'returned' where id = ${theirPending[0].id}::uuid`);
+      await notify(dbUrl, from, 'pokes', 'connection', { with: to, roomId });
+      await notify(dbUrl, to, 'pokes', 'connection', { with: from, roomId });
       const mine = rows(await db.execute(sql`
         insert into pokes (from_user, to_user, note, source, spot_id, cost_type, status, expires_at)
         values (${from}::uuid, ${to}::uuid, ${note ?? null}, ${source}::poke_source, ${spotId ?? null}::uuid, 'free_poke_back', 'returned', now() + interval '${sql.raw(String(POKE_RULES.expiryDays))} days')
@@ -107,6 +110,7 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
       insert into pokes (from_user, to_user, note, source, spot_id, cost_type, status, expires_at)
       values (${from}::uuid, ${to}::uuid, ${note ?? null}, ${source}::poke_source, ${spotId ?? null}::uuid, ${cost.cost}::poke_cost_type, 'pending', now() + interval '${sql.raw(String(POKE_RULES.expiryDays))} days')
       returning id, expires_at`));
+    await notify(dbUrl, to, 'pokes', 'poke_received', { from, pokeId: ins[0].id });
     return reply.code(201).send({ pokeBack: false, cost: cost.cost, pokeId: ins[0].id, expiresAt: ins[0].expires_at });
   });
 

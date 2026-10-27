@@ -4,6 +4,7 @@ import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
+import { notify } from '../notify.js';
 import { SPOT_RULES } from '@meshpoke/shared/constants';
 
 const Decision = z.object({
@@ -55,6 +56,7 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
       update applications set status = ${status}::application_status, decided_at = now(),
              decline_reason = ${declineReason}
        where id = ${req.params.id}::uuid`);
+    await notify(dbUrl, String(a.user_id), 'spots', `application_${status}`, { spotId: a.spot_id, reason: declineReason });
     if (status === 'accepted') {
       await db.execute(sql`
         insert into spot_members (spot_id, user_id, role, confirm_state) values (${a.spot_id}::uuid, ${a.user_id}, 'member', 'pending')
@@ -90,6 +92,11 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
              group_drop_id = ${parsed.data.groupDropId ?? null}, confirm_deadline = ${deadline}
        where id = ${s.id}::uuid`);
     await db.execute(sql`update applications set status = 'closed' where spot_id = ${s.id}::uuid and status = 'pending'`);
+    const membersToPing = rows(await db.execute(sql`
+      select user_id from spot_members where spot_id = ${s.id}::uuid and state = 'active' and role <> 'host'`));
+    for (const m of membersToPing) {
+      await notify(dbUrl, String(m.user_id), 'spots', 'date_pinned', { spotId: s.id, startsAt: parsed.data.startsAt, deadline: deadline.toISOString() });
+    }
     return { state: 'confirmed', confirmDeadline: deadline.toISOString() };
   });
 
