@@ -26,6 +26,7 @@ export const PRODUCTS: readonly Product[] = [
   sub('plus_7d', 'plus', 7, PRICES.plus.web.pass7d, PRICES.plus.iap.pass7d),
   sub('plus_3mo', 'plus', 90, PRICES.plus.web.term3mo, PRICES.plus.iap.term3mo),
   sub('plus_6mo', 'plus', 180, PRICES.plus.web.term6mo, PRICES.plus.iap.term6mo),
+  sub('plus_annual', 'plus', 365, PRICES.plus.web.annual, PRICES.plus.iap.annual), // T22.1 non-founding annual (BM: post-density raise)
   sub('plus_founding_monthly', 'plus', 30, PRICES.plus.web.foundingMonthly, PRICES.plus.iap.foundingMonthly),
   sub('plus_founding_annual', 'plus', 365, PRICES.plus.web.foundingAnnual, null), // web-only
   // Pro
@@ -33,6 +34,7 @@ export const PRODUCTS: readonly Product[] = [
   sub('pro_7d', 'pro', 7, PRICES.pro.web.pass7d, PRICES.pro.iap.pass7d),
   sub('pro_3mo', 'pro', 90, PRICES.pro.web.term3mo, PRICES.pro.iap.term3mo),
   sub('pro_6mo', 'pro', 180, PRICES.pro.web.term6mo, PRICES.pro.iap.term6mo),
+  sub('pro_annual', 'pro', 365, PRICES.pro.web.annual, PRICES.pro.iap.annual),
   sub('pro_founding_monthly', 'pro', 30, PRICES.pro.web.foundingMonthly, PRICES.pro.iap.foundingMonthly),
   sub('pro_founding_annual', 'pro', 365, PRICES.pro.web.foundingAnnual, null), // web-only
   // Packs / standalone pass

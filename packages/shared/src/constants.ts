@@ -46,8 +46,8 @@ export const TIER_CAPS: Record<
 // ── Consumer prices (HKD) ───────────────────────────────────────
 // web = Stripe checkout price; iap = App/Play (RevenueCat) price. Never show web prices in-app.
 export const PRICES = {
-  plus: { web: { monthly: 128, pass7d: 58, term3mo: 288, term6mo: 488, foundingMonthly: 88, foundingAnnual: 888 }, iap: { monthly: 148, pass7d: 68, term3mo: 328, term6mo: 558, foundingMonthly: 98 } },
-  pro: { web: { monthly: 198, pass7d: 98, term3mo: 488, term6mo: 788, foundingMonthly: 148, foundingAnnual: 1488 }, iap: { monthly: 228, pass7d: 108, term3mo: 558, term6mo: 898, foundingMonthly: 168 } },
+  plus: { web: { monthly: 128, pass7d: 58, term3mo: 288, term6mo: 488, annual: 788, foundingMonthly: 88, foundingAnnual: 888 }, iap: { monthly: 148, pass7d: 68, term3mo: 328, term6mo: 558, annual: 888, foundingMonthly: 98 } },
+  pro: { web: { monthly: 198, pass7d: 98, term3mo: 488, term6mo: 788, annual: 1288, foundingMonthly: 148, foundingAnnual: 1488 }, iap: { monthly: 228, pass7d: 108, term3mo: 558, term6mo: 898, annual: 1388, foundingMonthly: 168 } },
   pokePack5: { web: 38, iap: 48 },
   pokePack15: { web: 88, iap: 98 },
   filterPass7d: { web: 18, iap: 28 }, // standalone pass (Free tier); included in Plus/Pro

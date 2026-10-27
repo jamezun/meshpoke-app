@@ -12,8 +12,8 @@ import { recomputeEntitlement } from './consumer.js';
 
 
 // RevenueCat product identifiers (App Store / Play) → our SKUs
-const RC_INTERNAL = ['plus_monthly', 'plus_7d', 'plus_3mo', 'plus_6mo', 'plus_founding_monthly',
-  'pro_monthly', 'pro_7d', 'pro_3mo', 'pro_6mo', 'pro_founding_monthly',
+const RC_INTERNAL = ['plus_monthly', 'plus_7d', 'plus_3mo', 'plus_6mo', 'plus_annual', 'plus_founding_monthly',
+  'pro_monthly', 'pro_7d', 'pro_3mo', 'pro_6mo', 'pro_annual', 'pro_founding_monthly',
   'poke_pack_5', 'poke_pack_15', 'filter_pass_7d'];
 // store SKUs are mp_<internal> (App Store/Play); accept both forms (T21.1)
 const RC_PRODUCTS: Record<string, string> = {};
