@@ -9,6 +9,7 @@ import type { Redis } from 'ioredis';
 import { z } from 'zod';
 import { eq, and, ne, sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { referralOnPhoneVerified } from './referrals.js';
 import { encryptPii, piiHash } from '../db/pii.js';
 import { users } from '../db/schema/core.js';
 import type { GoTrueClient } from '../gotrue.js';
@@ -74,6 +75,7 @@ export function registerPhone(app: FastifyInstance, dbUrl: string, redis: Redis,
       .set({ phoneE164: encryptPii(phone), phoneHash: hash, phoneVerifiedAt: sql`now()` })
       .where(eq(users.id, req.user!.id));
     await redis.del(`auth:user:${req.user!.id}`); // kill cached phoneVerified:false
+    await referralOnPhoneVerified(db, req.user!.id);
     return { verified: true };
   });
 }

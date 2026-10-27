@@ -21,6 +21,7 @@ import ActivityPage from './pages/app/Activity.js';
 import { SignupPage } from './auth/Signup';
 import { PhoneVerifyPage } from './auth/PhoneVerify';
 import { BillingPage } from './pages/app/Billing.js';
+import { ReferralLanding } from './pages/ReferralLanding.js';
 import { SettingsPage } from './layouts/AppLayout';
 import { AppPage } from './pages/app/Placeholder';
 import { ProfileEditorPage } from './pages/app/ProfileEditor';
@@ -32,6 +33,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/how-it-works', element: <HowItWorksPage /> },
     { path: '/safety', element: <SafetyPage /> },
     { path: '/about', element: <AboutPage /> },
+    { path: '/r/:code', element: <ReferralLanding /> },
     { path: '/venue', element: <VenueLandingPage /> },
     { path: '/venue/pricing', element: <VenuePricingPage /> },
     { path: '/venue/claim', element: <VenueClaimPage /> },

@@ -64,6 +64,14 @@ class ProfileScreen extends StatelessWidget {
           ),
           Card(
             child: ListTile(
+              leading: const Icon(Icons.card_giftcard),
+              title: const Text('Invite friends'),
+              subtitle: const Text('Give 5 pokes, get 5 pokes'),
+              onTap: () => context.push('/referrals'),
+            ),
+          ),
+          Card(
+            child: ListTile(
               leading: const Icon(Icons.settings_outlined),
               title: const Text('Settings'),
               onTap: () {},
