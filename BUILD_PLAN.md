@@ -879,7 +879,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ### [ ] T18.4 Web QA pass
 **PRD refs:** §17 · **Depends:** T18.1–T18.3
-- [ ] Playwright suites for member flow, host flow, billing, settings
+- [x] Playwright suites for member flow, host flow, billing, settings
 **Acceptance:** suites green in CI.
 
 ---
@@ -1155,3 +1155,4 @@ Append one line per completed task (newest at the bottom).
 - T18.1 (✓): web Spots.tsx (/app/spots) — district dropdown + today/week/all, spot cards w/ state badges + required keywords, detail modal join (open) / apply w/ note, confirm attendance, leave/bail, members list (blocks filtered server-side). Keys aligned to API snake_case (my_role, join_mode, venue_name...).
 - T18.2 (✓): API GET /me/hosted + POST /spots/:id/remove-member (state removed, room kicked, audit_log spot.member_removed); web HostConsole.tsx (/app/host) — hosted list w/ pending badges, queue recommended|fifo w/ express ⚡ + trust + decline reason presets, schedule (datetime + /venues/search picker), roll-call absent checkboxes, member removal w/ reason prompt.
 - T18.3 (✓): API GET /me/wallet/drops (claimed drops w/ status claimed/redeemed/expired) + GET /me/spots/attended (done spots attended|forgiven); web Wallet.tsx (/app/wallet) — wallet tab + people-you-met tab w/ free-poke window + poke w/ note.
+- T18.4 e2e: compose.e2e.yml (postgis+redis 15432/16379), seed via direct SQL, GoTrue stand-in auth server (CORS/prefix/JSON fixes), Playwright setup+4 suites 6/6 green, CI e2e job; root causes fixed: main.tsx missing AuthProvider, supabase getSession headless stall (getAccessToken), PATCH prefs 500, queue displayName, IPv6 listen. b6d2a63
