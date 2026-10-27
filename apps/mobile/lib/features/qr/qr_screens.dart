@@ -79,8 +79,60 @@ class WalletScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Wallet')),
-      body: const _ClaimedDrops(),
+      body: ListView(children: const [
+        _Coupons(),
+        _ClaimedDrops(),
+      ]),
     );
+  }
+}
+
+/// T20.7: venue coupons (GET /me/coupons).
+class _Coupons extends ConsumerStatefulWidget {
+  const _Coupons();
+
+  @override
+  ConsumerState<_Coupons> createState() => _CouponsState();
+}
+
+class _CouponsState extends ConsumerState<_Coupons> {
+  List<dynamic> _coupons = [];
+  String? _err;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final dio = ref.read(apiClientProvider);
+      final res = await dio.get('/me/coupons');
+      if (mounted) setState(() => _coupons = List.from(res.data['coupons'] ?? []));
+    } on Exception {
+      if (mounted) setState(() => _err = 'Sign in to see coupons');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_err != null) return ListTile(title: Text(_err!));
+    if (_coupons.isEmpty) {
+      return const ListTile(leading: Icon(Icons.confirmation_number_outlined), title: Text('No coupons'), subtitle: Text('Regular visits earn venue rewards'));
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+        child: Text('Coupons', style: Theme.of(context).textTheme.titleMedium),
+      ),
+      for (final c in _coupons)
+        ListTile(
+          leading: const Icon(Icons.confirmation_number),
+          title: Text(((c as Map<String, dynamic>)['offer'] as Map?)?['text']?.toString() ?? 'Offer'),
+          subtitle: Text("${c['display_name']} · expires ${(c['expires_at'] as String?)?.split('T').first ?? ''}"),
+        ),
+    ]);
   }
 }
 

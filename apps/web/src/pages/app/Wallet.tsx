@@ -22,15 +22,19 @@ type Person = {
 };
 type Pym = { spotId: string; windowOpen: boolean; closesAt: string; people: Person[] };
 
+type Coupon = { id: string; offer: { text?: string; milestone?: string }; expires_at: string; display_name: string };
+
 export function WalletPage() {
   const [tab, setTab] = useState<'wallet' | 'pym'>('wallet');
   const [drops, setDrops] = useState<WalletDrop[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [spots, setSpots] = useState<{ id: string; name: string }[]>([]);
   const [pym, setPym] = useState<Pym | null>(null);
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
     api<{ drops: WalletDrop[] }>('/me/wallet/drops').then((d) => setDrops(d.drops)).catch((e) => setMsg(String(e)));
+    api<{ coupons: Coupon[] }>('/me/coupons').then((d) => setCoupons(d.coupons)).catch(() => {});
     // done spots I attended → people-you-met pickers
     api<{ spots: { id: string; name: string }[] }>('/me/spots/attended?state=done')
       .then((r) => setSpots(r.spots)).catch(() => {});
@@ -72,6 +76,14 @@ export function WalletPage() {
             </div>
           ))}
           {drops.length === 0 && <p className="text-gray-400">No claimed drops yet — claim one from a venue page.</p>}
+          <h3 className="font-semibold pt-2">Coupons</h3>
+          {coupons.map((c) => (
+            <div key={c.id} className="rounded-xl border p-4">
+              <p className="font-semibold">{c.offer?.text ?? 'Offer'}{c.offer?.milestone ? ` · ${c.offer.milestone} visits` : ''}</p>
+              <p className="text-sm text-gray-500">{c.display_name} · expires {new Date(c.expires_at).toLocaleDateString('en-HK')}</p>
+            </div>
+          ))}
+          {coupons.length === 0 && <p className="text-gray-400">No coupons — regular visits earn venue rewards.</p>}
         </div>
       )}
 

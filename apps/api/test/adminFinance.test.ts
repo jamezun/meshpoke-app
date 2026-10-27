@@ -88,7 +88,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await app.close();
   await pool.end();
-  await stopInfra(infra);
+  await stopInfra();
 });
 
 describe('T16.5 admin merchant finance', () => {

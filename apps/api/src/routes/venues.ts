@@ -12,6 +12,32 @@ const CATEGORIES = ['restaurant', 'cafe', 'bar', 'dessert', 'fast_food', 'conven
 export function registerVenues(app: FastifyInstance, dbUrl: string) {
   const db = getDb(dbUrl);
 
+  // ── GET /venues/:id — venue page payload (venue + ladder + my membership) (T20.7) ──
+  app.get<{ Params: { id: string } }>('/venues/:id', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const id = req.params.id;
+    const v = (await db.execute(sql`
+      select v.id, v.display_name, v.category, v.address, v.claimed_by_merchant_id,
+             coalesce(a.activity, 0) as activity_7d,
+             (select count(*)::int from memberships m where m.venue_id = v.id and m.status = 'active' and m.kind = 'member') as member_count
+        from venues v
+        left join venue_activity_7d a on a.venue_id = v.id
+       where v.id = ${id}::uuid and v.status <> 'closed'`)) as unknown as { rows: Record<string, unknown>[] };
+    if (!v.rows[0]) return reply.code(404).send({ problem: { title: 'Venue not found', status: 404 } });
+    const venue = v.rows[0];
+    // claimed → include the public ladder
+    let ladder: unknown[] = [];
+    if (venue.claimed_by_merchant_id) {
+      const l = (await db.execute(sql`
+        select position, name, min_visits, min_months, discount_pct, perk_text
+          from ladder_levels where venue_id = ${id}::uuid and effective_from <= now() order by position`)) as unknown as { rows: unknown[] };
+      ladder = l.rows;
+    }
+    const mine = (await db.execute(sql`
+      select status, kind, level_position, visits_count from memberships
+       where venue_id = ${id}::uuid and user_id = ${req.user!.id}::uuid and status in ('active','waitlisted') limit 1`)) as unknown as { rows: Record<string, unknown>[] };
+    return { venue: { ...venue, claimed: venue.claimed_by_merchant_id != null }, ladder, myMembership: mine.rows[0] ?? null };
+  });
+
   const createVenue = z.object({
     name: z.string().min(1).max(120),
     category: z.enum(CATEGORIES),
