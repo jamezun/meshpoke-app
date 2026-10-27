@@ -999,14 +999,14 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Qualifying spot check at attendance finalisation (min headcount, ≥80% attended, avg rating ≥4) → 2-day `host_reward_pro` grant; cap 7 days/month; expire 60 days
 **Tests:** cap and expiry.
 
-### [ ] T21.4 Sponsored amplification
+### [x] T21.4 Sponsored amplification
 **PRD refs:** BM §7.3, §8 · **Depends:** M16
-- [ ] Sponsored toggle on drops (Growth/Pro): district feed placement labelled "Sponsored"; promo push to opted-in users only; per-district per-day send caps; seats billed ×1.5
+- [x] Sponsored toggle on drops (Growth/Pro): district feed placement labelled "Sponsored"; promo push to opted-in users only; per-district per-day send caps; seats billed ×1.5
 **Tests:** caps; opted-out users never receive; marker size unaffected.
 
-### [ ] T21.5 Promotional push (venue offers)
+### [x] T21.5 Promotional push (venue offers)
 **PRD refs:** §3.11 · **Depends:** T14.3
-- [ ] Merchant "offer to members/savers" sends (rate-limited), consent-gated, per-merchant mute
+- [x] Merchant "offer to members/savers" sends (rate-limited), consent-gated, per-merchant mute
 **Tests:** consent gating.
 
 ### [ ] T21.6 Nearby perks (proximity)
@@ -1166,3 +1166,5 @@ Append one line per completed task (newest at the bottom).
 - T21.1 (✓): Pro products web+IAP+RC (mp_* SKU map fix), founding shares consumer_500, 7d pass, tier 1.0, caps — all already wired via T17 engine
 - T21.2 (✓): poke packs→credits + filter-pass grants (web+RC) already wired; keyword filter UI added mobile Spots tab + web Spots page (Plus-gated)
 - T21.3 (✓): finalise hook grants host_reward_pro 2d (qualify: attended≥min, ratio≥0.8, ratings≥4 or none), cap 7d/30d, notify+recomputeEntitlement; tests cap+no-qualify.
+- T21.4 (✓): drops.ts wires amplifySponsoredDrop (promo.ts): opted-in-only push, 1/district/day Redis cap, x1.5 billing already in billing.ts; marker size untouched
+- T21.5 (✓): POST /merchant/promo: members+savers audience, 1/venue/7d rate limit, notify() consent gate + merchant_mutes; test proves opted-out never get push_outbox rows
