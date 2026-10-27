@@ -777,20 +777,20 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M16 Merchant billing & founding programme
 
-### [ ] T16.1 Seat charge engine
+### [x] T16.1 Seat charge engine
 **PRD refs:** §8.3 · **Depends:** T15.2
-- [ ] `onCheckin(checkin)`: determine event type (`drop_seat` once per user per drop; `group_drop_seat` per attendee; `new_member_visit` within attribution window — wired in M20), band fee from merchant's band, multiplier 1.5 if sponsored, `shadow` flag from founding clock
-- [ ] Verified-seat preconditions: confidence high, account phone-verified and > 7 days old
-- [ ] Idempotent by `checkin_id`
+- [x] `onCheckin(checkin)`: determine event type (`drop_seat` once per user per drop; `group_drop_seat` per attendee; `new_member_visit` within attribution window — wired in M20), band fee from merchant's band, multiplier 1.5 if sponsored, `shadow` flag from founding clock
+- [x] Verified-seat preconditions: confidence high, account phone-verified and > 7 days old
+- [x] Idempotent by `checkin_id`
 **Tests:** every band; sponsored multiplier; account age; idempotency; shadow flag.
 
-### [ ] T16.2 Founding programme clock
+### [x] T16.2 Founding programme clock
 **PRD refs:** §8.3 (Founding programme), BM §7.5 · **Depends:** T16.1
-- [ ] On a founding merchant's first drop go-live: set `founding_drops_start_at`, `founding_free_until = +3 months`
-- [ ] Month 1 → seats `shadow=true`; from month 2 → billable
-- [ ] End of month 3: if verified seats < 30 → extend `founding_free_until` by 1 month (once) + notify
-- [ ] At `founding_free_until`: start Growth at founding price (288/mo or 2,880/yr if pre-chosen) — requires card on file; else downgrade to Starter with notice
-- [ ] `founding_counters.merchant_50` atomic
+- [x] On a founding merchant's first drop go-live: set `founding_drops_start_at`, `founding_free_until = +3 months`
+- [x] Month 1 → seats `shadow=true`; from month 2 → billable
+- [x] End of month 3: if verified seats < 30 → extend `founding_free_until` by 1 month (once) + notify
+- [x] At `founding_free_until`: start Growth at founding price (288/mo or 2,880/yr if pre-chosen) — requires card on file; else downgrade to Starter with notice
+- [x] `founding_counters.merchant_50` atomic
 **Tests:** clock transitions with frozen time; guarantee extension.
 
 ### [ ] T16.3 Merchant Stripe billing
@@ -1143,3 +1143,4 @@ Append one line per completed task (newest at the bottom).
 - T15.3 (✓): drops.test 2 green (create/claim exactly-once capacity 2, dup/full 409; tier 402 + pause frees slot; budget 402). 179 api tests.
 - T15.4+T15.5 (✓): Scanner.tsx + DropsBuilder.tsx (tsc/eslint/vitest green, 8 web tests). Staff mgmt endpoint deferred — scan auth already accepts merchant_staff rows.
 - T15.6 (✓): mobile qr_screens.dart + venue_drops_sheet.dart (analyze 0, 14 tests). M15 6/6 — staff-mgmt endpoint + redemption feed deferred to M16 wiring.
+- T16.1+T16.2 (✓): src/billing.ts onCheckin (band 1-6 fee via price_band, sponsored x1.5, drop_seat once/user, phone-verified+7d-age gate, shadow in founding month 1, invoice YYYY-MM rollup, idempotent via unique checkin_id) + onDropActivated (first drop sets founding clock 3mo). Wired into scan.ts (charge in response). 181 api tests green.
