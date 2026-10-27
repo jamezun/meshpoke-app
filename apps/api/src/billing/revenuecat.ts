@@ -27,8 +27,12 @@ export function registerRevenueCat(app: FastifyInstance, dbUrl: string, config: 
 
   app.post('/webhooks/revenuecat', async (req, reply) => {
     // Authorization: Bearer <REVENUECAT_WEBHOOK_SECRET> (header set in RC dashboard)
+    // fail closed: reject if the secret is not configured
+    if (!config.REVENUECAT_WEBHOOK_SECRET) {
+      return reply.code(503).send({ title: 'Webhook secret not configured' });
+    }
     const auth = req.headers.authorization;
-    if (config.REVENUECAT_WEBHOOK_SECRET && auth !== `Bearer ${config.REVENUECAT_WEBHOOK_SECRET}`) {
+    if (auth !== `Bearer ${config.REVENUECAT_WEBHOOK_SECRET}`) {
       return reply.code(401).send({ title: 'Unauthorized webhook' });
     }
 

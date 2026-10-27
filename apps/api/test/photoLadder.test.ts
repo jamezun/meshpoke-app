@@ -17,6 +17,7 @@ let app: Awaited<ReturnType<typeof buildApp>> | null = null;
 let viewer: { id: string; headers: Record<string, string> };
 let subject: { id: string; headers: Record<string, string> };
 let spotId = '';
+let roomId = '';
 
 const fakeStorage = {
   async presignPut(key: string) { return `https://fake-r2/${key}?sig=put`; },
@@ -118,6 +119,18 @@ beforeAll(async () => {
     [viewer.id],
   );
   spotId = r.rows[0].id;
+  // subject is a co-member of the spot; a shared chat room exists for chat_room context
+  await pool!.query(
+    `INSERT INTO spot_members (spot_id, user_id, role, state) VALUES ($1,$2,'host','active'),($1,$3,'member','active')`,
+    [spotId, viewer.id, subject.id],
+  );
+  const room = await pool!.query(
+    `INSERT INTO rooms (kind) VALUES ('chat') RETURNING id`);
+  roomId = room.rows[0].id;
+  await pool!.query(
+    `INSERT INTO room_members (room_id, user_id, role) VALUES ($1,$2,'member'),($1,$3,'member')`,
+    [roomId, viewer.id, subject.id],
+  );
 });
 
 afterAll(async () => {
@@ -135,7 +148,7 @@ describe('T3.3 photo ladder — FULL MATRIX (launch gate)', () => {
       if (!expected) continue;
       it(`${ctx} × ${rel} → ${expected}`, async () => {
         await setupRelation(rel);
-        const ctxId = ctx === 'event_done' ? spotId : undefined;
+        const ctxId = ctx === 'chat_room' ? roomId : ctx === 'event_done' || ctx === 'event_room' ? spotId : undefined;
         const access = await resolveProfileView(infra!.dbUrl, viewer.id, subject.id, ctx, ctxId);
         expect(access.level).toBe(expected);
       });
@@ -156,9 +169,23 @@ describe('T3.3 photo ladder — FULL MATRIX (launch gate)', () => {
   it('hide_photo_in_rooms: chat_room strangers → sketch instead of primary', async () => {
     await setupRelation('strangers');
     await pool!.query(`UPDATE profiles SET hide_photo_in_rooms = true WHERE user_id = $1`, [subject.id]);
-    const access = await resolveProfileView(infra!.dbUrl, viewer.id, subject.id, 'chat_room');
+    const access = await resolveProfileView(infra!.dbUrl, viewer.id, subject.id, 'chat_room', roomId);
     expect(access.level).toBe('sketch');
     await pool!.query(`UPDATE profiles SET hide_photo_in_rooms = false WHERE user_id = $1`, [subject.id]);
+  });
+
+  it('stranger NOT in the room/spot → sketch even with contextId (server-side membership check)', async () => {
+    await setupRelation('strangers');
+    await pool!.query(`DELETE FROM room_members WHERE room_id = $1 AND user_id = $2`, [roomId, subject.id]);
+    const notInRoom = await resolveProfileView(infra!.dbUrl, viewer.id, subject.id, 'chat_room', roomId);
+    expect(notInRoom.level).toBe('sketch');
+    await pool!.query(`DELETE FROM spot_members WHERE spot_id = $1 AND user_id = $2`, [spotId, subject.id]);
+    const notInSpot = await resolveProfileView(infra!.dbUrl, viewer.id, subject.id, 'event_room', spotId);
+    expect(notInSpot.level).toBe('sketch');
+    const noCtx = await resolveProfileView(infra!.dbUrl, viewer.id, subject.id, 'event_room');
+    expect(noCtx.level).toBe('sketch');
+    await pool!.query(`INSERT INTO room_members (room_id, user_id, role) VALUES ($1,$2,'member') ON CONFLICT DO NOTHING`, [roomId, subject.id]);
+    await pool!.query(`INSERT INTO spot_members (spot_id, user_id, role, state) VALUES ($1,$2,'member','active') ON CONFLICT DO NOTHING`, [spotId, subject.id]);
   });
 
   it('API shape: sketch (no photos key), primary (1 photo), full (all photos + prompts + socials)', async () => {

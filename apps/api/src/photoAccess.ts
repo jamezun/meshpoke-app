@@ -63,11 +63,32 @@ export async function resolveProfileView(
       return { level: 'sketch' };
     case 'chat_room': {
       if (connected) return { level: 'full' };
+      // verify BOTH viewer and subject are members of that room — client-asserted context is not trusted
+      if (!contextId) return { level: 'sketch' };
+      const rm = await db.execute(sql`
+        SELECT count(*)::int AS n FROM room_members m
+        JOIN room_members s ON m.room_id = s.room_id
+        WHERE m.room_id = ${contextId}
+          AND m.user_id = ${viewerId} AND m.left_at IS NULL
+          AND s.user_id = ${subjectId} AND s.left_at IS NULL`);
+      const inRoom = (rm as unknown as { rows: { n: number }[] }).rows[0].n > 0;
+      if (!inRoom) return { level: 'sketch' };
       const [p] = await db.select({ hide: profiles.hidePhotoInRooms }).from(profiles).where(eq(profiles.userId, subjectId));
       return p?.hide ? { level: 'sketch' } : { level: 'primary' };
     }
-    case 'event_room':
-      return connected ? { level: 'full' } : { level: 'primary' };
+    case 'event_room': {
+      if (connected) return { level: 'full' };
+      // verify BOTH are active members of that spot
+      if (!contextId) return { level: 'sketch' };
+      const sm = await db.execute(sql`
+        SELECT count(*)::int AS n FROM spot_members m
+        JOIN spot_members s ON m.spot_id = s.spot_id
+        WHERE m.spot_id = ${contextId}
+          AND m.user_id = ${viewerId} AND m.state = 'active' AND m.role <> 'waitlist'
+          AND s.user_id = ${subjectId} AND s.state = 'active' AND s.role <> 'waitlist'`);
+      const inSpot = (sm as unknown as { rows: { n: number }[] }).rows[0].n > 0;
+      return inSpot ? { level: 'primary' } : { level: 'sketch' };
+    }
     case 'event_done': {
       // same event, both attended (verified check-in) → full
       if (!contextId) return { level: 'sketch' };

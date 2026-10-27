@@ -25,6 +25,7 @@ beforeAll(async () => {
     QR_HMAC_SECRET: 'test-qr-hmac-secret-32-chars-minimum!!!',
     ADMIN_BOOTSTRAP_PASSWORD: 'test-admin-bootstrap-pw',
     SENTRY_DSN: undefined, ENABLE_JOBS: false, ENABLE_SWAGGER: false,
+    REVENUECAT_WEBHOOK_SECRET: 'rc-test-secret',
   } });
   pool = new Pool({ connectionString: i.dbUrl });
   await migrate(drizzle(pool, { schema }), { migrationsFolder: join(import.meta.dirname, '../drizzle') });
@@ -38,7 +39,7 @@ beforeAll(async () => {
 afterAll(async () => { await app.close(); await pool.end(); await stopInfra(); });
 
 const rc = (event: Record<string, unknown>) =>
-  app.inject({ method: 'POST', url: '/v1/webhooks/revenuecat', payload: { event } });
+  app.inject({ method: 'POST', url: '/v1/webhooks/revenuecat', headers: { authorization: 'Bearer rc-test-secret' }, payload: { event } });
 
 const plan = async () => (await pool.query(`select plan from entitlements where user_id = $1`, [uid])).rows[0]?.plan;
 

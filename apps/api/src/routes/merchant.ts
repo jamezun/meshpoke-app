@@ -28,6 +28,8 @@ export function registerMerchant(app: FastifyInstance, dbUrl: string, storage: S
       const userId = req.user!.id;
       const b = req.body;
       if (!b?.venueId || !b?.certKey) return reply.code(422).send({ problem: { title: 'venueId and certKey required', status: 422 } });
+      // cert keys are caller-scoped at presign — reject keys belonging to someone else's prefix
+      if (!b.certKey.startsWith(`br/${userId}/`)) return reply.code(422).send({ problem: { title: 'certKey must use your own presigned key', status: 422 } });
       if (!Number.isInteger(b.priceBand) || b.priceBand < 1 || b.priceBand > 6) {
         return reply.code(422).send({ problem: { title: 'priceBand must be 1–6', status: 422 } });
       }

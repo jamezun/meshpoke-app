@@ -79,6 +79,8 @@ export async function buildApp(opts: BuildAppOptions) {
   initSentry(config);
 
   const app = Fastify({
+    // behind Dokploy/nginx/Cloudflare — trust X-Forwarded-For so req.ip is the client, not the proxy
+    trustProxy: true,
     logger: {
       level: config.LOG_LEVEL,
       genReqId: () => `req_${Date.now().toString(36)}_${(reqCounter++).toString(36)}`,
@@ -88,6 +90,16 @@ export async function buildApp(opts: BuildAppOptions) {
   }).withTypeProvider<ZodTypeProvider>();
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  // keep the raw body available for Stripe webhook signature verification
+  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (_req, body, done) => {
+    try {
+      const json = JSON.parse(body.toString('utf8'));
+      if (json && typeof json === 'object') (json as { rawBody?: Buffer }).rawBody = Buffer.from(body);
+      done(null, json);
+    } catch (err) {
+      done(err as Error, undefined);
+    }
+  });
 
   app.decorate('config', config);
   app.decorate(
@@ -111,8 +123,8 @@ export async function buildApp(opts: BuildAppOptions) {
     timeWindow: '1 minute',
     nameSpace: 'rl:',
     redis: app.redis,
-    // health checks stay unthrottled for uptime probes
-    keyGenerator: (req) => (req.url === '/v1/health' ? 'health' : req.ip),
+    // health checks stay unthrottled for uptime probes; authenticated users key on user id
+    keyGenerator: (req) => (req.url === '/v1/health' ? 'health' : ((req as unknown as { user?: { id?: string } }).user?.id ?? req.ip)),
   });
 
   if (config.ENABLE_SWAGGER && config.NODE_ENV !== 'production') {

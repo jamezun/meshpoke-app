@@ -157,7 +157,10 @@ export function registerMerchantBilling(app: FastifyInstance, dbUrl: string, con
       const sig = req.headers['stripe-signature'] as string | undefined;
       if (!sig) return reply.code(400).send({ title: 'Missing stripe-signature' });
       try {
-        stripe.webhooks.constructEvent(JSON.stringify(req.body), sig, config.STRIPE_WEBHOOK_SECRET);
+        // verify over the raw request body — re-serialized JSON breaks the signature
+        const raw = (req.body as { rawBody?: Buffer })?.rawBody as Buffer | undefined;
+        const payload: string | Buffer = raw ?? JSON.stringify(req.body);
+        stripe.webhooks.constructEvent(payload, sig, config.STRIPE_WEBHOOK_SECRET);
       } catch {
         return reply.code(400).send({ title: 'Invalid signature' });
       }

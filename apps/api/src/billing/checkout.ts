@@ -122,11 +122,18 @@ export function registerCheckout(app: FastifyInstance, dbUrl: string, config: Co
       const sig = req.headers['stripe-signature'] as string | undefined;
       if (!sig) return reply.code(400).send({ title: 'Missing stripe-signature' });
       try {
-        stripe.webhooks.constructEvent(JSON.stringify(req.body), sig, config.STRIPE_WEBHOOK_SECRET);
+        // verify over the raw request body — re-serialized JSON breaks the signature
+        const raw = (req.body as { rawBody?: Buffer })?.rawBody as Buffer | undefined;
+        const payload: string | Buffer = raw ?? JSON.stringify(req.body);
+        stripe.webhooks.constructEvent(payload, sig, config.STRIPE_WEBHOOK_SECRET);
       } catch {
         return reply.code(400).send({ title: 'Invalid signature' });
       }
     } else {
+      // stub mode is dev/test only — never accept unsigned fulfilment in production
+      if (config.NODE_ENV === 'production') {
+        return reply.code(503).send({ title: 'Stripe not configured' });
+      }
       const ev = req.body as { type?: string };
       if (ev?.type !== 'test') return reply.code(400).send({ title: 'Signature not configured' });
     }

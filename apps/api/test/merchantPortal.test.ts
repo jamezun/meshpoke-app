@@ -56,7 +56,7 @@ beforeAll(async () => {
   venueId = v.rows[0].id;
 
   const claim = await app.inject({ method: 'POST', url: '/v1/merchant/claim', headers: { authorization: `Bearer ${ownerTok}` },
-    payload: { venueId, certKey: 'br/cert.pdf', priceBand: 2 } });
+    payload: { venueId, certKey: `br/${owner}/cert.pdf`, priceBand: 2 } });
   merchantId = claim.json().merchantId;
   await app.inject({ method: 'POST', url: `/v1/admin/merchant-claims/${merchantId}`, headers: { authorization: `Bearer ${adminTok}` }, payload: { action: 'approve' } });
 }, 200_000);

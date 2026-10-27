@@ -37,6 +37,9 @@ export function registerPhone(app: FastifyInstance, dbUrl: string, redis: Redis,
     ]);
     if (uHit === 1) await redis.expire(`phone_otp:u:${req.user!.id}`, 3600);
     if (ipHit === 1) await redis.expire(`phone_otp:ip:${req.ip}`, 3600);
+    // re-assert TTL every hit — a crash between incr and expire must not lock the counter forever
+    if (uHit > 1) await redis.expire(`phone_otp:u:${req.user!.id}`, 3600);
+    if (ipHit > 1) await redis.expire(`phone_otp:ip:${req.ip}`, 3600);
     if (uHit > 3 || ipHit > 10) {
       return reply.code(429).send({ type: 'about:blank', title: 'Too Many Requests', status: 429, detail: 'OTP limit: 3/hour per account' });
     }

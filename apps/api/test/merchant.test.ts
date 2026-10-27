@@ -65,12 +65,12 @@ describe('T8.1 merchant claim', () => {
   it('claim → pending, staff owner row, one active claim per venue', async () => {
     const tok = await token(owner);
     const r1 = await app.inject({ method: 'POST', url: '/v1/merchant/claim', headers: { authorization: `Bearer ${tok}` },
-      payload: { venueId, certKey: 'br/cert-1.pdf', priceBand: 3, contactName: 'Boss', contactPhone: '+85212345678' } });
+      payload: { venueId, certKey: `br/${owner}/cert-1.pdf`, priceBand: 3, contactName: 'Boss', contactPhone: '+85212345678' } });
     expect(r1.statusCode).toBe(200);
     merchantId = r1.json().merchantId;
 
     const r2 = await app.inject({ method: 'POST', url: '/v1/merchant/claim', headers: { authorization: `Bearer ${await token(other)}` },
-      payload: { venueId, certKey: 'br/cert-2.pdf', priceBand: 2 } });
+      payload: { venueId, certKey: `br/${other}/cert-2.pdf`, priceBand: 2 } });
     expect(r2.statusCode).toBe(409);
 
     const staff = await pool.query(`select role from merchant_staff where merchant_id = $1`, [merchantId]);
@@ -84,7 +84,7 @@ describe('T8.1 merchant claim', () => {
     expect(reject.statusCode).toBe(200);
 
     const resubmit = await app.inject({ method: 'POST', url: '/v1/merchant/claim', headers: { authorization: `Bearer ${tok}` },
-      payload: { venueId, certKey: 'br/cert-1-clear.pdf', priceBand: 3 } });
+      payload: { venueId, certKey: `br/${owner}/cert-1-clear.pdf`, priceBand: 3 } });
     expect(resubmit.statusCode).toBe(200);
     expect(resubmit.json().merchantId).toBe(merchantId); // updated, not duplicated
 

@@ -70,7 +70,10 @@ export async function registerRealtime(app: FastifyInstance, dbUrl: string, redi
       socket.to(roomId).emit('presence', { roomId, count: n });
     });
 
-    socket.on('typing', (roomId: string, isTyping: boolean) => {
+    socket.on('typing', async (roomId: string, isTyping: boolean) => {
+      // membership check — typing indicators must not leak into rooms the socket never joined
+      const a = await roomAccess(userId, roomId);
+      if (!a.exists || !a.member) return;
       socket.to(roomId).emit('typing', { roomId, userId, isTyping });
     });
 
