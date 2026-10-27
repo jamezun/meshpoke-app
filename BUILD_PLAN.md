@@ -1016,9 +1016,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [~] Play background-location declaration + iOS usage strings (native manifest — deferred to device build, strings already listed in STORE_LISTING.md)
 **Tests:** daily cap; non-joined venue never triggers.
 
-### [ ] T21.7 Pro merchant automations
+### [x] T21.7 Pro merchant automations
 **PRD refs:** §6.3 (Pro) · **Depends:** T20.5
-- [ ] Birthday treat (requires user opt-in to share birth month with venues they join — default off), win-back after N days inactive, members-only event invites
+- [x] Birthday treat (requires user opt-in to share birth month with venues they join — default off), win-back after N days inactive, members-only event invites
 **Tests:** automation triggers; opt-in respected.
 
 ### [ ] T21.8 Second district & finance dashboards
@@ -1169,3 +1169,4 @@ Append one line per completed task (newest at the bottom).
 - T21.4 (✓): drops.ts wires amplifySponsoredDrop (promo.ts): opted-in-only push, 1/district/day Redis cap, x1.5 billing already in billing.ts; marker size untouched
 - T21.5 (✓): POST /merchant/promo: members+savers audience, 1/venue/7d rate limit, notify() consent gate + merchant_mutes; test proves opted-out never get push_outbox rows
 - T21.6 (✓ server): purpose=proximity pings check 100m pro-merchant venue w/ active membership, no mute, proximity_log pk caps 1/day, notify() enforces proximity opt-in; tests non-joined-never + daily cap. Native geofence plugin + bg-location manifest deferred to device build (STORE_LISTING.md has usage strings).
+- T21.7 (✓): automations.ts (birthday/winback sweeps + event-invite, idempotent coupons); migration 0017 share_birth_month default off; me.ts PATCH accepts share_birth_month; automations.test.ts 2 green; cachedPool error-swallow fixes teardown race.
