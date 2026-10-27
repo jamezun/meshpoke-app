@@ -102,7 +102,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 6 | ✔ |
 | M18 Authenticated web & host console | 1 | 4 | 3 | ☐ |
-| M19 Phase 1 hardening & launch | 1 | 7 | 1 | ◐ |
+| M19 Phase 1 hardening & launch | 3 | 7 | 3 | ◐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
 | M21 Scale features | 3 | 8 | 0 | ☐ |
 | M22 Expand backlog | 4 | 6 | 0 | ☐ |
@@ -898,9 +898,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [ ] Verify memory limits on the shared box under load; tune pool sizes
 **Acceptance:** NFR targets met (server-time p95) at Phase 1 scale.
 
-### [~] T19.3 Security review
+### [x] T19.3 Security review
 **PRD refs:** §15 (Security) · **Depends:** T19.1
-- [ ] Rate limits on all write endpoints; authz tests for every route (owner/merchant/admin); webhook signature tests; signed URL expiry; PII encryption; dependency audit
+- [x] Rate limits on all write endpoints; authz tests for every route (owner/merchant/admin); webhook signature tests; signed URL expiry; PII encryption; dependency audit
 **Acceptance:** zero high findings.
 
 ### [ ] T19.4 Legal & store prep
@@ -1157,3 +1157,4 @@ Append one line per completed task (newest at the bottom).
 - T18.3 (✓): API GET /me/wallet/drops (claimed drops w/ status claimed/redeemed/expired) + GET /me/spots/attended (done spots attended|forgiven); web Wallet.tsx (/app/wallet) — wallet tab + people-you-met tab w/ free-poke window + poke w/ note.
 - T18.4 e2e: compose.e2e.yml (postgis+redis 15432/16379), seed via direct SQL, GoTrue stand-in auth server (CORS/prefix/JSON fixes), Playwright setup+4 suites 6/6 green, CI e2e job; root causes fixed: main.tsx missing AuthProvider, supabase getSession headless stall (getAccessToken), PATCH prefs 500, queue displayName, IPv6 listen. b6d2a63
 - T19.1 analytics: capture() direct-HTTP PostHog (no-op w/o key) + 10 funnel events + sort-weights flag via decide API + GET /admin/metrics (funnel/attendance/rebook/fairness/top-venues/conversion/pokes) + web Admin MetricsSection + RBAC test. 196 api tests.
+- T19.2 k6 scripts (viewport/drop_stampede/ws_fanout/scan_burst + README, thresholds=PRD §17; staging run blocked on deploy). T19.3 per-route rate limits + authz sweep test + zod v4.6.7/fastify-type-provider-zod 5 (audit clean; 198 api tests).
