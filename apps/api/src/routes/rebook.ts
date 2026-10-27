@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { notify } from '../notify.js';
@@ -135,6 +136,7 @@ export function registerRebook(app: FastifyInstance, dbUrl: string) {
       await db.execute(sql`insert into room_members (room_id, user_id) values (${room[0].id}::uuid, ${m.user_id}::uuid)`);
     }
     await db.execute(sql`update rebooks set new_spot_id = ${spotId}::uuid where id = ${req.params.id}::uuid`);
+    capture('rebook_created', req.user!.id, { crewId: req.params.id });
     await db.execute(sql`update crews set dormant_at = null where id = ${rb[0].crew_id}::uuid`);
     return reply.code(201).send({ spotId, members: crewMembers.length, publicSeats: body.data.publicSeats });
   });

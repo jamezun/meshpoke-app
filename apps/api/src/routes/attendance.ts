@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { getDb } from '../db/client.js';
 import { referralOnFirstAttendance } from './referrals.js';
 import { SPOT_RULES } from '@meshpoke/shared';
@@ -183,6 +184,7 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
       await db.execute(sql`
         update attendance set finalized_at = now()
          where spot_id = ${req.params.id}::uuid and finalized_at is null`);
+      capture('spot_finalised', req.user!.id, { spotId: req.params.id });
       // referral: referrer bonus fires on referee's FIRST finalised attendance
       for (const at of unfinalised) {
         if (at.status === 'attended' || at.status === 'forgiven') {

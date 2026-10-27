@@ -1,12 +1,51 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../auth/supabase';
+import { getAccessToken } from '../auth/supabase';
 
 async function api(path: string) {
-  const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } };
-  const token = data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch(`/v1${path}`, { headers: { authorization: `Bearer ${token}` } });
   if (res.status === 403) throw new Error('Not an admin.');
   return res.json();
+}
+
+
+type Metrics = {
+  funnel: Record<string, number>;
+  attendanceRate: number | null;
+  rebookRate: number | null;
+  fairness: { freeAccepted: number; paidAccepted: number; freeShare: number | null };
+  topVenues: { name: string; checkins: number }[];
+  conversion: { paying: number; total: number; rate: number | null };
+  pokes: { sent: number; returned: number };
+};
+
+function MetricsSection() {
+  const [m, setM] = useState<Metrics | null>(null);
+  useEffect(() => { api('/admin/metrics').then(setM).catch(() => {}); }, []);
+  if (!m) return <p className="text-sm text-gray-400">Metrics…</p>;
+  const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)}%`);
+  return (
+    <section className="mt-8">
+      <h2 className="text-lg font-bold">Metrics</h2>
+      <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+        <div className="rounded-xl border p-3"><p className="text-gray-500">Attendance rate</p><p className="text-xl font-bold">{pct(m.attendanceRate)}</p></div>
+        <div className="rounded-xl border p-3"><p className="text-gray-500">Rebook rate</p><p className="text-xl font-bold">{pct(m.rebookRate)}</p></div>
+        <div className="rounded-xl border p-3"><p className="text-gray-500">Free share of accepts</p><p className="text-xl font-bold">{pct(m.fairness.freeShare)}</p><p className="text-xs text-gray-400">fairness gate: keep free visible</p></div>
+        <div className="rounded-xl border p-3"><p className="text-gray-500">Payer conversion</p><p className="text-xl font-bold">{pct(m.conversion.rate)}</p><p className="text-xs text-gray-400">{m.conversion.paying}/{m.conversion.total} users</p></div>
+      </div>
+      <p className="mt-3 text-sm text-gray-600">
+        Funnel: {m.funnel.created} created → {m.funnel.forming} forming → {m.funnel.confirmed} confirmed → {m.funnel.live} live → {m.funnel.done} done
+        ({m.funnel.cancelled} cancelled, {m.funnel.dissolved} dissolved)
+      </p>
+      <p className="mt-1 text-sm text-gray-600">Pokes: {m.pokes.sent} sent, {m.pokes.returned} mutual ({pct(m.pokes.sent ? m.pokes.returned / m.pokes.sent : null)} poke-back)</p>
+      {m.topVenues.length > 0 && (
+        <>
+          <h3 className="mt-4 font-semibold">Top venues by check-ins</h3>
+          <ul className="mt-1 text-sm text-gray-600">{m.topVenues.map((v) => <li key={v.name}>{v.name} — {v.checkins}</li>)}</ul>
+        </>
+      )}
+    </section>
+  );
 }
 
 export function AdminPage() {
@@ -28,7 +67,7 @@ export function AdminPage() {
   const decide = async (id: string, action: 'approve' | 'reject') => {
     await fetch(`/v1/admin/merchant-claims/${id}`, {
       method: 'POST',
-      headers: { authorization: `Bearer ${(await supabase!.auth.getSession()).data.session?.access_token}`, 'content-type': 'application/json' },
+      headers: { authorization: `Bearer ${getAccessToken()}`, 'content-type': 'application/json' },
       body: JSON.stringify({ action }),
     });
     setClaims((c) => c.filter((x) => x.id !== id));
@@ -37,6 +76,7 @@ export function AdminPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="text-2xl font-bold mb-6">Admin</h1>
+      <MetricsSection />
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       <h2 className="font-semibold mb-2">Merchant claims ({claims.length})</h2>
       <ul className="divide-y divide-neutral-200 border rounded-lg overflow-hidden mb-8">

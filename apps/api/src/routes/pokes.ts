@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { notify } from '../notify.js';
@@ -97,6 +98,7 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
         insert into pokes (from_user, to_user, note, source, spot_id, cost_type, status, expires_at)
         values (${from}::uuid, ${to}::uuid, ${note ?? null}, ${source}::poke_source, ${spotId ?? null}::uuid, 'free_poke_back', 'returned', now() + interval '${sql.raw(String(POKE_RULES.expiryDays))} days')
         returning id`));
+      capture('poke_back', from, { to });
       return reply.code(201).send({ pokeBack: true, connectionId: connId, roomId, pokeId: mine[0].id });
     }
 
@@ -111,6 +113,7 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
       values (${from}::uuid, ${to}::uuid, ${note ?? null}, ${source}::poke_source, ${spotId ?? null}::uuid, ${cost.cost}::poke_cost_type, 'pending', now() + interval '${sql.raw(String(POKE_RULES.expiryDays))} days')
       returning id, expires_at`));
     await notify(dbUrl, to, 'pokes', 'poke_received', { from, pokeId: ins[0].id });
+    capture('poke_sent', from, { to, source, costType: cost.cost });
     return reply.code(201).send({ pokeBack: false, cost: cost.cost, pokeId: ins[0].id, expiresAt: ins[0].expires_at });
   });
 
@@ -135,7 +138,8 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
        group by p.id, e.plan, u.id`));
     const myKw = rows(await db.execute(sql`select keyword, level from keywords where user_id = ${me}::uuid`))
       .map((k) => ({ keyword: String(k.keyword).toLowerCase(), level: k.level as number }));
-    const weights = await currentSortWeights();
+    const { fetchFlag } = await import('../analytics.js');
+    const weights = await currentSortWeights(() => fetchFlag('admin', 'sort-weights'));
     const scored = pokes.map((p): Record<string, unknown> => {
       const kw = ((p.keywords as { keyword: string; level: number }[]) ?? []).map((k) => ({ keyword: k.keyword.toLowerCase(), level: k.level }));
       const vibeVal = vibe(kw, myKw);

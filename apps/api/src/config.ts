@@ -20,6 +20,8 @@ export const configSchema = z.object({
 
   PII_ENCRYPTION_KEY: z.string().length(64),
   QR_HMAC_SECRET: z.string().min(32),
+  POSTHOG_HOST: z.string().url().optional(),
+  POSTHOG_API_KEY: z.string().optional(),
   ADMIN_BOOTSTRAP_PASSWORD: z.string().min(12),
   ENABLE_SWAGGER: bool.default('true'),
 

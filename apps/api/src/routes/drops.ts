@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { Pool, type PoolClient } from 'pg';
 import { z } from 'zod';
 import { MERCHANT_PER_SEAT_BANDS } from '@meshpoke/shared/constants';
@@ -175,6 +176,7 @@ export function registerDrops(app: FastifyInstance, dbUrl: string): void {
       const ins = await client.query(
         `insert into drop_claims (drop_id, user_id) values ($1::uuid, $2::uuid) returning id`, [req.params.id, me]);
       await client.query('commit');
+      capture('drop_claimed', req.user!.id, { dropId: req.params.id });
       return reply.code(201).send({ claimId: ins.rows[0].id, claimedCount: upd.rows[0].claimed_count });
     } catch (e) {
       await client.query('rollback');

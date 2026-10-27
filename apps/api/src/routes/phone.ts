@@ -6,6 +6,7 @@
  */
 import type { FastifyInstance } from 'fastify';
 import type { Redis } from 'ioredis';
+import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { eq, and, ne, sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
@@ -76,6 +77,7 @@ export function registerPhone(app: FastifyInstance, dbUrl: string, redis: Redis,
       .where(eq(users.id, req.user!.id));
     await redis.del(`auth:user:${req.user!.id}`); // kill cached phoneVerified:false
     await referralOnPhoneVerified(db, req.user!.id);
+    capture('phone_verified', req.user!.id);
     return { verified: true };
   });
 }

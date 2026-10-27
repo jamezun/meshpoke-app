@@ -18,6 +18,61 @@ export function registerAdmin(app: FastifyInstance, dbUrl: string, storage: Stor
   const asRows = <T>(r: unknown) => (r as Rows<T>).rows;
 
   // ── users ───────────────────────────────────────────────────────
+  // T19.1: metrics — one aggregate query per metric
+  app.get('/admin/metrics', { preHandler: [app.authenticate, app.requireAdminRole('support')] }, async () => {
+    const db = getDb(dbUrl);
+    const one = async (q: Parameters<typeof db.execute>[0]) => asRows<Record<string, unknown>>(await db.execute(q))[0] ?? {};
+    const [funnel, attendance, rebook, fairness, venues, conversion, pokes] = await Promise.all([
+      one(sql`select
+        count(*)::int as created,
+        count(*) filter (where state = 'forming')::int as forming,
+        count(*) filter (where state = 'confirmed')::int as confirmed,
+        count(*) filter (where state = 'live')::int as live,
+        count(*) filter (where state = 'done')::int as done,
+        count(*) filter (where state = 'cancelled')::int as cancelled,
+        count(*) filter (where state = 'dissolved')::int as dissolved
+        from spots where kind = 'event'`),
+      one(sql`select
+        count(*) filter (where status in ('attended','forgiven'))::int as attended,
+        count(*)::int as total
+        from attendance where finalized_at is not null`),
+      one(sql`select
+        (select count(*)::int from rebooks where new_spot_id is not null) as rebooks_with_spot,
+        (select count(*)::int from spots where kind = 'event' and state = 'done') as done_spots`),
+      one(sql`select
+        count(*) filter (where coalesce(e.plan, 'free') = 'free')::int as free_accepted,
+        count(*) filter (where coalesce(e.plan, 'free') <> 'free')::int as paid_accepted
+        from applications a left join entitlements e on e.user_id = a.user_id
+        where a.status = 'accepted'`),
+      db.execute(sql`select v.display_name, count(*)::int as checkins
+        from merchant_checkins c join venues v on v.id = c.venue_id
+        group by v.display_name order by checkins desc limit 10`),
+      one(sql`select
+        count(*) filter (where e.plan in ('plus','pro'))::int as paying,
+        count(*)::int as total
+        from users u left join entitlements e on e.user_id = u.id
+        where u.deleted_at is null`),
+      one(sql`select
+        count(*)::int as sent,
+        count(*) filter (where status = 'returned')::int as returned
+        from pokes`),
+    ]);
+    const n = (v: unknown) => Number(v ?? 0);
+    const attendanceRate = n(attendance.total) > 0 ? n(attendance.attended) / n(attendance.total) : null;
+    const rebookRate = n(rebook.done_spots) > 0 ? n(rebook.rebooks_with_spot) / n(rebook.done_spots) : null;
+    const fairnessFreeShare = (Number(fairness.free_accepted) + Number(fairness.paid_accepted)) > 0
+      ? Number(fairness.free_accepted) / (Number(fairness.free_accepted) + Number(fairness.paid_accepted)) : null;
+    return {
+      funnel,
+      attendanceRate,
+      rebookRate,
+      fairness: { freeAccepted: fairness.free_accepted, paidAccepted: fairness.paid_accepted, freeShare: fairnessFreeShare },
+      topVenues: asRows<{ display_name: string; checkins: number }>(venues).map((r) => ({ name: r.display_name, checkins: r.checkins })),
+      conversion: { paying: conversion.paying, total: conversion.total, rate: n(conversion.total) > 0 ? n(conversion.paying) / n(conversion.total) : null },
+      pokes,
+    };
+  });
+
   app.get<{ Querystring: { q?: string } }>('/admin/users', { preHandler: [app.authenticate, app.requireAdminRole('support')] }, async (req) => {
     const q = (req.query?.q ?? '').trim();
     const like = `%${q}%`;

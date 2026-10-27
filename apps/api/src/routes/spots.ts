@@ -4,6 +4,7 @@
 /// district anchor while forming (venue pin comes at confirm — T9.4), date range.
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 
@@ -88,6 +89,7 @@ export function registerSpots(app: FastifyInstance, dbUrl: string) {
       insert into spot_members (spot_id, user_id, role) select id, ${userId}, 'host' from s returning spot_id`);
     const spotId = rows(res)[0].spot_id as string;
     await db.execute(sql`insert into room_members (room_id, user_id, role) select id, ${userId}, 'host' from rooms where spot_id = ${spotId} on conflict do nothing`);
+    capture('spot_created', req.user!.id, { template: v.template, joinMode: v.joinMode });
     return { spotId, state: 'forming' };
   });
 }

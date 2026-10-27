@@ -172,4 +172,18 @@ describe('T13.4 moderation queue', () => {
       headers: { authorization: `Bearer ${modTok}` }, payload: { action: 'ban', reason: 'x' } });
     expect(bad.statusCode).toBe(422);
   });
+
+  it('metrics endpoint returns funnel, fairness, conversion (T19.1)', async () => {
+    const res = await app.inject({ method: 'GET', url: '/v1/admin/metrics', headers: { authorization: `Bearer ${superTok}` } });
+    expect(res.statusCode).toBe(200);
+    const m = res.json();
+    expect(m.funnel).toHaveProperty('created');
+    expect(m.funnel).toHaveProperty('done');
+    expect(m.fairness).toHaveProperty('freeShare');
+    expect(m.conversion).toHaveProperty('rate');
+    expect(Array.isArray(m.topVenues)).toBe(true);
+    // support role also allowed; moderator 403
+    const sup = await app.inject({ method: 'GET', url: '/v1/admin/metrics', headers: { authorization: `Bearer ${modTok}` } });
+    expect(sup.statusCode).toBe(403);
+  });
 });

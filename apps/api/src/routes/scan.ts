@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { verifyQrToken, markQrUsed, lastLocationPing } from './userQr.js';
@@ -127,6 +128,7 @@ export function registerScan(app: FastifyInstance, dbUrl: string, secret: string
       returning id`));
 
     // 5b. billing hook (T16.1): high-confidence billable events → seat_charges
+    capture('checkin_verified', guestId, { context, confidence });
     const billableEvent = confidence === 'high';
     let charge: { charged: boolean; shadow: boolean; amount: number | null } = { charged: false, shadow: false, amount: null };
     if (billableEvent) charge = await onCheckin(db, ins[0].id as string);

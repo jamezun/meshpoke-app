@@ -4,6 +4,7 @@
 /// Joining caps: activeEventSpots free 3 / plus 5 / pro 10 (TIER_CAPS).
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { trustExpr } from '../trust.js';
@@ -116,6 +117,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     await db.execute(sql`
       insert into applications (spot_id, user_id, note) values (${s.id}::uuid, ${userId}, ${parsed.data.note ?? null})
       on conflict (spot_id, user_id) do update set status = 'pending', note = excluded.note, decided_at = null`);
+    capture('application_submitted', req.user!.id, { spotId: req.params.id });
     return { status: 'pending' };
   });
 
@@ -168,7 +170,8 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
        group by a.id, e.plan, sc.score, sc.proven_state, u.created_at, u.id`));
     const { recommendedScore, currentSortWeights } = await import('../sort.js');
     const { vibe } = await import('@meshpoke/shared/vibe');
-    const weights = await currentSortWeights();
+    const { fetchFlag } = await import('../analytics.js');
+    const weights = await currentSortWeights(() => fetchFlag('admin', 'sort-weights'));
     const spot = rows(await db.execute(sql`select required_keywords from spots where id = ${req.params.id}::uuid`));
     const spotKw = ((spot[0]?.required_keywords as string[] | null) ?? []).map((k) => ({ keyword: k.toLowerCase(), level: 10 }));
     const scored = apps.map((a): Record<string, unknown> => {

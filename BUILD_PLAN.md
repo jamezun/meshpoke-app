@@ -886,7 +886,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M19 Phase 1 hardening & launch
 
-### [ ] T19.1 Analytics & metrics
+### [~] T19.1 Analytics & metrics
 **PRD refs:** §1.4, BM §11 · **Depends:** M9–M17
 - [ ] PostHog events for funnels (sign-up → verify → first spot → attended; poke → poke back; drop claim → redemption), feature flags wired
 - [ ] Admin metrics page: rebook rate, formation funnel, attendance rate, **free vs paid acceptance (fairness gate)**, check-ins per venue, conversion

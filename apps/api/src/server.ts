@@ -1,8 +1,10 @@
 import 'dotenv/config';
 import { loadConfig } from './config.js';
+import { initAnalytics } from './analytics.js';
 import { buildApp } from './app.js';
 
 const config = loadConfig();
+initAnalytics(config.POSTHOG_HOST, config.POSTHOG_API_KEY);
 const app = await buildApp({ config });
 
 if (config.ENABLE_JOBS && config.FEHD_URL) {

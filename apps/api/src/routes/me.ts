@@ -6,6 +6,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import { getDb, withTx, type Tx } from '../db/client.js';
+import { capture } from '../analytics.js';
 
 import { profiles, users } from '../db/schema/core.js';
 import { eq } from 'drizzle-orm';
@@ -107,6 +108,7 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
       throw e;
     }
     await redis.del(`auth:user:${req.user!.id}`); // kill cached onboarded:false
+    capture('signed_up', req.user!.id, { referrer: !!refCode });
     return reply.code(201).send({ status: 'onboarded' });
   });
 
