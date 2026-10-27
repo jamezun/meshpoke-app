@@ -48,6 +48,77 @@ function MetricsSection() {
   );
 }
 
+function FinanceSection() {
+  const [health, setHealth] = useState<{ merchantMrrHkd: number; seatRevenueMtdHkd: number; openDisputes: number; foundingMerchants: number } | null>(null);
+  const [disputes, setDisputes] = useState<{ id: string; venue_name: string; event_type: string; amount: number; disputed_at: string }[]>([]);
+  const [due, setDue] = useState<{ id: string; display_name: string; price_band: number; checkins_90d: number }[]>([]);
+
+  const load = () => {
+    api('/admin/merchant-finance/health').then(setHealth).catch(() => {});
+    api('/admin/merchant-finance/disputes').then((d) => setDisputes(d.disputes ?? [])).catch(() => {});
+    api('/admin/merchant-finance/band-audit').then((d) => setDue(d.due ?? [])).catch(() => {});
+  };
+  useEffect(load, []);
+
+  const resolve = async (id: string, resolution: 'credit_note' | 'rejected') => {
+    await fetch(`/v1/admin/merchant-finance/disputes/${id}/resolve`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${getAccessToken()}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ resolution }),
+    });
+    load();
+  };
+
+  const setBand = async (venueId: string, newBand: number) => {
+    await fetch(`/v1/admin/merchant-finance/band-audit/${venueId}`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${getAccessToken()}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ newBand }),
+    });
+    load();
+  };
+
+  return (
+    <section className="mb-8">
+      <h2 className="font-semibold mb-2">Merchant finance</h2>
+      {health && (
+        <div className="grid grid-cols-4 gap-2 text-center mb-4">
+          <div className="border rounded-lg p-2"><div className="text-lg font-bold">${health.merchantMrrHkd}</div><div className="text-xs opacity-60">SaaS MRR</div></div>
+          <div className="border rounded-lg p-2"><div className="text-lg font-bold">${health.seatRevenueMtdHkd}</div><div className="text-xs opacity-60">Seats MTD</div></div>
+          <div className="border rounded-lg p-2"><div className="text-lg font-bold">{health.openDisputes}</div><div className="text-xs opacity-60">Open disputes</div></div>
+          <div className="border rounded-lg p-2"><div className="text-lg font-bold">{health.foundingMerchants}</div><div className="text-xs opacity-60">Founding</div></div>
+        </div>
+      )}
+      <h3 className="text-sm font-medium mb-1">Disputes</h3>
+      <ul className="divide-y divide-neutral-200 border rounded-lg overflow-hidden mb-4">
+        {disputes.map((d) => (
+          <li key={d.id} className="px-4 py-2 text-sm flex items-center justify-between">
+            <span>{d.venue_name} <span className="opacity-50">${d.amount} · {d.event_type}</span></span>
+            <span className="flex gap-2">
+              <button className="border rounded px-2 py-1 text-xs" onClick={() => resolve(d.id, 'rejected')}>Reject</button>
+              <button className="bg-neutral-900 text-white rounded px-2 py-1 text-xs" onClick={() => resolve(d.id, 'credit_note')}>Credit note</button>
+            </span>
+          </li>
+        ))}
+        {disputes.length === 0 && <li className="px-4 py-2 text-sm opacity-60">No open disputes.</li>}
+      </ul>
+      <h3 className="text-sm font-medium mb-1">Band audits due (&gt;90d)</h3>
+      <ul className="divide-y divide-neutral-200 border rounded-lg overflow-hidden">
+        {due.map((d) => (
+          <li key={d.id} className="px-4 py-2 text-sm flex items-center justify-between">
+            <span>{d.display_name} <span className="opacity-50">band {d.price_band} · {d.checkins_90d} check-ins</span></span>
+            <select className="border rounded text-xs px-2 py-1" defaultValue="" onChange={(e) => e.target.value && setBand(d.id, Number(e.target.value))}>
+              <option value="" disabled>Set band…</option>
+              {[1, 2, 3, 4, 5, 6].map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </li>
+        ))}
+        {due.length === 0 && <li className="px-4 py-2 text-sm opacity-60">Nothing due.</li>}
+      </ul>
+    </section>
+  );
+}
+
 export function AdminPage() {
   const [claims, setClaims] = useState<{ id: string; venue: string; owner: string; price_band: number; certUrl: string | null }[]>([]);
   const [users, setUsers] = useState<{ id: string; email: string; display_name: string; liveness_state: string }[]>([]);
@@ -77,6 +148,7 @@ export function AdminPage() {
     <main className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="text-2xl font-bold mb-6">Admin</h1>
       <MetricsSection />
+      <FinanceSection />
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       <h2 className="font-semibold mb-2">Merchant claims ({claims.length})</h2>
       <ul className="divide-y divide-neutral-200 border rounded-lg overflow-hidden mb-8">

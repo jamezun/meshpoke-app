@@ -42,6 +42,7 @@ import { registerDrops } from './routes/drops.js';
 import { registerLadder } from './routes/ladder.js';
 import { registerMemberships } from './routes/memberships.js';
 import { registerCrm } from './routes/crm.js';
+import { registerAdminFinance } from './routes/adminFinance.js';
 import { registerMerchantBilling } from './routes/merchantBilling.js';
 import { registerCheckout } from './billing/checkout.js';
 import { registerRevenueCat } from './billing/revenuecat.js';
@@ -181,6 +182,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(async (r) => registerLadder(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMemberships(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerCrm(r, config.DATABASE_URL, config.QR_HMAC_SECRET), { prefix: '/v1' });
+  await app.register(async (r) => registerAdminFinance(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerMerchantBilling(r, config.DATABASE_URL, config), { prefix: '/v1' });
   await app.register(async (r) => registerCheckout(r, config.DATABASE_URL, config), { prefix: '/v1' });
   await app.register(async (r) => registerRevenueCat(r, config.DATABASE_URL, config), { prefix: '/v1' });
