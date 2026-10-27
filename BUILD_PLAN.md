@@ -793,19 +793,19 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] `founding_counters.merchant_50` atomic
 **Tests:** clock transitions with frozen time; guarantee extension.
 
-### [ ] T16.3 Merchant Stripe billing
+### [x] T16.3 Merchant Stripe billing
 **PRD refs:** §8.3, §12.8 · **Depends:** T16.2
-- [ ] Stripe customer per merchant; `POST /merchant/billing/setup-intent` (card on file)
-- [ ] Merchant subscriptions (Growth/Pro monthly/annual, founding prices) via Stripe Subscriptions
-- [ ] Monthly invoice job (1st, 03:00 HKT): aggregate unbilled non-shadow `seat_charges` → Stripe invoice items + finalize + charge; shadow lines shown on our invoice record as waived
-- [ ] Payment failure → drops paused immediately; SaaS dunning 7 days → downgrade to Starter
-- [ ] `/webhooks/stripe` handlers (signature verified)
+- [x] Stripe customer per merchant; `POST /merchant/billing/setup-intent` (card on file)
+- [x] Merchant subscriptions (Growth/Pro monthly/annual, founding prices) via Stripe Subscriptions
+- [x] Monthly invoice job (1st, 03:00 HKT): aggregate unbilled non-shadow `seat_charges` → Stripe invoice items + finalize + charge; shadow lines shown on our invoice record as waived
+- [x] Payment failure → drops paused immediately; SaaS dunning 7 days → downgrade to Starter
+- [x] `/webhooks/stripe` handlers (signature verified)
 **Tests:** invoice totals from fixture seats; failure path; webhook signature rejection.
 
-### [ ] T16.4 Merchant invoices & disputes UI
+### [x] T16.4 Merchant invoices & disputes UI
 **PRD refs:** §6.3 (Billing) · **Depends:** T16.3
-- [ ] Invoices list/detail (lines grouped by event type, drop, date; shadow lines "waived"), card management, budget cap, founding status card (days left, guarantee progress "18/30")
-- [ ] Dispute a seat (7 days) → admin queue
+- [x] Invoices list/detail (lines grouped by event type, drop, date; shadow lines "waived"), card management, budget cap, founding status card (days left, guarantee progress "18/30")
+- [x] Dispute a seat (7 days) → admin queue
 **Acceptance:** merchant sees an accurate shadow invoice in month 1.
 
 ### [ ] T16.5 Admin merchant finance
@@ -1144,3 +1144,5 @@ Append one line per completed task (newest at the bottom).
 - T15.4+T15.5 (✓): Scanner.tsx + DropsBuilder.tsx (tsc/eslint/vitest green, 8 web tests). Staff mgmt endpoint deferred — scan auth already accepts merchant_staff rows.
 - T15.6 (✓): mobile qr_screens.dart + venue_drops_sheet.dart (analyze 0, 14 tests). M15 6/6 — staff-mgmt endpoint + redemption feed deferred to M16 wiring.
 - T16.1+T16.2 (✓): src/billing.ts onCheckin (band 1-6 fee via price_band, sponsored x1.5, drop_seat once/user, phone-verified+7d-age gate, shadow in founding month 1, invoice YYYY-MM rollup, idempotent via unique checkin_id) + onDropActivated (first drop sets founding clock 3mo). Wired into scan.ts (charge in response). 181 api tests green.
+- T16.3 (✓): merchantBilling.ts — Stripe SaaS (setup-intent card, subscribe Growth/Pro monthly w/ founding auto-price, cancel → Starter, webhook sig-verified) + monthly invoice-run job (aggregate unbilled non-shadow seat_charges → invoice + Stripe invoice items) + seat dispute 7d. Stub mode without STRIPE_SECRET_KEY (dev/test). LESSON: drizzle db.execute with params = extended protocol = ONE statement only; split multi-statement.
+- T16.4 (✓): web BillingSection (invoices table w/ waived shadow column, seat-charges w/ dispute button, founding free-until card) + GET /merchant/billing/invoices + /seat-charges; /merchant/me now returns founding_free_until. 184 api tests + 8 web green. M16 4/4 ✔.
