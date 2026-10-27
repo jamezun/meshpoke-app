@@ -4,7 +4,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { SignJWT } from 'jose';
 import pg from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { join } from 'node:path';
 import { startInfra, stopInfra, type TestInfra } from './db.js';
@@ -162,7 +161,6 @@ describe('T20.3 level engine + T20.4 attribution billing', () => {
     // (scan QR machinery is covered by scan.test.ts; here we test engine + billing gate)
     await pool.query(`update memberships set visits_count = 3 where user_id = $1::uuid and venue_id = $2::uuid`, [member, venueId]);
 
-    const sweepTok = await token(await mkUser({ admin: true }));
     // ensure the admin user has superadmin role
     const adm = await pool.query(`select id from users where is_admin = true order by created_at desc limit 1`);
     await pool.query(`update users set admin_roles = '{superadmin}' where id = $1::uuid`, [adm.rows[0].id]);
