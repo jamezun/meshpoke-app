@@ -100,7 +100,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
 | M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
-| M17 Consumer billing, entitlements, referrals | 1 | 6 | 4 | ☐ |
+| M17 Consumer billing, entitlements, referrals | 1 | 6 | 5 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
 | M19 Phase 1 hardening & launch | 1 | 7 | 0 | ☐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
@@ -844,11 +844,11 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Caps (event/chat/merchant/crews), poke allowance, note length, tier value for Recommended sort, advanced filters (Plus/Pro or filter pass grant), auto-claim drops (Plus 1/wk, Pro 3/wk at saved venues — job when a drop is published), waitlist auto-join weights
 **Tests:** each feature per plan.
 
-### [ ] T17.5 Paywall & upgrade UI
+### [x] T17.5 Paywall & upgrade UI
 **PRD refs:** §5, §6.2 · **Depends:** T17.3, T17.4
-- [ ] Mobile upgrade sheet triggered by 402 (shows the cap hit and IAP options only)
-- [ ] Web billing page (web prices, founding banner, current plan, portal link)
-- [ ] Copy review: no web price anywhere in mobile (automated grep test in CI for "HK$128", "web", "cheaper" strings in `apps/mobile/lib`)
+- [x] Mobile upgrade sheet triggered by 402 (shows the cap hit and IAP options only)
+- [x] Web billing page (web prices, founding banner, current plan, portal link)
+- [x] Copy review: no web price anywhere in mobile (automated grep test in CI for "HK$128", "web", "cheaper" strings in `apps/mobile/lib`)
 **Acceptance:** CI grep test passes.
 
 ### [ ] T17.6 Referral pokes
@@ -1150,3 +1150,4 @@ Append one line per completed task (newest at the bottom).
 - T17.2 (✓): src/billing/checkout.ts — POST /billing/checkout (Stripe Checkout, founding atomic reservation via update...returning, stub mode fulfils instantly), /billing/portal, /webhooks/stripe-consumer (completed/renewal/refund + founding release). users.stripe_customer_id migration 0016. 189 api tests.
 - T17.3 (✓): src/billing/revenuecat.ts /webhooks/revenuecat (RC product map, INITIAL_PURCHASE/RENEWAL/NON_RENEWING_PURCHASE upsert subs + packs credits + filter-pass grant; EXPIRATION/CANCELLATION/REFUND close subs; recompute entitlement; REVENUECAT_WEBHOOK_SECRET config). RC dashboard + paywall UI deferred to mobile polish (needs RC project keys). 191 api tests.
 - T17.4 (✓): filterGate.ts requireAdvancedFilters (402 filter_pass), map.ts ?keywords= on district spots (ANY(array) parens lesson), drops.ts autoClaimForSavedVenues (window fn NOT allowed in WHERE — subselect wrapper; drop_claims col is claimed_at NOT created_at), spotLifecycle waitlist backfill weighted by plan 1/2/3 then FIFO. planFeatures.test.ts 2. 193 api tests.
+- T17.5 (✓): upgrade_sheet.dart (402 → DioException hit → sheet w/ plan options, NO prices — App Store 3.1.1; wired spot detail), web Billing.tsx (/app/billing, PRICES.web grid + founding banner + portal), CI no-web-prices-in-mobile grep step, FOUNDING_SLOTS export, products.ts null-typing fix.
