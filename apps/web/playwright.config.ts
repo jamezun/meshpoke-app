@@ -8,7 +8,7 @@ const API_ENV = {
   REDIS_URL: process.env.E2E_REDIS_URL ?? 'redis://localhost:16379',
   GOTRUE_URL: process.env.E2E_GOTRUE_URL ?? 'http://localhost:9998',
   GOTRUE_JWT_SECRET: 'e2e-secret-e2e-secret-e2e-secret-e2e-secret',
-  CORS_ORIGINS: 'http://localhost:5173',
+  CORS_ORIGINS: 'http://localhost:5199',
   PII_ENCRYPTION_KEY: 'e2e0000000000000000000000000000000000000000000000000000000000000',
   QR_HMAC_SECRET: 'e2e-qr-secret-e2e-qr-secret-e2e-qr-secret',
   ADMIN_BOOTSTRAP_PASSWORD: 'e2e-admin-password',
@@ -20,7 +20,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: 'line',
-  use: { baseURL: 'http://localhost:5173', trace: 'on-first-retry' },
+  use: { baseURL: 'http://localhost:5199', trace: 'on-first-retry' },
   projects: [
     { name: 'setup', testMatch: /auth\.setup\.ts/ },
     { name: 'specs', testDir: './e2e', testIgnore: /auth\.setup\.ts/, dependencies: ['setup'] },
@@ -41,8 +41,8 @@ export default defineConfig({
       timeout: 20_000,
     },
     {
-      command: 'pnpm dev',
-      url: 'http://localhost:5173',
+      command: 'pnpm exec vite --port 5199 --strictPort',
+      url: 'http://localhost:5199',
       reuseExistingServer: true,
       timeout: 60_000,
     },
