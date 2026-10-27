@@ -55,6 +55,8 @@ export const PRICES = {
   foundingAnnualWebOnly: true,
 } as const;
 
+export const FOUNDING_SLOTS = 500;
+
 // ── Pokes ───────────────────────────────────────────────────────
 export const POKE_RULES = {
   expiryDays: 7, // unaccepted pokes expire

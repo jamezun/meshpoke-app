@@ -20,6 +20,7 @@ import CrewsPage from './pages/app/Crews.js';
 import ActivityPage from './pages/app/Activity.js';
 import { SignupPage } from './auth/Signup';
 import { PhoneVerifyPage } from './auth/PhoneVerify';
+import { BillingPage } from './pages/app/Billing.js';
 import { SettingsPage } from './layouts/AppLayout';
 import { AppPage } from './pages/app/Placeholder';
 import { ProfileEditorPage } from './pages/app/ProfileEditor';
@@ -57,7 +58,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
         { path: 'connections', element: <InboxPage /> },
         { path: 'people-you-met/:spotId', element: <PeopleYouMetPage /> },
         { path: 'wallet', element: <AppPage title="Wallet" /> },
-        { path: 'billing', element: <AppPage title="Billing" /> },
+        { path: 'billing', element: <BillingPage /> },
         { path: 'profile', element: <ProfileEditorPage /> },
         { path: 'settings', element: <SettingsPage /> },
       ],

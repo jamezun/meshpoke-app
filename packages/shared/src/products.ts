@@ -16,7 +16,7 @@ export type Product = {
   priceIapHkd: number | null;
 };
 
-function sub(id: string, plan: 'plus' | 'pro', termDays: number, w: number, i: number): Product {
+function sub(id: string, plan: 'plus' | 'pro', termDays: number, w: number | null, i: number | null): Product {
   return { id, kind: 'subscription', plan, termDays, priceWebHkd: w, priceIapHkd: i };
 }
 

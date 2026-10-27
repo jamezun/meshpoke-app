@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meshpoke/core/api_client.dart';
 import 'spot_repository.dart';
+import '../billing/upgrade_sheet.dart';
 import 'host_queue_screen.dart';
 import 'live_spot_screen.dart';
 
@@ -35,7 +36,12 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
       );
       ref.invalidate(spotDetailProvider(widget.spotId));
     } catch (e) {
-      if (mounted) setState(() => _error = '$e');
+      final hit = upgradeHitFrom(e);
+      if (hit != null && mounted) {
+        await showUpgradeSheet(context, hit.capType, hit.detail);
+      } else if (mounted) {
+        setState(() => _error = '$e');
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
