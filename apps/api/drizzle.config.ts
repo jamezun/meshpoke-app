@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
@@ -5,6 +6,7 @@ export default defineConfig({
   schema: './src/db/schema',
   out: './drizzle',
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? 'postgres://meshpoke:meshpoke_dev_2026@localhost:5432/meshpoke_dev',
+    // no silent dev fallback — force explicit DATABASE_URL so dev creds can't leak into other envs
+    url: (() => { if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL required (drizzle-kit)'); return process.env.DATABASE_URL; })(),
   },
 });

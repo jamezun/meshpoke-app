@@ -106,7 +106,8 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
     const allowance = plan === 'pro' ? 50 : plan === 'plus' ? 20 : 5;
     const cost = await resolvePokeCost(db, from, to, allowance);
     if ('error' in cost) return reply.code(402).send({ problem: { title: 'No pokes left this week', status: 402, type: 'cap', capType: 'weeklyPokes' } });
-    await chargePoke(db, from, cost.cost);
+    const charged = await chargePoke(db, from, cost.cost, allowance);
+    if (!charged) return reply.code(402).send({ problem: { title: 'No pokes left this week', status: 402, type: 'cap', capType: 'weeklyPokes' } });
     await ensureBalanceReset(db, from);
     const ins = rows(await db.execute(sql`
       insert into pokes (from_user, to_user, note, source, spot_id, cost_type, status, expires_at)

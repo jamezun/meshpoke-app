@@ -76,6 +76,9 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     const s = spot[0];
     if (!(await isHost(String(s.id), userId))) return reply.code(403).send({ problem: { title: 'Host only', status: 403 } });
     if (s.state !== 'forming') return reply.code(422).send({ problem: { title: `Spot is ${s.state}`, status: 422 } });
+    if (new Date(parsed.data.startsAt).getTime() <= Date.now()) {
+      return reply.code(422).send({ problem: { title: 'startsAt must be in the future', status: 422 } });
+    }
 
     // headcount includes the host (same rule as join capacity)
     const accepted = rows(await db.execute(sql`select count(*)::int as n from spot_members where spot_id = ${s.id}::uuid and state = 'active' and role in ('host','member')`));
@@ -100,14 +103,16 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     return { state: 'confirmed', confirmDeadline: deadline.toISOString() };
   });
 
-  // member confirm (within 48h of date pin)
+  // member confirm (within 48h of date pin; spot must still be confirmed and inside the deadline)
   app.post<{ Params: { id: string } }>('/spots/:id/confirm', { preHandler: [app.authenticate] }, async (req, reply) => {
     const userId = req.user!.id;
     const r = rows(await db.execute(sql`
-      update spot_members set confirm_state = 'confirmed'
-       where spot_id = ${req.params.id}::uuid and user_id = ${userId} and state = 'active'
-         and confirm_state = 'pending' returning 1 as ok`));
-    if (r.length === 0) return reply.code(409).send({ problem: { title: 'Nothing to confirm', status: 409 } });
+      update spot_members m set confirm_state = 'confirmed'
+       from spots s
+       where m.spot_id = ${req.params.id}::uuid and s.id = m.spot_id
+         and m.user_id = ${userId} and m.state = 'active' and m.confirm_state = 'pending'
+         and s.state = 'confirmed' and s.confirm_deadline > now() returning 1 as ok`));
+    if (r.length === 0) return reply.code(409).send({ problem: { title: 'Nothing to confirm (deadline passed or spot state changed)', status: 409 } });
     return { confirmed: true };
   });
 
@@ -119,27 +124,36 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     const s = spot[0];
     const member = rows(await db.execute(sql`select role, confirm_state from spot_members where spot_id = ${s.id}::uuid and user_id = ${userId} and state = 'active'`));
     if (member.length === 0) return reply.code(409).send({ problem: { title: 'Not a member', status: 409 } });
+    if (member[0].role === 'host') {
+      return reply.code(422).send({ problem: { title: 'Hosts must cancel the spot, not bail (cancel applies the host penalty)', status: 422 } });
+    }
 
     const startsAt = s.starts_at ? new Date(String(s.starts_at)).getTime() : null;
     const withinGrace = startsAt !== null && startsAt - Date.now() > SPOT_RULES.bailGraceHours * 3600_000;
     await db.execute(sql`update spot_members set state = 'left', confirm_state = 'bailed', bailed_at = now() where spot_id = ${s.id}::uuid and user_id = ${userId}`);
     await db.execute(sql`delete from room_members rm using rooms r where r.spot_id = ${s.id}::uuid and rm.room_id = r.id and rm.user_id = ${userId}`);
 
-    if (s.state === 'confirmed' && !withinGrace) {
+    if ((s.state === 'confirmed' || s.state === 'live') && !withinGrace) {
       await db.execute(sql`insert into score_events (user_id, spot_id, type, weight) values (${userId}, ${s.id}::uuid, 'late_cancel', -0.15)`);
     }
-    // waitlist backfill: promote first waitlisted member if a seat freed in a confirmed/forming spot
+    // waitlist backfill: promote first waitlisted member into the freed seat, atomically rechecking capacity
     const next = rows(await db.execute(sql`
-      select m.user_id from spot_members m
-        left join entitlements e on e.user_id = m.user_id and (e.expires_at is null or e.expires_at > now())
-       where m.spot_id = ${s.id}::uuid and m.role = 'waitlist' and m.state = 'active'
-       order by case coalesce(e.plan, 'free') when 'pro' then 3 when 'plus' then 2 else 1 end desc, m.joined_at asc
-       limit 1`));
+      update spot_members m set role = 'member', confirm_state = 'pending'
+       where (m.spot_id, m.user_id) = (
+         select w.spot_id, w.user_id from spot_members w
+          where w.spot_id = ${s.id}::uuid and w.role = 'waitlist' and w.state = 'active'
+          order by case coalesce((select e.plan from entitlements e where e.user_id = w.user_id
+                                    and (e.expires_at is null or e.expires_at > now())), 'free')
+                    when 'pro' then 3 when 'plus' then 2 else 1 end desc, w.joined_at asc
+          limit 1 for update skip locked)
+        and (select count(*) from spot_members m2
+              where m2.spot_id = ${s.id}::uuid and m2.role in ('host','member') and m2.state = 'active')
+            < (select max_headcount + overbook_buffer from spots where id = ${s.id}::uuid)
+       returning m.user_id`));
     if (next.length > 0) {
-      await db.execute(sql`update spot_members set role = 'member', confirm_state = 'pending' where spot_id = ${s.id}::uuid and user_id = ${next[0].user_id}`);
       await db.execute(sql`insert into room_members (room_id, user_id) select r.id, ${next[0].user_id} from rooms r where r.spot_id = ${s.id}::uuid on conflict do nothing`);
     }
-    return { bailed: true, penalty: s.state === 'confirmed' && !withinGrace ? 'late_cancel' : null };
+    return { bailed: true, penalty: (s.state === 'confirmed' || s.state === 'live') && !withinGrace ? 'late_cancel' : null };
   });
 
   // host cancel → score event + auto-apology system message
@@ -154,6 +168,7 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     }
     const wasConfirmed = s.state === 'confirmed' || s.state === 'live';
     await db.execute(sql`update spots set state = 'cancelled' where id = ${s.id}::uuid`);
+    await db.execute(sql`update applications set status = 'closed' where spot_id = ${s.id}::uuid and status = 'pending'`);
     if (wasConfirmed) {
       await db.execute(sql`insert into score_events (user_id, spot_id, type, weight) values (${userId}, ${s.id}::uuid, 'host_cancel', -0.2)`);
       await db.execute(sql`

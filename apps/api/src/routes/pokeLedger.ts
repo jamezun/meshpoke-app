@@ -48,7 +48,8 @@ export async function resolvePokeCost(
       join spots s on s.id = a1.spot_id
      where a1.user_id = ${from}::uuid and a2.user_id = ${to}::uuid
        and a1.status in ('attended','forgiven') and a2.status in ('attended','forgiven')
-       and s.state = 'done' and s.starts_at > now() - interval '${sql.raw(String(POKE_RULES.postSpotWindowHours))} hours'
+       and s.state = 'done' and s.starts_at > now() - interval '${sql.raw(String(POKE_RULES.postSpotWindowHours + 12))} hours'
+       -- ponytail: 48h window anchored at starts_at+12h (sweep marks done 12h after start); a completed_at column is the clean fix if spot lengths vary
      limit 1`)) as unknown as { rows: unknown[] };
   if (shared.rows.length > 0) return { cost: 'free_post_spot' };
 
@@ -59,12 +60,21 @@ export async function resolvePokeCost(
   return { error: 'no_allowance' };
 }
 
-export async function chargePoke(db: LedgerDb, from: string, cost: PokeCostType): Promise<void> {
+export async function chargePoke(db: LedgerDb, from: string, cost: PokeCostType, weeklyAllowance: number): Promise<boolean> {
+  // atomic conditional charge — two concurrent pokes can never overshoot the allowance or go negative
   if (cost === 'weekly') {
-    await db.execute(sql`update poke_balances set weekly_used = weekly_used + 1 where user_id = ${from}::uuid`);
-  } else if (cost === 'credit') {
-    await db.execute(sql`update poke_balances set credits = credits - 1 where user_id = ${from}::uuid`);
-  } // free types: nothing
+    const r = (await db.execute(sql`
+      update poke_balances set weekly_used = weekly_used + 1
+       where user_id = ${from}::uuid and weekly_used < ${weeklyAllowance} returning 1 as ok`)) as unknown as { rows: unknown[] };
+    return r.rows.length > 0;
+  }
+  if (cost === 'credit') {
+    const r = (await db.execute(sql`
+      update poke_balances set credits = credits - 1
+       where user_id = ${from}::uuid and credits > 0 returning 1 as ok`)) as unknown as { rows: unknown[] };
+    return r.rows.length > 0;
+  }
+  return true; // free types: nothing
 }
 
 export function registerPokeLedger(app: FastifyInstance, dbUrl: string) {

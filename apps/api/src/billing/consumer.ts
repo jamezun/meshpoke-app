@@ -13,31 +13,33 @@ export async function recomputeEntitlement(db: Db, userId: string): Promise<Plan
   // active subscriptions: not expired, not refunded/cancelled-past-end
   const subs = rows(await db.execute(sql`
     select product, current_period_end from subscriptions
-     where user_id = ${userId}::uuid and status = 'active' and current_period_end > now()`));
+     where user_id = ${userId}::uuid and status = 'active' and (current_period_end is null or current_period_end > now())`));
   // grants: host_reward_pro → pro, pass7 → plus; filter_pass is feature-only (no plan)
   const grants = rows(await db.execute(sql`
     select kind, ends_at from grants
-     where user_id = ${userId}::uuid and ends_at > now() and kind in ('host_reward_pro', 'pass7')`));
+     where user_id = ${userId}::uuid and (ends_at is null or ends_at > now()) and kind in ('host_reward_pro', 'pass7')`));
 
-  type Cand = { plan: Plan; end: Date };
+  type Cand = { plan: Plan; end: Date | null }; // null end = lifetime (founding locked)
   const cands: Cand[] = [];
   for (const s of subs) {
     const p = String(s.product);
-    if (p.startsWith('pro')) cands.push({ plan: 'pro', end: new Date(s.current_period_end as string) });
-    else if (p.startsWith('plus')) cands.push({ plan: 'plus', end: new Date(s.current_period_end as string) });
+    const end = s.current_period_end == null ? null : new Date(s.current_period_end as string);
+    if (p.startsWith('pro')) cands.push({ plan: 'pro', end });
+    else if (p.startsWith('plus')) cands.push({ plan: 'plus', end });
   }
   for (const g of grants) {
-    if (g.kind === 'host_reward_pro') cands.push({ plan: 'pro', end: new Date(g.ends_at as string) });
-    else if (g.kind === 'pass7') cands.push({ plan: 'plus', end: new Date(g.ends_at as string) });
+    const end = g.ends_at == null ? null : new Date(g.ends_at as string);
+    if (g.kind === 'host_reward_pro') cands.push({ plan: 'pro', end });
+    else if (g.kind === 'pass7') cands.push({ plan: 'plus', end });
   }
 
   // highest plan; furthest end among rows of that plan (expiry of the winning entitlement)
   let plan: Plan = 'free';
   let end: Date | null = null;
   for (const c of cands) {
-    if (RANK[c.plan] > RANK[plan] || (c.plan === plan && (!end || c.end > end))) {
+    if (RANK[c.plan] > RANK[plan] || (c.plan === plan && (c.end == null || !end || c.end > end))) {
       plan = c.plan;
-      end = c.end;
+      end = c.end; // null (lifetime) sticks — nothing outranks forever
     }
   }
 

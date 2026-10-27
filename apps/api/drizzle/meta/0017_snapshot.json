@@ -214,6 +214,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'none'"
+        },
+        "shareBirthMonth": {
+          "name": "share_birth_month",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
