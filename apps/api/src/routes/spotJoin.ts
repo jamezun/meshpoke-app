@@ -200,4 +200,42 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     await db.execute(sql`update applications set status = 'closed' where spot_id = ${req.params.id}::uuid and user_id = ${userId} and status = 'pending'`);
     return { status: 'left' };
   });
+
+  // T18.2: my hosted spots (host console list)
+  app.get('/me/hosted', { preHandler: [app.authenticate] }, async (req) => {
+    const mine = rows(await db.execute(sql`
+      select s.id, s.kind, s.template, s.name, s.state, s.join_mode, s.starts_at, s.confirm_deadline,
+             s.min_headcount, s.max_headcount,
+             (select count(*)::int from spot_members m where m.spot_id = s.id and m.state = 'active' and m.role in ('host','member')) as member_count,
+             (select count(*)::int from applications a where a.spot_id = s.id and a.status = 'pending') as pending_count,
+             v.display_name as venue_name, d.name_en as district
+        from spots s
+        left join venues v on v.id = s.venue_id
+        left join districts d on d.id = s.district_id
+       where s.host_user_id = ${req.user!.id}::uuid
+         and (s.state is null or s.state in ('forming', 'confirmed', 'live'))
+       order by s.created_at desc limit 50`));
+    return { spots: mine };
+  });
+
+  // T18.2: host removes a member (logged + reportable)
+  app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/remove-member', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const b = req.body as { userId?: string; reason?: string };
+    if (!b?.userId) return reply.code(422).send({ problem: { title: 'userId required', status: 422 } });
+    const host = rows(await db.execute(sql`
+      select 1 from spot_members m join spots s on s.id = m.spot_id
+       where s.id = ${req.params.id}::uuid and m.user_id = ${req.user!.id}::uuid and m.role = 'host'`));
+    if (host.length === 0) return reply.code(403).send({ problem: { title: 'Host only', status: 403 } });
+    const target = rows(await db.execute(sql`
+      select m.user_id from spot_members m
+       where m.spot_id = ${req.params.id}::uuid and m.user_id = ${b.userId}::uuid and m.state = 'active' and m.role <> 'host'`));
+    if (target.length === 0) return reply.code(404).send({ problem: { title: 'Member not found', status: 404 } });
+    await db.execute(sql`update spot_members set state = 'removed' where spot_id = ${req.params.id}::uuid and user_id = ${b.userId}::uuid`);
+    await db.execute(sql`delete from room_members rm using rooms r
+       where r.id = rm.room_id and r.spot_id = ${req.params.id}::uuid and rm.user_id = ${b.userId}::uuid`);
+    await db.execute(sql`insert into audit_log (actor_id, action, target, meta)
+      values (${req.user!.id}::uuid, 'spot.member_removed', ${req.params.id}::uuid, ${JSON.stringify({ userId: b.userId, reason: b.reason ?? null })}::jsonb)`);
+    return { removed: true };
+  });
 }
+
