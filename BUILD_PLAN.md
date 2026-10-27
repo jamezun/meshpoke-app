@@ -910,7 +910,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [ ] IAP products created in both stores and mapped in RevenueCat (user action; product table in STORE_LISTING.md)
 **Acceptance:** checklist §18 legal + app store items ticked.
 
-### [ ] T19.5 Production deploy
+### [~] T19.5 Production deploy
 **PRD refs:** §2.3, §18 (Infrastructure) · **Depends:** T19.4
 - [ ] Production Dokploy apps + env, Cloudflare DNS + CDN rules, Resend domain, mailboxes, backups + **restore drill**, Sentry alerts
 **Acceptance:** restore drill completed and documented.

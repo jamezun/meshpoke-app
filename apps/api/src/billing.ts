@@ -31,6 +31,19 @@ export async function onCheckin(db: Db, checkinId: string): Promise<{ charged: b
   else if (c[0].context === 'group_drop') eventType = 'group_drop_seat';
   else eventType = 'new_member_visit';
 
+  // T20.4: new_member_visit only inside 60d attribution window, max 3 billed visits
+  if (eventType === 'new_member_visit') {
+    const m = rows(await db.execute(sql`
+      select attribution_until, attribution_visits_billed from memberships
+       where user_id = ${c[0].user_id}::uuid and venue_id = ${c[0].venue_id}::uuid and status = 'active' limit 1`));
+    if (!m[0]) return { charged: false, shadow: false, amount: null };
+    const until = m[0].attribution_until ? new Date(m[0].attribution_until as string) : null;
+    const inWindow = until !== null && Date.now() <= until.getTime();
+    if (!inWindow || Number(m[0].attribution_visits_billed) >= MERCHANT_RULES.attributionVisits) {
+      return { charged: false, shadow: false, amount: null };
+    }
+  }
+
   // drop_seat: once per user per drop
   if (eventType === 'drop_seat') {
     const already = rows(await db.execute(sql`
@@ -67,6 +80,11 @@ export async function onCheckin(db: Db, checkinId: string): Promise<{ charged: b
 
   // roll into the current-month invoice
   if (ins[0]) {
+    if (eventType === 'new_member_visit') {
+      await db.execute(sql`
+        update memberships set attribution_visits_billed = attribution_visits_billed + 1
+         where user_id = ${c[0].user_id}::uuid and venue_id = ${c[0].venue_id}::uuid and status = 'active'`);
+    }
     await db.execute(sql`
       insert into invoices (merchant_id, period, seat_amount, shadow_amount, total)
       values (${c[0].merchant_id}::uuid, to_char(now(), 'YYYY-MM'), ${shadow ? 0 : amount}, ${shadow ? amount : 0}, ${shadow ? 0 : amount})

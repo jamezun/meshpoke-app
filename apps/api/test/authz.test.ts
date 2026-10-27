@@ -24,7 +24,6 @@ let infra: TestInfra;
 let pool: pg.Pool;
 let app: Awaited<ReturnType<typeof buildApp>>;
 let userTok: string;
-const uid = () => crypto.randomUUID();
 
 const WRITE_ROUTES: [string, string, string][] = [
   ['POST', '/v1/spots/events', '{}'],

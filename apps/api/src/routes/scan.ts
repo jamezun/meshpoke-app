@@ -133,11 +133,27 @@ export function registerScan(app: FastifyInstance, dbUrl: string, secret: string
     let charge: { charged: boolean; shadow: boolean; amount: number | null } = { charged: false, shadow: false, amount: null };
     if (billableEvent) charge = await onCheckin(db, ins[0].id as string);
 
-    // 6. membership visit counting + last-visit touch
+    // 6. membership visit counting + last-visit touch + level recompute (T20.3)
     if (context === 'member_visit') {
       await db.execute(sql`
         update memberships set visits_count = visits_count + 1, last_visit_at = now()
          where user_id = ${guestId}::uuid and venue_id = ${venueId}::uuid and status = 'active'`);
+      const up = rows(await db.execute(sql`
+        with best as (
+          select max(l.position) as pos from ladder_levels l
+           where l.venue_id = ${venueId}::uuid and l.effective_from <= now()
+             and (select visits_count from memberships
+                   where user_id = ${guestId}::uuid and venue_id = ${venueId}::uuid and status='active') >= l.min_visits
+             and (select extract(epoch from (now() - joined_at))/2592000 from memberships
+                   where user_id = ${guestId}::uuid and venue_id = ${venueId}::uuid and status='active') >= l.min_months)
+        update memberships m set level_position = best.pos from best
+         where m.user_id = ${guestId}::uuid and m.venue_id = ${venueId}::uuid and m.status='active'
+           and coalesce(m.level_position,0) < best.pos
+         returning m.id, m.level_position`));
+      if (up[0]) {
+        const { notify } = await import('../notify.js');
+        await notify(dbUrl, guestId, 'spots', 'membership_level_up', { venueId, level: Number(up[0].level_position) });
+      }
     }
 
     // 7. user sketch for staff identification (display name only — no photo browsing for staff)
