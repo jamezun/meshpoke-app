@@ -49,7 +49,7 @@ export function registerPokes(app: FastifyInstance, dbUrl: string) {
     return { connId, roomId };
   };
 
-  app.post<{ Body: unknown }>('/pokes', { preHandler: [app.authenticate] }, async (req, reply) => {
+  app.post<{ Body: unknown }>('/pokes', { config: { rateLimit: { max: 30 } }, preHandler: [app.authenticate] }, async (req, reply) => {
     const from = req.user!.id;
     const body = z.object({
       to: z.string().uuid(),

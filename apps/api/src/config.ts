@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-const bool = z.enum(['true', 'false']).transform((v) => v === 'true');
 
 export const configSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -23,11 +22,11 @@ export const configSchema = z.object({
   POSTHOG_HOST: z.string().url().optional(),
   POSTHOG_API_KEY: z.string().optional(),
   ADMIN_BOOTSTRAP_PASSWORD: z.string().min(12),
-  ENABLE_SWAGGER: bool.default('true'),
+  ENABLE_SWAGGER: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
 
   FEHD_URL: z.string().url().optional(), // data.gov.hk FEHD licensed restaurants XML
   FEHD_DISTRICTS: z.string().optional(), // comma filter e.g. 'CENTRAL AND WESTERN'
-  ENABLE_JOBS: bool.default('false'), // pg-boss schedulers (off in dev/test)
+  ENABLE_JOBS: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'), // pg-boss schedulers (off in dev/test)
 
   STRIPE_SECRET_KEY: z.string().optional(), // absent → merchant Stripe routes stub
   REVENUECAT_WEBHOOK_SECRET: z.string().optional(), // absent → RC webhook unsigned (dev)

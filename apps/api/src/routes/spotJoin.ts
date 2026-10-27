@@ -94,7 +94,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
   });
 
   // application mode
-  app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/apply', { preHandler: [app.authenticate] }, async (req, reply) => {
+  app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/apply', { config: { rateLimit: { max: 30 } }, preHandler: [app.authenticate] }, async (req, reply) => {
     const userId = req.user!.id;
     const parsed = Apply.safeParse(req.body ?? {});
     if (!parsed.success) return reply.code(422).send({ problem: { title: 'Invalid application', status: 422 } });

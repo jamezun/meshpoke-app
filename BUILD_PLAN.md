@@ -898,7 +898,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [ ] Verify memory limits on the shared box under load; tune pool sizes
 **Acceptance:** NFR targets met (server-time p95) at Phase 1 scale.
 
-### [ ] T19.3 Security review
+### [~] T19.3 Security review
 **PRD refs:** §15 (Security) · **Depends:** T19.1
 - [ ] Rate limits on all write endpoints; authz tests for every route (owner/merchant/admin); webhook signature tests; signed URL expiry; PII encryption; dependency audit
 **Acceptance:** zero high findings.

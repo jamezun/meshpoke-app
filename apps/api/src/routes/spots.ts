@@ -32,7 +32,7 @@ export function registerSpots(app: FastifyInstance, dbUrl: string) {
   const db = getDb(dbUrl);
   const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
 
-  app.post<{ Body: unknown }>('/spots/events', { preHandler: [app.authenticate] }, async (req, reply) => {
+  app.post<{ Body: unknown }>('/spots/events', { config: { rateLimit: { max: 30 } }, preHandler: [app.authenticate] }, async (req, reply) => {
     const userId = req.user!.id;
     const parsed = CreateEvent.safeParse(req.body);
     if (!parsed.success) {
