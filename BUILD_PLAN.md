@@ -101,7 +101,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 6 | ✔ |
-| M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
+| M18 Authenticated web & host console | 1 | 4 | 1 | ☐ |
 | M19 Phase 1 hardening & launch | 1 | 7 | 0 | ☐ |
 | M20 Memberships & ladders | 2 | 7 | 0 | ☐ |
 | M21 Scale features | 3 | 8 | 0 | ☐ |
@@ -862,9 +862,9 @@ Update the "Done" column whenever a task is marked `[x]`.
 
 ## M18 Authenticated web & host console
 
-### [ ] T18.1 Spots district list (web)
+### [x] T18.1 Spots district list (web)
 **PRD refs:** §6.2 · **Depends:** T9.4, T6.4
-- [ ] District picker, spot cards, apply/join, RSVP status, 48h confirm, 24h bail
+- [x] District picker, spot cards, apply/join, RSVP status, 48h confirm, 24h bail
 **Acceptance:** a user can do the whole member flow on web except "I'm here".
 
 ### [ ] T18.2 Host console (web)
@@ -1152,3 +1152,4 @@ Append one line per completed task (newest at the bottom).
 - T17.4 (✓): filterGate.ts requireAdvancedFilters (402 filter_pass), map.ts ?keywords= on district spots (ANY(array) parens lesson), drops.ts autoClaimForSavedVenues (window fn NOT allowed in WHERE — subselect wrapper; drop_claims col is claimed_at NOT created_at), spotLifecycle waitlist backfill weighted by plan 1/2/3 then FIFO. planFeatures.test.ts 2. 193 api tests.
 - T17.5 (✓): upgrade_sheet.dart (402 → DioException hit → sheet w/ plan options, NO prices — App Store 3.1.1; wired spot detail), web Billing.tsx (/app/billing, PRICES.web grid + founding banner + portal), CI no-web-prices-in-mobile grep step, FOUNDING_SLOTS export, products.ts null-typing fix.
 - T17.6 (✓): routes/referrals.ts (referralOnPhoneVerified referee+5 only — per PRD §3.4, referrer+5 at first finalised attendance via attendance.ts finalise hook, 10/mo cap, unique referee row = same-phone protection), GET /me/referrals, mobile ReferralScreen + profile entry, web /r/:code landing. referrals.test.ts 2. 195 api tests. M17 6/6 ✔.
+- T18.1 (✓): web Spots.tsx (/app/spots) — district dropdown + today/week/all, spot cards w/ state badges + required keywords, detail modal join (open) / apply w/ note, confirm attendance, leave/bail, members list (blocks filtered server-side). Keys aligned to API snake_case (my_role, join_mode, venue_name...).
