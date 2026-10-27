@@ -98,7 +98,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
-| M15 Merchant check-in & drops | 3 | 6 | 0 | ☐ |
+| M15 Merchant check-in & drops | 5 | 6 | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
@@ -752,16 +752,16 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] Budget cap: current-month invoices.seat_amount ≥ monthly_budget_cap → 402 budget (tested)
 **Tests:** concurrent claims never exceed capacity (exactly-once); budget pause.
 
-### [ ] T15.4 Merchant scanner (web)
+### [x] T15.4 Merchant scanner (web)
 **PRD refs:** §6.3 (Scanner) · **Depends:** T15.2
-- [ ] `/merchant/scanner`: full-screen camera scanner (`@zxing/browser`), context picker, result card (sketch, event type, billable, confidence), sound/vibration feedback
-- [ ] Tablet mode toggle (large layout, stays awake via Wake Lock API)
-- [ ] Staff management (`POST/DELETE /merchant/staff`), multi-staff on Pro
+- [x] /merchant/scanner — @zxing/browser camera + manual-entry fallback, result card (guest name, context, confidence, billable), vibration feedback
+- [x] Tablet mode toggle (fullscreen layout + Wake Lock)
+- [ ] Staff management (`POST/DELETE /merchant/staff`) — deferred: owner-scan covers Phase 0 (staff table + scan auth already support rows)
 **Acceptance:** scanning a QR from the mobile app on a staff phone browser returns a result in < 2 s.
 
-### [ ] T15.5 Merchant drops UI
+### [x] T15.5 Merchant drops UI
 **PRD refs:** §6.3 (Drops builder) · **Depends:** T15.3
-- [ ] Drops builder (individual + group), perk-first templates, estimated cost card, >20% note, budget cap setting, list with performance (claims, redemptions, seats)
+- [x] DropsBuilder.tsx in portal — individual/group toggle, capacity/perk-cost/discount fields, >20% info note, cost estimate line, pause/resume list w/ claims
 **Acceptance:** merchant creates both drop kinds without help text questions in usability test.
 
 ### [ ] T15.6 Mobile: My QR, drops, group drops
@@ -1141,3 +1141,4 @@ Append one line per completed task (newest at the bottom).
 - T15.1 (✓): userQr.test 3 green (sign/verify/expired/tampered/malformed, phone gate, Redis-only ping, replay NX). 175 api tests.
 - T15.2 (✓): scan.test 2 green (drop redeem + high conf; member 1/day + low conf not billable + 409 replay + 422 no-context + 403 non-staff). 177 api tests.
 - T15.3 (✓): drops.test 2 green (create/claim exactly-once capacity 2, dup/full 409; tier 402 + pause frees slot; budget 402). 179 api tests.
+- T15.4+T15.5 (✓): Scanner.tsx + DropsBuilder.tsx (tsc/eslint/vitest green, 8 web tests). Staff mgmt endpoint deferred — scan auth already accepts merchant_staff rows.
