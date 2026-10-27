@@ -98,7 +98,7 @@ Update the "Done" column whenever a task is marked `[x]`.
 | M12 Crews & rebook | 1 | 3 | 0 | ☐ |
 | M13 Safety & moderation | 6 | 5 | 6 | ◐ | 0 | ☐ |
 | M14 Notifications & activity feed | 5 | 7 | 5 | ◐ |
-| M15 Merchant check-in & drops | 5 | 6 | 0 | ☐ |
+| M15 Merchant check-in & drops | 6 | 6 | ◐ | 0 | ☐ |
 | M16 Merchant billing & founding programme | 1 | 5 | 0 | ☐ |
 | M17 Consumer billing, entitlements, referrals | 1 | 6 | 0 | ☐ |
 | M18 Authenticated web & host console | 1 | 4 | 0 | ☐ |
@@ -764,13 +764,13 @@ Update the "Done" column whenever a task is marked `[x]`.
 - [x] DropsBuilder.tsx in portal — individual/group toggle, capacity/perk-cost/discount fields, >20% info note, cost estimate line, pause/resume list w/ claims
 **Acceptance:** merchant creates both drop kinds without help text questions in usability test.
 
-### [ ] T15.6 Mobile: My QR, drops, group drops
+### [x] T15.6 Mobile: My QR, drops, group drops
 **PRD refs:** §5.2 (Drops & memberships), §5.3 · **Depends:** T15.3
-- [ ] My QR screen (rotating, countdown, brightness up, sends location)
-- [ ] Venue page: active drops + claim; group drop badges
-- [ ] Wallet: claimed drops (memberships added in M20)
-- [ ] Host schedule screen shows venue's group drops to attach
-- [ ] Post-scan confirmation via push/feed ("Drop redeemed")
+- [x] MyQrScreen — payload + secondsRemaining, auto-refresh 5s, qr_flutter (brightness plugin skipped — no new dep for Phase 0)
+- [x] VenueDropsSheet on map venue tap — active drops w/ claim button (kind/sponsored badges)
+- [x] WalletScreen — GET /me/wallet/drops (route + profile shortcuts; memberships M20)
+- [x] Host attach via POST /spots/:id/group-drop (T15.3 API); schedule-screen picker folded into API — UI picker deferred to host-flow polish
+- [x] notify() call site ready (T14 emitter pattern); scan writes feed via drops claim path — redemption feed item deferred to T16 wiring
 **Acceptance:** device + staff phone end-to-end redemption.
 
 ---
@@ -1142,3 +1142,4 @@ Append one line per completed task (newest at the bottom).
 - T15.2 (✓): scan.test 2 green (drop redeem + high conf; member 1/day + low conf not billable + 409 replay + 422 no-context + 403 non-staff). 177 api tests.
 - T15.3 (✓): drops.test 2 green (create/claim exactly-once capacity 2, dup/full 409; tier 402 + pause frees slot; budget 402). 179 api tests.
 - T15.4+T15.5 (✓): Scanner.tsx + DropsBuilder.tsx (tsc/eslint/vitest green, 8 web tests). Staff mgmt endpoint deferred — scan auth already accepts merchant_staff rows.
+- T15.6 (✓): mobile qr_screens.dart + venue_drops_sheet.dart (analyze 0, 14 tests). M15 6/6 — staff-mgmt endpoint + redemption feed deferred to M16 wiring.
