@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "serve": "node server.mjs",
-    "test:server": "node --test server.test.mjs"
+    "test:server": "node --test server.test.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@meshpoke/shared": "workspace:*",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@playwright/test": "^1.50.0",
     "@tailwindcss/vite": "^4.0.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -31,6 +33,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.14.0",
+    "jose": "^6.2.13",
     "jsdom": "^25.0.1",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.6.3",

@@ -154,7 +154,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     if (host.length === 0) return reply.code(403).send({ problem: { title: 'Host only', status: 403 } });
     const sort = req.query?.sort === 'fifo' ? 'fifo' : 'recommended';
     const apps = rows(await db.execute(sql`
-      select a.id, a.user_id, a.status, a.note, a.created_at,
+      select a.id, a.user_id, a.status, a.note, a.created_at, u.display_name,
              coalesce(e.plan, 'free') as plan,
              sc.score as score, coalesce(sc.proven_state, 'unproven') as proven_state,
              ${trustExpr(userId)},
@@ -183,7 +183,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
       sort,
       counts,
       queue: scored.map((a) => ({
-        applicationId: a.id, userId: a.user_id, status: a.status, note: a.note, createdAt: a.created_at,
+        applicationId: a.id, userId: a.user_id, displayName: a.display_name, status: a.status, note: a.note, createdAt: a.created_at,
         score: a.score, provenState: a.proven_state, plan: a.plan, express: a.plan !== 'free', trust: a.trust,
       })),
     };

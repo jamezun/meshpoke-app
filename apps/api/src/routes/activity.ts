@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { sql } from 'drizzle-orm';
+import { type SQL, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 
@@ -78,18 +78,23 @@ export function registerActivity(app: FastifyInstance, dbUrl: string): void {
       categories: z.record(z.string(), z.boolean()).optional(),
     }) },
   }, async (req) => {
-    const b = req.body as Record<string, unknown>;
-    // promo opt-in records consent only via explicit true (never cleared silently)
-    const consent = b.promoOptIn === true ? sql`now()` : sql`promo_consent_at`;
+    const b = req.body as { promoOptIn?: boolean; proximityOptIn?: boolean; quietHours?: boolean; categories?: Record<string, boolean> };
+    if (b.promoOptIn === undefined && b.proximityOptIn === undefined && b.quietHours === undefined && b.categories === undefined) {
+      return { ok: true, consentTextVersion: CONSENT_TEXT_VERSION };
+    }
+    const sets: SQL[] = [];
+    if (b.promoOptIn !== undefined) {
+      sets.push(sql`promo_opt_in = ${b.promoOptIn}`);
+      if (b.promoOptIn) sets.push(sql`promo_consent_at = now()`);
+    }
+    if (b.proximityOptIn !== undefined) sets.push(sql`proximity_opt_in = ${b.proximityOptIn}`);
+    if (b.quietHours !== undefined) sets.push(sql`quiet_hours = ${b.quietHours}`);
+    if (b.categories !== undefined) sets.push(sql`categories = ${JSON.stringify(b.categories)}::jsonb`);
+    const setExpr = sql.join(sets, sql`, `);
     await db.execute(sql`
       insert into notification_prefs (user_id, promo_opt_in, promo_consent_at, proximity_opt_in, quiet_hours, categories)
-      values (${req.user!.id}::uuid, ${b.promoOptIn === true}, ${consent}, ${b.proximityOptIn === true}, ${b.quietHours !== false}, ${JSON.stringify(b.categories ?? {})}::jsonb)
-      on conflict (user_id) do update set
-        promo_opt_in = coalesce(${b.promoOptIn ?? null}, notification_prefs.promo_opt_in),
-        promo_consent_at = case when ${b.promoOptIn === true} then now() else notification_prefs.promo_consent_at end,
-        proximity_opt_in = coalesce(${b.proximityOptIn ?? null}, notification_prefs.proximity_opt_in),
-        quiet_hours = coalesce(${b.quietHours ?? null}, notification_prefs.quiet_hours),
-        categories = coalesce(${JSON.stringify(b.categories ?? null)}, notification_prefs.categories)`);
+      values (${req.user!.id}::uuid, ${b.promoOptIn ?? false}, ${b.promoOptIn ? sql`now()` : null}, ${b.proximityOptIn ?? false}, ${b.quietHours ?? true}, ${JSON.stringify(b.categories ?? {})}::jsonb)
+      on conflict (user_id) do update set ${setExpr}`);
     return { ok: true, consentTextVersion: CONSENT_TEXT_VERSION };
   });
 

@@ -1,9 +1,9 @@
 // T18.3: read-only wallet (claimed drops) + People-you-met with free pokes.
 import { useEffect, useState } from 'react';
-import { supabase } from '../../auth/supabase.js';
+import { getAccessToken } from '../../auth/supabase.js';
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch(`/v1${path}`, {
     ...init,
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init?.headers ?? {}) },

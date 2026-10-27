@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../../auth/supabase.js';
+import { getAccessToken } from '../../auth/supabase.js';
 
 type IncomingPoke = {
   id: string; fromUserId: string; note: string | null; source: string;
@@ -11,7 +11,7 @@ type Connection = { id: string; active: boolean; userId: string; displayName: st
 type Pym = { userId: string; displayName: string; trust: { spotsAttended?: number; provenState?: string } | null };
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch(`/v1${path}`, {
     ...init,
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init?.headers ?? {}) },
@@ -49,7 +49,7 @@ export default function InboxPage() {
   const reportUser = async (userId: string) => {
   const reason = window.prompt('What happened? (min 3 chars)');
   if (!reason || reason.trim().length < 3) return;
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch('/v1/reports', {
     method: 'POST',
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
@@ -60,7 +60,7 @@ export default function InboxPage() {
 
 const blockUser = async (userId: string) => {
   if (!window.confirm('Block this user? You will not see each other anywhere.')) return;
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   await fetch(`/v1/blocks/${userId}`, {
     method: 'POST',
     headers: { authorization: `Bearer ${token}` },

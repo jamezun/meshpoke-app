@@ -1,9 +1,9 @@
 // T18.1: member flow on web — district picker, spot cards, join/apply, confirm, bail.
 import { useEffect, useState } from 'react';
-import { supabase } from '../../auth/supabase.js';
+import { getAccessToken } from '../../auth/supabase.js';
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch(`/v1${path}`, {
     ...init,
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init?.headers ?? {}) },
@@ -98,6 +98,7 @@ export function SpotsPage() {
             <p className="text-sm text-gray-500">
               {detail.venue_name ?? detail.district ?? ''} · {detail.starts_at ? new Date(detail.starts_at).toLocaleString('en-HK') : 'date on fill'}
             </p>
+            {detail.required_keywords?.length ? <p className="text-xs text-gray-400">needs: {detail.required_keywords.join(', ')}</p> : null}
 
             {detail.my_role ? (
               <div className="space-y-2">

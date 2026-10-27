@@ -1,9 +1,9 @@
 // T18.2: host console — my spots, queue review, schedule, roll-call, member removal.
 import { useEffect, useState } from 'react';
-import { supabase } from '../../auth/supabase.js';
+import { getAccessToken } from '../../auth/supabase.js';
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch(`/v1${path}`, {
     ...init,
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init?.headers ?? {}) },
@@ -45,8 +45,8 @@ export function HostConsole() {
   const open = async (s: Hosted) => {
     setSel(s); setMsg('');
     try {
-      const q = await api<{ applications: QueueApp[] }>(`/spots/${s.id}/queue?sort=${sort}`);
-      setQueue(q.applications);
+      const q = await api<{ queue: QueueApp[] }>(`/spots/${s.id}/queue?sort=${sort}`);
+      setQueue(q.queue);
       const d = await api<{ members: Member[] }>(`/spots/${s.id}`);
       setMembers(d.members);
     } catch (e) { setMsg(String(e)); }
@@ -145,7 +145,7 @@ export function HostConsole() {
             {queue.map((a) => (
               <div key={a.applicationId} className="rounded-lg border p-3 text-sm space-y-1">
                 <p className="font-medium">
-                  {a.displayName} {a.express && <span title="express">⚡</span>}
+                  {a.displayName || 'Applicant'} {a.express && <span title="express">⚡</span>}
                   <span className="text-gray-400"> · {a.plan} · {a.provenState} {a.score !== null ? `(${a.score.toFixed(2)})` : ''}</span>
                   {a.trust?.spotsAttended ? <span className="text-gray-400"> · {a.trust.spotsAttended} spots</span> : null}
                 </p>

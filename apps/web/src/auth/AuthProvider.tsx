@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { supabase } from './supabase';
+import { supabase, storageKey } from './supabase';
 
 type Session = { userId: string; email: string } | null;
 const AuthCtx = createContext<{ session: Session; ready: boolean }>({ session: null, ready: false });
@@ -10,6 +10,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!supabase) return;
+    // read the stored session directly: supabase-js getSession can stall behind
+    // navigator locks in headless browsers; JWT payload is enough to boot.
+    try {
+      const key = storageKey();
+      const raw = key ? localStorage.getItem(key) : null;
+      if (raw) {
+        const stored = JSON.parse(raw) as { access_token?: string };
+        const payload = stored.access_token?.split('.')[1];
+        if (payload) {
+          const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as { sub?: string; exp?: number };
+          if (claims.sub && claims.exp && claims.exp > Date.now() / 1000) {
+            setSession({ userId: claims.sub, email: '' });
+          }
+        }
+      }
+    } catch { /* fall through to client */ }
     supabase.auth.getSession().then(({ data }) => {
       const s = data.session;
       setSession(s?.user ? { userId: s.user.id, email: s.user.email ?? '' } : null);

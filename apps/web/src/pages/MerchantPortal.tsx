@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../auth/supabase';
+import { getAccessToken } from '../auth/supabase';
 import { DropsBuilder } from './DropsBuilder';
 import { BillingSection } from './Billing';
 
 type Venue = { id: string; display_name: string; category: string; profile?: { hours?: string; menu?: string } | null; tier: string; founding: boolean; location?: string };
 
 async function api(path: string, init?: RequestInit) {
-  const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } };
-  const token = data.session?.access_token;
+  const token = getAccessToken();
   if (!token) throw new Error('Sign in first.');
   const res = await fetch(`/v1${path}`, {
     ...init,

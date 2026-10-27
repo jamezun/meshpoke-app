@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../auth/supabase.js';
+import { getAccessToken } from '../../auth/supabase.js';
 
 type Item = {
   id: string; category: string; type: string;
@@ -8,7 +8,7 @@ type Item = {
 };
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const token = getAccessToken();
   const res = await fetch(`/v1${path}`, {
     ...init,
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init?.headers ?? {}) },

@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NotificationPrefs } from '../pages/app/Activity.js';
 import { RequireAuth, useAuth } from '../auth/AuthProvider';
 import { supabase } from '../auth/supabase';
 
@@ -44,7 +45,7 @@ export function SettingsPage() {
       <section className="mt-8 space-y-4">
         <details className="rounded-lg border border-zinc-800 p-4">
           <summary className="cursor-pointer text-sm font-medium">Notification preferences</summary>
-          <p className="mt-2 text-sm text-zinc-500">Wired with push notifications (coming with the mobile release).</p>
+          <NotificationPrefs />
         </details>
         <details className="rounded-lg border border-zinc-800 p-4">
           <summary className="cursor-pointer text-sm font-medium">Blocked accounts</summary>
