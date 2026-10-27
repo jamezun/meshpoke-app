@@ -51,6 +51,32 @@ beforeAll(async () => {
   await mkUser('alice'); await mkUser('bob', false);
 });
 
+
+// T21.6: proximity perk — daily cap; non-joined venue never triggers
+test('T21.6 proximity ping: pro-venue member gets perk once/day; non-joined never', async () => {
+  const bob = users.bob!;
+  // pro merchant venue at 114.16, 22.28 (same coords as QR test venue pattern)
+  const vname = `Prox venue ${crypto.randomUUID().slice(0, 6)}`;
+  await pool.query(
+    `insert into venues (source, display_name, category, location, status)
+     values ('merchant', $1, 'bar', ST_SetSRID(ST_MakePoint(114.16, 22.28), 4326), 'active')`, [vname]);
+  const vid = (await pool.query(`select id from venues where display_name = $1`, [vname])).rows[0].id;
+  await pool.query(
+    `insert into merchant_accounts (owner_user_id, venue_id, business_reg_cert_key, claim_status, tier)
+     values ($1, $2, 'k', 'approved', 'pro')`, [users.carol?.id ?? bob.id, vid]);
+  // bob NOT a member yet → no perk
+  const p1 = await app.inject({ method: 'POST', url: '/v1/me/location-ping', headers: { authorization: `Bearer ${bob.tok}` }, payload: { lat: 22.28, lng: 114.16, purpose: 'proximity' } });
+  expect(p1.statusCode).toBe(200);
+  expect(p1.json().perk).toBeNull();
+  // join → perk fires
+  await pool.query(`insert into memberships (venue_id, user_id, kind, status, level_position) values ($1, $2, 'member', 'active', 0)`, [vid, bob.id]);
+  const p2 = await app.inject({ method: 'POST', url: '/v1/me/location-ping', headers: { authorization: `Bearer ${bob.tok}` }, payload: { lat: 22.28, lng: 114.16, purpose: 'proximity' } });
+  expect(p2.json().perk).toMatchObject({ venueId: vid });
+  // same day → capped
+  const p3 = await app.inject({ method: 'POST', url: '/v1/me/location-ping', headers: { authorization: `Bearer ${bob.tok}` }, payload: { lat: 22.28, lng: 114.16, purpose: 'proximity' } });
+  expect(p3.json().perk).toBeNull();
+});
+
 afterAll(async () => { await app.close(); await pool.end(); await redis.quit(); await stopInfra(); });
 
 const tok = (n: string) => ({ authorization: `Bearer ${users[n].tok}` });

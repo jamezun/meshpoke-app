@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Redis } from 'ioredis';
 import { QR_RULES } from '@meshpoke/shared/constants';
 import { getDb } from '../db/client.js';
+import { notify } from '../notify.js';
 
 const b64u = (b: Buffer | string) => Buffer.from(b).toString('base64url');
 
@@ -73,11 +74,38 @@ export function registerUserQr(app: FastifyInstance, dbUrl: string, secret: stri
     preHandler: app.authenticate,
     schema: { body: z.object({
       lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180),
-      accuracyM: z.number().min(0).max(5000).default(50), purpose: z.literal('qr'),
+      accuracyM: z.number().min(0).max(5000).default(50), purpose: z.enum(['qr', 'proximity']),
     }) },
   }, async (req) => {
-    const { lat, lng, accuracyM, purpose } = req.body as { lat: number; lng: number; accuracyM: number; purpose: 'qr' };
+    const { lat, lng, accuracyM, purpose } = req.body as { lat: number; lng: number; accuracyM: number; purpose: 'qr' | 'proximity' };
     await storeLocationPing(app.redis!, req.user!.id, lat, lng, accuracyM);
-    return { ok: true, purpose };
+    // T21.6: proximity perk check — never triggers unless opted-in, unmuted,
+    // within 100m of a PRO-merchant venue the user joined/saved, ≤1/day.
+    let perk: { venueId: string; venueName: string } | null = null;
+    if (purpose === 'proximity') {
+      const r = (await db.execute(sql`
+        select v.id, v.display_name
+          from venues v
+          join merchant_accounts ma on ma.venue_id = v.id and ma.claim_status = 'approved' and ma.tier = 'pro'
+         where st_dwithin(v.location, st_setsrid(st_makepoint(${lng}, ${lat}), 4326)::geography, 100 + ${accuracyM})
+           and exists (select 1 from memberships m where m.venue_id = v.id and m.user_id = ${req.user!.id}::uuid and m.status = 'active')
+           and not exists (select 1 from merchant_mutes mm where mm.merchant_id = v.id and mm.user_id = ${req.user!.id}::uuid)
+         order by st_distance(v.location, st_setsrid(st_makepoint(${lng}, ${lat}), 4326)::geography)
+         limit 1`)) as unknown as { rows: { id: string; display_name: string }[] };
+      const hit = r.rows[0];
+      if (hit) {
+        const ins = (await db.execute(sql`
+          insert into proximity_log (user_id, sent_on, venue_id)
+          values (${req.user!.id}::uuid, current_date, ${hit.id}::uuid)
+          on conflict (user_id, sent_on) do nothing
+          returning venue_id`)) as unknown as { rows: { venue_id: string }[] };
+        if (ins.rows.length > 0) {
+          // notify() enforces the proximity opt-in gate itself
+          await notify(dbUrl, req.user!.id, 'proximity', 'nearby_perk', { venueId: hit.id, venueName: hit.display_name }).catch(() => {});
+          perk = { venueId: hit.id, venueName: hit.display_name };
+        }
+      }
+    }
+    return { ok: true, purpose, perk };
   });
 }
