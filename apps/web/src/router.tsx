@@ -44,6 +44,7 @@ export function createRouter(opts: { memory?: boolean; initial?: string } = {}) 
     { path: '/merchant/scanner', element: <ScannerPage /> },
     { path: '/admin', element: <AdminPage /> },
     { path: '/support', element: <SupportPage /> },
+    { path: '/faq', element: <SupportPage /> },
     { path: '/terms', element: <TermsPage /> },
     { path: '/privacy', element: <PrivacyPage /> },
     { path: '/login', element: <LoginPage /> },

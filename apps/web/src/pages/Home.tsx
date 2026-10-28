@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { MarketingHeader } from '../components/MarketingHeader';
+import { SiteFooter } from '../components/SiteFooter';
 
 export function HomePage() {
   const [waitlistState, setWaitlistState] = useState<'idle' | 'sending' | 'done' | 'already' | 'error'>('idle');
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16">
-      <div className="flex justify-end"><ThemeToggle /></div>
+    <>
+      <MarketingHeader />
+      <main className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="text-4xl font-bold tracking-tight">Poke the mesh.<br />Watch your network ripple.</h1>
       <p className="mt-4 text-lg text-muted">A live map for meeting people in real life. Spots, venues, crews — Hong Kong first.</p>
       <div className="mt-8 flex gap-3">
@@ -58,10 +60,8 @@ export function HomePage() {
           {(!waitlistState || waitlistState === 'idle') && 'Launch notice only. No spam.'}
         </p>
       </section>
-      <footer className="mt-16 border-t border-line pt-6 text-xs text-muted">
-        <p>Contains information from DATA.GOV.HK / 資料一線通 — FEHD licensed restaurants. Geocoding via Lands Department ALS.</p>
-        <p className="mt-2">© 2026 MeshPoke · <a href="/terms" className="underline">Terms</a> · <a href="/privacy" className="underline">Privacy</a> · <a href="/safety" className="underline">Safety</a></p>
-      </footer>
-    </main>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

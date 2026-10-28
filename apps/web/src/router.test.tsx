@@ -6,7 +6,7 @@ describe('web routes', () => {
   it('landing renders hero + waitlist + attributions', () => {
     const { Router } = createRouter({ memory: true });
     render(<Router />);
-    expect(screen.getByText(/Watch your network ripple/)).toBeTruthy();
+    expect(screen.getAllByText(/Watch your network ripple/).length).toBeGreaterThan(0); // hero + footer tagline
     expect(screen.getAllByText(/waitlist/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/DATA\.GOV\.HK/)).toBeTruthy();
   });
