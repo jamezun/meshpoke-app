@@ -29,9 +29,9 @@ class _DobScreenState extends State<DobScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
+            Text(
               'MeshPoke is for adults only. We use this to check your age — it stays private.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             OutlinedButton(

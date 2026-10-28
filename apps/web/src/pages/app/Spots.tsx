@@ -84,26 +84,26 @@ export function SpotsPage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-semibold">{s.name}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   {s.template} · {s.member_count}/{s.max_headcount} · {s.join_mode === 'open' ? 'open join' : 'apply'}
                 </p>
               </div>
               <span className={`rounded-full px-2 py-0.5 text-xs ${STATE_COLOR[s.state ?? 'forming']}`}>{s.state ?? 'forming'}</span>
             </div>
-            {s.required_keywords?.length ? <p className="mt-1 text-xs text-gray-400">needs: {s.required_keywords.join(', ')}</p> : null}
+            {s.required_keywords?.length ? <p className="mt-1 text-xs text-muted">needs: {s.required_keywords.join(', ')}</p> : null}
           </button>
         ))}
-        {district && spots.length === 0 && <p className="text-gray-400">No spots here yet — be the host on mobile.</p>}
+        {district && spots.length === 0 && <p className="text-muted">No spots here yet — be the host on mobile.</p>}
       </div>
 
       {detail && (
         <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center p-4" onClick={() => setDetail(null)}>
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold">{detail.name}</h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted">
               {detail.venue_name ?? detail.district ?? ''} · {detail.starts_at ? new Date(detail.starts_at).toLocaleString('en-HK') : 'date on fill'}
             </p>
-            {detail.required_keywords?.length ? <p className="text-xs text-gray-400">needs: {detail.required_keywords.join(', ')}</p> : null}
+            {detail.required_keywords?.length ? <p className="text-xs text-muted">needs: {detail.required_keywords.join(', ')}</p> : null}
 
             {detail.my_role ? (
               <div className="space-y-2">
@@ -129,7 +129,7 @@ export function SpotsPage() {
             )}
 
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase">Members</p>
+              <p className="text-xs font-semibold text-muted uppercase">Members</p>
               {detail.members?.map((m) => (
                 <p key={m.userId} className="text-sm">
                   {m.displayName} · {m.role}

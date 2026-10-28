@@ -68,22 +68,22 @@ export function WalletPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-semibold">{d.title}</p>
-                  <p className="text-sm text-gray-500">{d.venueName} · claimed {new Date(d.claimedAt).toLocaleDateString('en-HK')}</p>
+                  <p className="text-sm text-muted">{d.venueName} · claimed {new Date(d.claimedAt).toLocaleDateString('en-HK')}</p>
                 </div>
                 <span className={`text-xs rounded-full px-2 py-0.5 ${d.status === 'redeemed' ? 'bg-gray-100 text-gray-600' : d.status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{d.status}</span>
               </div>
               {d.offerText && <p className="text-sm text-gray-600 mt-1">{d.offerText}</p>}
             </div>
           ))}
-          {drops.length === 0 && <p className="text-gray-400">No claimed drops yet — claim one from a venue page.</p>}
+          {drops.length === 0 && <p className="text-muted">No claimed drops yet — claim one from a venue page.</p>}
           <h3 className="font-semibold pt-2">Coupons</h3>
           {coupons.map((c) => (
             <div key={c.id} className="rounded-xl border p-4">
               <p className="font-semibold">{c.offer?.text ?? 'Offer'}{c.offer?.milestone ? ` · ${c.offer.milestone} visits` : ''}</p>
-              <p className="text-sm text-gray-500">{c.display_name} · expires {new Date(c.expires_at).toLocaleDateString('en-HK')}</p>
+              <p className="text-sm text-muted">{c.display_name} · expires {new Date(c.expires_at).toLocaleDateString('en-HK')}</p>
             </div>
           ))}
-          {coupons.length === 0 && <p className="text-gray-400">No coupons — regular visits earn venue rewards.</p>}
+          {coupons.length === 0 && <p className="text-muted">No coupons — regular visits earn venue rewards.</p>}
         </div>
       )}
 
@@ -95,19 +95,19 @@ export function WalletPage() {
           </select>
           {pym && (
             <>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 {pym.windowOpen ? <>Free-poke window open until {new Date(pym.closesAt).toLocaleString('en-HK')}</> : 'Window closed — normal pokes apply'}
               </p>
               {pym.people.map((p) => (
                 <div key={p.userId} className="rounded-xl border p-4 flex justify-between items-center">
                   <div>
                     <p className="font-semibold">{p.displayName}</p>
-                    {p.trust?.spotsAttended ? <p className="text-xs text-gray-500">{p.trust.spotsAttended} spots attended</p> : null}
+                    {p.trust?.spotsAttended ? <p className="text-xs text-muted">{p.trust.spotsAttended} spots attended</p> : null}
                   </div>
                   <button className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm" onClick={() => poke(p.userId)}>Poke</button>
                 </div>
               ))}
-              {pym.people.length === 0 && <p className="text-gray-400">Nobody else attended.</p>}
+              {pym.people.length === 0 && <p className="text-muted">Nobody else attended.</p>}
             </>
           )}
         </div>

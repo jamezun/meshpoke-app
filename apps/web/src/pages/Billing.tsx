@@ -46,7 +46,7 @@ export function BillingSection() {
   };
 
   return (
-    <section className="border-t border-zinc-200 pt-6 mt-6">
+    <section className="border-t border-line pt-6 mt-6">
       <h3 className="font-semibold mb-2">Billing</h3>
       {err && <p className="text-sm text-red-600">{err}</p>}
       {msg && <p className="text-sm text-emerald-600">{msg}</p>}
@@ -58,37 +58,37 @@ export function BillingSection() {
         </div>
       )}
 
-      <h4 className="text-sm font-medium text-zinc-500 mb-1">Invoices</h4>
+      <h4 className="text-sm font-medium text-muted mb-1">Invoices</h4>
       <table className="w-full text-sm mb-4">
-        <thead><tr className="text-left text-zinc-500"><th>Period</th><th>Seats</th><th>Waived (shadow)</th><th>Total</th></tr></thead>
+        <thead><tr className="text-left text-muted"><th>Period</th><th>Seats</th><th>Waived (shadow)</th><th>Total</th></tr></thead>
         <tbody>
           {invoices.map((i) => (
-            <tr key={i.id} className="border-t border-zinc-100">
+            <tr key={i.id} className="border-t border-line">
               <td className="py-1">{i.period}</td>
               <td>${i.seatAmount}</td>
-              <td className="text-zinc-400">${i.shadowAmount}</td>
+              <td className="text-muted">${i.shadowAmount}</td>
               <td className="font-medium">${i.total}</td>
             </tr>
           ))}
-          {invoices.length === 0 && <tr><td colSpan={4} className="py-2 text-zinc-400">No invoices yet</td></tr>}
+          {invoices.length === 0 && <tr><td colSpan={4} className="py-2 text-muted">No invoices yet</td></tr>}
         </tbody>
       </table>
 
-      <h4 className="text-sm font-medium text-zinc-500 mb-1">Verified-seat charges (dispute within 7 days)</h4>
+      <h4 className="text-sm font-medium text-muted mb-1">Verified-seat charges (dispute within 7 days)</h4>
       <ul className="text-sm">
         {charges.map((c) => (
-          <li key={c.id} className="flex items-center justify-between border-t border-zinc-100 py-1">
+          <li key={c.id} className="flex items-center justify-between border-t border-line py-1">
             <span>
               {c.eventType.replace(/_/g, ' ')} · {new Date(c.createdAt).toLocaleDateString('en-HK')} ·{' '}
               {c.shadow ? <span className="text-amber-600">waived</span> : `$${c.amount}`}
               {c.disputedAt && <span className="ml-2 text-red-500">disputed</span>}
             </span>
             {!c.disputedAt && !c.invoiceId && (
-              <button className="text-xs underline text-zinc-500" onClick={() => dispute(c.id)}>dispute</button>
+              <button className="text-xs underline text-muted" onClick={() => dispute(c.id)}>dispute</button>
             )}
           </li>
         ))}
-        {charges.length === 0 && <li className="py-2 text-zinc-400">No seat charges yet</li>}
+        {charges.length === 0 && <li className="py-2 text-muted">No seat charges yet</li>}
       </ul>
     </section>
   );

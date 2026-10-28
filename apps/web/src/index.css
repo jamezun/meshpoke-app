@@ -1,12 +1,74 @@
 @import 'tailwindcss';
 
-/* Design tokens §13: mesh dark + light. CSS vars keep both themes one source. */
+/* MeshPoke design tokens — light default, [data-theme="dark"] override (Suprema-style). */
 :root {
-  --bg: #0b0d10;
-  --fg: #e8eaf0;
-  --accent: #4cc38a;
+  --bg: #fdfcfa;            /* warm white */
+  --fg: #26201a;            /* warm near-black */
+  --muted: #7d746b;         /* secondary text */
+  --line: #e9e2d9;          /* hairline borders */
+  --surface: #ffffff;       /* card fill */
+  --surface-2: #f6f1ea;     /* recessed fill */
+  --accent: #ffb26b;        /* pastel peach — brand */
+  --accent-on: #3b2412;     /* text on peach fills (dark brown) */
+  --accent-text: #c06a24;   /* peach-family text that reads on white */
+  --accent-hover: color-mix(in oklab, var(--accent) 88%, black);
+  --danger: #b3402a;
+  --motion-fast: 140ms;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-soft: 0 8px 24px rgb(59 36 18 / 0.08);
 }
-@media (prefers-color-scheme: light) {
-  :root { --bg: #f7f8fa; --fg: #1a1d24; --accent: #0e8a5f; }
+
+[data-theme='dark'] {
+  --bg: #14110d;            /* warm dark */
+  --fg: #f3ede4;
+  --muted: #a89e92;
+  --line: #2c261f;
+  --surface: #1e1a15;
+  --surface-2: #262019;
+  --accent: #ffb26b;
+  --accent-on: #3b2412;
+  --accent-text: #ffc48d;   /* lighter peach for dark bg */
+  --accent-hover: color-mix(in oklab, var(--accent) 85%, black);
+  --danger: #e06a50;
+  --shadow-soft: 0 8px 24px rgb(0 0 0 / 0.35);
 }
-body { background: var(--bg); color: var(--fg); }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  transition: background var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);
+}
+
+/* Tailwind 4 token bridge — utilities: bg-surface, text-muted, border-line, text-accent, bg-accent… */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-accent: var(--accent);
+  --color-accent-on: var(--accent-on);
+  --color-accent-text: var(--accent-text);
+}
+
+/* Glass card — transparent, blurred, lifts on hover. */
+.glass-card {
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  transition: transform var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);
+}
+.glass-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--line));
+  box-shadow: var(--shadow-soft), 0 0 0 1px color-mix(in oklab, var(--accent) 25%, transparent);
+}
+
+button, a, input, select, textarea, summary {
+  transition: background var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease),
+    color var(--motion-fast) var(--ease), box-shadow var(--motion-fast) var(--ease);
+}

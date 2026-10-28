@@ -64,7 +64,7 @@ class _EmailAuthScreenState extends ConsumerState<EmailAuthScreen> {
               _signin
                   ? 'Welcome back — the map has been waiting.'
                   : 'One account, one phone number. Free tier included, no card required.',
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -93,7 +93,7 @@ class _EmailAuthScreenState extends ConsumerState<EmailAuthScreen> {
             Text(
               'By continuing you agree to the Terms and Privacy Policy.',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.white38),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),

@@ -32,15 +32,15 @@ export function BillingPage() {
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">Billing</h1>
 
-      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+      <div className="glass-card p-4" style={{ borderColor: "var(--accent)" }}>
         <p className="font-semibold">開台價 — Founding member prices for the first {FOUNDING_SLOTS}</p>
         <p className="text-sm">
           Plus HK${p.foundingMonthly}/mo · Pro HK${pr.foundingMonthly}/mo — locked forever while subscribed.
         </p>
       </div>
 
-      <div className="rounded-xl border p-4">
-        <p className="text-sm text-gray-500">Current plan</p>
+      <div className="glass-card p-4">
+        <p className="text-sm text-muted">Current plan</p>
         <p className="text-lg font-semibold">{PLAN_LABEL[plan] ?? plan}</p>
         <a className="text-sm text-blue-600 underline" href="#/app/billing" onClick={async (e) => {
           e.preventDefault();
@@ -83,7 +83,7 @@ export function BillingPage() {
         </div>
       </div>
 
-      <p className="text-xs text-gray-400">Flat prices, no personalized offers, cancel anytime (keeps benefits until period end).</p>
+      <p className="text-xs text-muted">Flat prices, no personalized offers, cancel anytime (keeps benefits until period end).</p>
     </div>
   );
 }

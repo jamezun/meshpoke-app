@@ -102,7 +102,7 @@ export function HostConsole() {
           <div className="flex justify-between">
             <div>
               <p className="font-semibold">{h.name}</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 {h.venue_name ?? h.district} · {h.member_count}/{h.max_headcount}
                 {h.pending_count > 0 && <b className="text-amber-700"> · {h.pending_count} pending</b>}
               </p>
@@ -146,8 +146,8 @@ export function HostConsole() {
               <div key={a.applicationId} className="rounded-lg border p-3 text-sm space-y-1">
                 <p className="font-medium">
                   {a.displayName || 'Applicant'} {a.express && <span title="express">⚡</span>}
-                  <span className="text-gray-400"> · {a.plan} · {a.provenState} {a.score !== null ? `(${a.score.toFixed(2)})` : ''}</span>
-                  {a.trust?.spotsAttended ? <span className="text-gray-400"> · {a.trust.spotsAttended} spots</span> : null}
+                  <span className="text-muted"> · {a.plan} · {a.provenState} {a.score !== null ? `(${a.score.toFixed(2)})` : ''}</span>
+                  {a.trust?.spotsAttended ? <span className="text-muted"> · {a.trust.spotsAttended} spots</span> : null}
                 </p>
                 {a.note && <p className="text-gray-600 italic">“{a.note}”</p>}
                 <div className="flex gap-2">
@@ -160,7 +160,7 @@ export function HostConsole() {
                 </div>
               </div>
             ))}
-            {queue.length === 0 && <p className="text-gray-400 text-sm">No applications.</p>}
+            {queue.length === 0 && <p className="text-muted text-sm">No applications.</p>}
           </div>
 
           <div className="rounded-xl border p-4 space-y-2">

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meshpoke/main.dart' show themeModeProvider, setThemeMode;
 
 /// Profile tab: trust-signal row, sketch/keywords editor, photos, settings entries.
 class ProfileScreen extends StatelessWidget {
@@ -60,6 +61,20 @@ class ProfileScreen extends StatelessWidget {
               title: const Text('Hide my photo in chat rooms'),
               value: true,
               onChanged: (_) {}, // PATCH /me hide_photo_in_rooms
+            ),
+          ),
+          Card(
+            child: ValueListenableBuilder<ThemeMode>(
+              valueListenable: themeModeProvider,
+              builder: (context, mode, _) => SwitchListTile(
+                secondary: Icon(mode == ThemeMode.dark
+                    ? Icons.dark_mode_outlined
+                    : Icons.light_mode_outlined),
+                title: const Text('Dark mode'),
+                value: mode == ThemeMode.dark,
+                onChanged: (on) =>
+                    setThemeMode(on ? ThemeMode.dark : ThemeMode.light),
+              ),
             ),
           ),
           Card(

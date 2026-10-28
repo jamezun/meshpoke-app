@@ -43,9 +43,9 @@ class SignInScreen extends ConsumerWidget {
                 'Poke the mesh.',
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
-              const Text(
+              Text(
                 'Watch your network ripple.',
-                style: TextStyle(fontSize: 20, color: Colors.white70),
+                style: TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 48),
               FilledButton.icon(

@@ -14,7 +14,7 @@ The brand's signature orange (`#ff4f00`) is unmistakable -- a vivid, saturated r
 - Degular Display for hero headlines at 0.90 line-height -- compressed, impactful, modern
 - Inter as the universal UI font across all functional typography
 - GT Alpina for editorial accents -- thin-weight serif with extreme negative tracking
-- Zapier Orange (`#ff4f00`) as the single accent -- vivid, warm, sparingly applied
+- MeshPoke Peach (`#FFB26B`) as the single accent -- pastel, soft, warm (supersedes the earlier Zapier Orange study; light-first since 2026-10-28)
 - Warm neutral palette: borders (`#c5c0b1`), muted text (`#939084`), surface tints (`#eceae3`)
 - 8px base spacing system with generous padding on CTAs (20px 24px)
 - Border-forward design: `1px solid` borders in warm grays define structure over shadows
@@ -27,7 +27,7 @@ The brand's signature orange (`#ff4f00`) is unmistakable -- a vivid, saturated r
 - **Off-White** (`#fffdf9`): Secondary background surface, subtle alternate tint. Nearly indistinguishable from cream white but creates depth.
 
 ### Brand Accent
-- **Zapier Orange** (`#ff4f00`): Primary CTA buttons, active underline indicators, accent borders. The signature color -- vivid and warm.
+- **MeshPoke Peach** (`#FFB26B`): Primary CTA buttons, active underline indicators, accent borders. The signature color -- pastel and soft. On peach fills use dark-brown text (`#3B2412`); peach-family text on white is `#C06A24`, on dark `#FFC48D`.
 
 ### Neutral Scale
 - **Dark Charcoal** (`#36342e`): Secondary text, footer text, border color for strong dividers. A warm dark gray-brown with 70% opacity variant.

@@ -13,9 +13,9 @@ export default function SupportPage() {
   return (
     <StaticPage title="Support & FAQ">
       {faqs.map(([q, a]) => (
-        <details key={q} className="rounded-lg border border-zinc-800 p-4">
+        <details key={q} className="rounded-lg border border-line p-4">
           <summary className="cursor-pointer text-sm font-medium">{q}</summary>
-          <p className="mt-2 text-sm text-zinc-400">{a}</p>
+          <p className="mt-2 text-sm text-muted">{a}</p>
         </details>
       ))}
       <P>Still stuck? <a className="underline" href="mailto:support@meshpoke.com">support@meshpoke.com</a></P>

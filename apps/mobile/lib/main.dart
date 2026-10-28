@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meshpoke/core/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meshpoke/features/auth/dob_screen.dart';
 import 'package:meshpoke/features/auth/phone_screen.dart';
 import 'package:meshpoke/features/auth/sign_in_screen.dart';
@@ -106,15 +107,35 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
+/// User theme choice — default light, persisted. ponytail: simple ValueNotifier over a state lib.
+final themeModeProvider = ValueNotifier<ThemeMode>(ThemeMode.light);
+
+Future<void> _loadTheme() async {
+  final prefs = await SharedPreferences.getInstance();
+  themeModeProvider.value =
+      prefs.getBool('mp-dark') == true ? ThemeMode.dark : ThemeMode.light;
+}
+
+Future<void> setThemeMode(ThemeMode mode) async {
+  themeModeProvider.value = mode;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('mp-dark', mode == ThemeMode.dark);
+}
+
 class MeshPokeApp extends ConsumerWidget {
   const MeshPokeApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router(
-      title: 'MeshPoke',
-      theme: AppTheme.dark(),
-      routerConfig: ref.watch(routerProvider),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeProvider,
+      builder: (context, mode, _) => MaterialApp.router(
+        title: 'MeshPoke',
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
+        themeMode: mode,
+        routerConfig: ref.watch(routerProvider),
+      ),
     );
   }
 }
@@ -127,5 +148,6 @@ Future<void> main() async {
     url: const String.fromEnvironment('SUPABASE_URL', defaultValue: 'http://localhost:9999'),
     publishableKey: const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'e2e-anon-key'),
   );
+  await _loadTheme();
   runApp(const ProviderScope(child: MeshPokeApp()));
 }

@@ -19,7 +19,7 @@ export function ReferralLanding() {
         >
           Get the app
         </a>
-        <p className="text-xs text-gray-400">iOS & Android · Sign up with the same device to claim your invite.</p>
+        <p className="text-xs text-muted">iOS & Android · Sign up with the same device to claim your invite.</p>
         <Link to="/" className="block text-sm text-blue-600 underline">What is MeshPoke?</Link>
       </div>
     </div>

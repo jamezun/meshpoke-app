@@ -45,7 +45,7 @@ export const useAuth = () => useContext(AuthCtx);
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { session, ready } = useAuth();
-  if (!ready) return <div className="p-16 text-center text-zinc-500">Loading…</div>;
+  if (!ready) return <div className="p-16 text-center text-muted">Loading…</div>;
   if (!session) return <AuthGate />;
   return <>{children}</>;
 }
@@ -54,7 +54,7 @@ function AuthGate() {
   return (
     <main className="mx-auto max-w-sm px-6 py-24 text-center">
       <h1 className="text-2xl font-bold">Sign in to continue</h1>
-      <p className="mt-2 text-sm text-zinc-400">MeshPoke web is a companion — the full experience lives in the app.</p>
+      <p className="mt-2 text-sm text-muted">MeshPoke web is a companion — the full experience lives in the app.</p>
       <a href="/login" className="mt-6 inline-block rounded-lg px-5 py-2.5 font-medium" style={{ background: 'var(--accent)', color: '#08110c' }}>Sign in</a>
     </main>
   );

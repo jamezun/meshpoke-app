@@ -57,16 +57,16 @@ export default function ActivityPage() {
             <span className="flex items-center gap-2 text-sm">
               <span>{ICON[i.category] ?? '🔔'}</span>
               <span>{TEXT[i.type] ?? i.type}</span>
-              <span className="text-xs text-zinc-500">{new Date(i.created_at).toLocaleString('en-HK')}</span>
+              <span className="text-xs text-muted">{new Date(i.created_at).toLocaleString('en-HK')}</span>
             </span>
           );
-          return <li key={i.id} className={`rounded border border-zinc-800 px-3 py-2 ${i.read_at ? 'opacity-60' : 'bg-zinc-900'}`}>
+          return <li key={i.id} className={`rounded border border-line px-3 py-2 ${i.read_at ? 'opacity-60' : 'bg-surface'}`}>
             {to ? <button className="text-left underline-offset-2 hover:underline" onClick={() => nav(to)}>{row}</button> : row}
           </li>;
         })}
-        {items.length === 0 && <li className="text-sm text-zinc-500">Nothing yet</li>}
+        {items.length === 0 && <li className="text-sm text-muted">Nothing yet</li>}
       </ul>
-      <p className="mt-4 text-sm text-zinc-500"><Link className="underline" to="/app/settings">Notification settings</Link></p>
+      <p className="mt-4 text-sm text-muted"><Link className="underline" to="/app/settings">Notification settings</Link></p>
     </div>
   );
 }

@@ -26,20 +26,20 @@ export function PhoneVerifyPage() {
   return (
     <main className="mx-auto max-w-sm px-6 py-24">
       <h1 className="text-2xl font-bold">Verify your phone</h1>
-      <p className="mt-2 text-sm text-zinc-400">One account per verified HK number. Your number is never shown to anyone.</p>
+      <p className="mt-2 text-sm text-muted">One account per verified HK number. Your number is never shown to anyone.</p>
       {!sent ? (
         <div className="mt-6 space-y-3">
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+852 9123 4567" className="w-full rounded-lg border border-zinc-700 bg-transparent px-3 py-2" />
-          {!validPhone && phone.length > 0 && <p className="text-sm text-zinc-500">HK format: +852 followed by 8 digits.</p>}
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+852 9123 4567" className="w-full rounded-lg border border-line bg-transparent px-3 py-2" />
+          {!validPhone && phone.length > 0 && <p className="text-sm text-muted">HK format: +852 followed by 8 digits.</p>}
           {err && <p className="text-sm text-red-400">{err}</p>}
           <button disabled={!validPhone} onClick={send} className="w-full rounded-lg px-4 py-2 font-medium disabled:opacity-40" style={{ background: 'var(--accent)', color: '#08110c' }}>Send code</button>
         </div>
       ) : (
         <div className="mt-6 space-y-3">
-          <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="6-digit code" inputMode="numeric" maxLength={6} className="w-full rounded-lg border border-zinc-700 bg-transparent px-3 py-2 text-center text-xl tracking-widest" />
+          <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="6-digit code" inputMode="numeric" maxLength={6} className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-center text-xl tracking-widest" />
           {err && <p className="text-sm text-red-400">{err}</p>}
           <button disabled={code.length !== 6} onClick={verify} className="w-full rounded-lg px-4 py-2 font-medium disabled:opacity-40" style={{ background: 'var(--accent)', color: '#08110c' }}>Verify</button>
-          <button onClick={send} className="w-full text-sm text-zinc-400 underline">Resend</button>
+          <button onClick={send} className="w-full text-sm text-muted underline">Resend</button>
         </div>
       )}
     </main>

@@ -1,0 +1,20 @@
+import { useState } from 'react';
+
+/** Light/dark switch — default light; persists to localStorage (mp-theme), paints data-theme. */
+export function ThemeToggle() {
+  const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark');
+  return (
+    <button
+      aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="ml-4 rounded-full border border-line px-3 py-1 text-sm text-muted hover:border-accent hover:text-fg"
+      onClick={() => {
+        const next = !dark;
+        setDark(next);
+        document.documentElement.dataset.theme = next ? 'dark' : 'light';
+        try { localStorage.setItem('mp-theme', next ? 'dark' : 'light'); } catch { /* private mode */ }
+      }}
+    >
+      {dark ? '☀' : '☾'}
+    </button>
+  );
+}

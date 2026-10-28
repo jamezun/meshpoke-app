@@ -65,9 +65,9 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_stage == PhoneStage.number) ...[
-              const Text(
+              Text(
                 'We verify every member with a phone number. This keeps the mesh real.',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               Row(

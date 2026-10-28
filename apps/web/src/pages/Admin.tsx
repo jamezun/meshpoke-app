@@ -22,16 +22,16 @@ type Metrics = {
 function MetricsSection() {
   const [m, setM] = useState<Metrics | null>(null);
   useEffect(() => { api('/admin/metrics').then(setM).catch(() => {}); }, []);
-  if (!m) return <p className="text-sm text-gray-400">Metrics…</p>;
+  if (!m) return <p className="text-sm text-muted">Metrics…</p>;
   const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)}%`);
   return (
     <section className="mt-8">
       <h2 className="text-lg font-bold">Metrics</h2>
       <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-        <div className="rounded-xl border p-3"><p className="text-gray-500">Attendance rate</p><p className="text-xl font-bold">{pct(m.attendanceRate)}</p></div>
-        <div className="rounded-xl border p-3"><p className="text-gray-500">Rebook rate</p><p className="text-xl font-bold">{pct(m.rebookRate)}</p></div>
-        <div className="rounded-xl border p-3"><p className="text-gray-500">Free share of accepts</p><p className="text-xl font-bold">{pct(m.fairness.freeShare)}</p><p className="text-xs text-gray-400">fairness gate: keep free visible</p></div>
-        <div className="rounded-xl border p-3"><p className="text-gray-500">Payer conversion</p><p className="text-xl font-bold">{pct(m.conversion.rate)}</p><p className="text-xs text-gray-400">{m.conversion.paying}/{m.conversion.total} users</p></div>
+        <div className="rounded-xl border p-3"><p className="text-muted">Attendance rate</p><p className="text-xl font-bold">{pct(m.attendanceRate)}</p></div>
+        <div className="rounded-xl border p-3"><p className="text-muted">Rebook rate</p><p className="text-xl font-bold">{pct(m.rebookRate)}</p></div>
+        <div className="rounded-xl border p-3"><p className="text-muted">Free share of accepts</p><p className="text-xl font-bold">{pct(m.fairness.freeShare)}</p><p className="text-xs text-muted">fairness gate: keep free visible</p></div>
+        <div className="rounded-xl border p-3"><p className="text-muted">Payer conversion</p><p className="text-xl font-bold">{pct(m.conversion.rate)}</p><p className="text-xs text-muted">{m.conversion.paying}/{m.conversion.total} users</p></div>
       </div>
       <p className="mt-3 text-sm text-gray-600">
         Funnel: {m.funnel.created} created → {m.funnel.forming} forming → {m.funnel.confirmed} confirmed → {m.funnel.live} live → {m.funnel.done} done
