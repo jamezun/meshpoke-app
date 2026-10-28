@@ -13,7 +13,7 @@ export const configSchema = z.object({
   GOTRUE_JWT_SECRET: z.string().min(32),
   GOTRUE_SERVICE_ROLE_KEY: z.string().optional(),
 
-  CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:8081'),
+  CORS_ORIGINS: z.string().default('http://localhost:5180,http://localhost:5173,http://localhost:8081'),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   SENTRY_DSN: z.string().optional(),
 
