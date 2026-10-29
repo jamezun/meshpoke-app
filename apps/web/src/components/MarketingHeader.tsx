@@ -14,6 +14,12 @@ const TABS: [string, string][] = [
 export function MarketingHeader() {
   return (
     <header className="border-b border-line">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:shadow-lg"
+      >
+        Skip to content
+      </a>
       <div className="mx-auto flex max-w-4xl items-center gap-4 px-6 py-4">
         <Link to="/" className="text-lg font-bold">MeshPoke</Link>
         <nav className="ml-4 flex flex-1 flex-wrap gap-x-4" aria-label="Site">

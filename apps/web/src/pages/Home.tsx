@@ -7,12 +7,12 @@ export function HomePage() {
   return (
     <>
       <MarketingHeader />
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <main id="main" className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="text-4xl font-bold tracking-tight">Poke the mesh.<br />Watch your network ripple.</h1>
       <p className="mt-4 text-lg text-muted">A live map for meeting people in real life. Spots, venues, crews — Hong Kong first.</p>
       <div className="mt-8 flex gap-3">
-        <a href="#waitlist" className="rounded-lg px-5 py-2.5 font-medium" style={{ background: 'var(--accent)', color: '#08110c' }}>Join the waitlist</a>
-        <a href="/pricing" className="rounded-lg border border-line px-5 py-2.5 font-medium">Pricing</a>
+        <a href="#waitlist" className="btn-accent px-5 py-2.5">Join the waitlist</a>
+        <a href="/pricing" className="btn-ghost px-5 py-2.5">Pricing</a>
       </div>
       <section className="mt-16 grid gap-6 sm:grid-cols-3">
         {[
@@ -48,8 +48,19 @@ export function HomePage() {
             }
           }}
         >
-          <input type="email" name="email" required placeholder="you@example.com" className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2" />
-          <button disabled={waitlistState === 'sending'} className="rounded-lg px-4 py-2 font-medium disabled:opacity-50" style={{ background: 'var(--accent)', color: '#08110c' }}>
+          <label htmlFor="waitlist-email" className="sr-only">Email address</label>
+          <input
+            id="waitlist-email"
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            spellCheck={false}
+            placeholder="you@example.com…"
+            className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2.5"
+          />
+          <button disabled={waitlistState === 'sending'} className="btn-accent px-4 py-2.5">
             {waitlistState === 'sending' ? '…' : 'Notify me'}
           </button>
         </form>

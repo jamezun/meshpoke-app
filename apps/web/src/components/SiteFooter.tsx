@@ -55,7 +55,7 @@ export function SiteFooter() {
                 href={href}
                 aria-label={label}
                 title={href === '#' ? `${label} — coming soon` : label}
-                className="rounded-full border border-line p-2 text-muted transition hover:text-fg"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-line p-2.5 text-muted transition hover:text-fg"
                 style={{ transitionDuration: 'var(--motion-fast)' }}
               >
                 <Icon size={16} />

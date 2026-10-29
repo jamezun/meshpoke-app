@@ -6,7 +6,7 @@ export function StaticPage({ title, children }: { title: string; children: React
   return (
     <>
       <MarketingHeader />
-      <main className="mx-auto max-w-2xl px-6 py-16">
+      <main id="main" className="mx-auto max-w-2xl px-6 py-16">
         <h1 className="text-3xl font-bold">{title}</h1>
         <div className="mt-6 space-y-4 text-muted">{children}</div>
         <p className="mt-16 text-xs text-muted"><a href="/" className="underline">← Back</a></p>

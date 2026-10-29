@@ -72,3 +72,42 @@ button, a, input, select, textarea, summary {
   transition: background var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease),
     color var(--motion-fast) var(--ease), box-shadow var(--motion-fast) var(--ease);
 }
+
+/* Visible keyboard focus — accent ring, never removed. */
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+/* Buttons — token-driven, replace inline styles. */
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-on);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease);
+}
+.btn-accent:hover { background: var(--accent-hover); }
+.btn-accent:active { transform: translateY(1px); }
+.btn-accent:disabled { opacity: 0.5; }
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--fg);
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+.btn-ghost:hover { border-color: var(--accent); }
+
+html { scroll-behavior: smooth; }
+::selection { background: color-mix(in oklab, var(--accent) 40%, transparent); }
+
+/* Honor reduced motion — kill transforms/transitions, keep colors. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .glass-card:hover { transform: none; }
+}
