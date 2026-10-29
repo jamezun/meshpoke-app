@@ -38,7 +38,7 @@ export function MarketingHeader() {
         <ThemeToggle />
         <Link
           to="/login"
-          className="rounded-lg border border-line px-4 py-2 text-sm font-medium hover:border-[var(--accent)]"
+          className="hover-shade rounded-lg border border-line px-4 py-2 text-sm font-medium transition"
         >
           Log in
         </Link>

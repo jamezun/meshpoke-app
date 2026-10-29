@@ -6,7 +6,7 @@ export function ThemeToggle() {
   return (
     <button
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="ml-4 min-h-[44px] rounded-full border border-line px-3.5 py-2 text-sm text-muted hover:border-accent hover:text-fg"
+      className="hover-shade ml-4 min-h-[44px] rounded-full border border-line px-3.5 py-2 text-sm text-muted transition"
       onClick={() => {
         const next = !dark;
         setDark(next);

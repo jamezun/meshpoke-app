@@ -133,7 +133,10 @@ button, a, input, select, textarea, summary {
   border-radius: 0.5rem;
   font-weight: 500;
 }
-.btn-ghost:hover { border-color: var(--accent); }
+.btn-ghost:hover { background: color-mix(in oklab, var(--accent) 16%, transparent); }
+
+/* Shared hover affordance — soft shade, no border change (works light+dark). */
+.hover-shade:hover { background: color-mix(in oklab, var(--accent) 18%, transparent); color: var(--fg); }
 
 html { scroll-behavior: smooth; }
 ::selection { background: color-mix(in oklab, var(--accent) 40%, transparent); }
