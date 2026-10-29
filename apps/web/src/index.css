@@ -16,6 +16,9 @@
   --motion-fast: 140ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --shadow-soft: 0 8px 24px rgb(59 36 18 / 0.08);
+  --font-display: "Geist", "Geist Sans", -apple-system, system-ui, "Segoe UI", Arial, sans-serif;
+  --font-body: "Geist", "Geist Sans", -apple-system, system-ui, "Segoe UI", Arial, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
 [data-theme='dark'] {
@@ -36,8 +39,42 @@
 body {
   background: var(--bg);
   color: var(--fg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
   transition: background var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);
 }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--text-xs, 0.75rem); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+
+/* ── Auth pages (SupremaNode pattern) ─────────────────────────────── */
+.auth-wrap { min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 880px) { .auth-wrap { grid-template-columns: 1fr; } .auth-aside { display: none; } }
+.auth-aside {
+  background: var(--surface-2);
+  padding: 3rem;
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 1rem;
+  border-right: 1px solid var(--line);
+}
+.auth-main { display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.auth-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 1.25rem; }
+.auth-providers { display: flex; flex-direction: column; gap: 10px; }
+.auth-provider {
+  display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px;
+  border: 1px solid var(--line); border-radius: 0.5rem; background: var(--surface);
+  font-size: 0.875rem; font-weight: 500; color: var(--fg);
+  transition: background var(--motion-fast) var(--ease);
+}
+.auth-provider:hover { background: var(--surface-2); }
+.auth-divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 0.75rem; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
 /* Tailwind 4 token bridge — utilities: bg-surface, text-muted, border-line, text-accent, bg-accent… */
 @theme inline {

@@ -9,7 +9,7 @@ export default function AboutPage() {
     <StaticPage title="About MeshPoke">
       <P>
         MeshPoke is a live map for meeting people in real life. Hong Kong first.
-        「成個城市，就係你嘅人脈。」— the whole city is your network.
+        The whole city is your network.
       </P>
       <P>
         We're not a dating app. We're not a dinner app. We're the connective tissue

@@ -46,7 +46,7 @@ export function SiteFooter() {
         <div>
           <Link to="/" className="text-lg font-bold">MeshPoke</Link>
           <p className="mt-3 max-w-[34ch] text-sm text-muted">
-            A live map for meeting people in real life. Hong Kong first. 「成個城市，就係你嘅人脈。」
+            A live map for meeting people in real life. Hong Kong first.
           </p>
           <div className="mt-4 flex gap-3" aria-label="MeshPoke on social media">
             {SOCIALS.map(({ label, href, Icon }) => (
