@@ -7,6 +7,7 @@ import { sql } from 'drizzle-orm';
 import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
+import { enforcementState } from './score.js';
 
 const TEMPLATES = ['dinner', 'drinks', 'coffee', 'hike', 'run', 'tennis', 'pickleball', 'badminton', 'board_games', 'industry_mingle', 'open_sport'] as const;
 
@@ -49,6 +50,8 @@ export function registerSpots(app: FastifyInstance, dbUrl: string) {
     if (district.length === 0) return reply.code(422).send({ problem: { title: 'Unknown district', status: 422 } });
 
     // hosting capacity (1/3/5 earned via Show-up Score) — counts active hosted spots of BOTH kinds
+    const en = await enforcementState(db, userId);
+    if (en.action === 'hosting_paused') return reply.code(403).send({ problem: { title: 'Hosting paused', status: 403, detail: `${en.reason} — back ${en.pausedUntil?.toISOString().slice(0, 10)}` } });
     const cap = rows(await db.execute(sql`select max_active from hosting_capacity where user_id = ${userId}`));
     const maxActive = (cap[0]?.max_active as number | undefined) ?? 1;
     const active = rows(

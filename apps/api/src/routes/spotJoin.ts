@@ -7,6 +7,7 @@ import { sql } from 'drizzle-orm';
 import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
+import { enforcementState } from './score.js';
 import { trustExpr } from '../trust.js';
 
 const Apply = z.object({ note: z.string().trim().max(500).optional() });
@@ -70,6 +71,8 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     const s = spot[0];
     if (s.kind !== 'event') return reply.code(422).send({ problem: { title: 'Not an event spot', status: 422 } });
     if (s.join_mode !== 'open') return reply.code(422).send({ problem: { title: 'Application required', status: 422 } });
+    const en = await enforcementState(db, userId);
+    if (en.action === 'hosting_paused') return reply.code(403).send({ problem: { title: 'Participation paused', status: 403, detail: `${en.reason} — back ${en.pausedUntil?.toISOString().slice(0, 10)}` } });
     if (s.state !== 'forming' && s.state !== 'confirmed') {
       return reply.code(422).send({ problem: { title: `Spot is ${s.state ?? 'closed'}`, status: 422 } });
     }
@@ -103,6 +106,8 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
     const s = spot[0];
     if (s.kind !== 'event') return reply.code(422).send({ problem: { title: 'Not an event spot', status: 422 } });
     if (s.join_mode !== 'application') return reply.code(422).send({ problem: { title: 'Spot is open-join', status: 422 } });
+    const en = await enforcementState(db, userId);
+    if (en.action !== 'none' && en.action !== 'warning') return reply.code(403).send({ problem: { title: en.action === 'hosting_paused' ? 'Participation paused' : 'Applications cooling down', status: 403, detail: `${en.reason} — open spots still joinable, back ${en.pausedUntil?.toISOString().slice(0, 10)}` } });
     if (s.state !== 'forming') return reply.code(422).send({ problem: { title: `Spot is ${s.state ?? 'closed'}`, status: 422 } });
     const existing = rows(await db.execute(sql`select state from spot_members where spot_id = ${s.id}::uuid and user_id = ${userId}`));
     if (existing.length > 0 && existing[0].state === 'active') return reply.code(409).send({ problem: { title: 'Already a member', status: 409 } });

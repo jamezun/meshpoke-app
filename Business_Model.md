@@ -215,7 +215,7 @@ Creator-admin (democratised Timeleft ops):
 
 - A spot forms without a date; **when min headcount is reached, the creator pins the date**; all members confirm within a **48h window** or the spot auto-dissolves.
 - **Overbook buffer:** creator may accept above min to absorb flakes; bail → waitlist backfill.
-- **24h bail grace** before event time; later bails = no-show record.
+- **Graduated bail ladder:** bail >48h out = free · 24–48h out = 0.75 points · <24h out = 0.5 · no-show = 0 (§5.3 table). Every tier is forgiveness-eligible.
 
 ### 5.3 Attendance and Show-up Score (money-free anti-flake teeth)
 
@@ -227,13 +227,47 @@ Creator-admin (democratised Timeleft ops):
 
 **Merchant check-ins (money involved, QR required):** individual drops, group drops and member visits are verified by the **guest showing a rotating QR in the app and staff scanning it** with the merchant portal on any phone (tablet mode optional). GPS must overlap the venue; if GPS fails but the QR is valid, the check-in is **low-confidence**: it counts for Show-up Score and membership progress but is **never billed**.
 
-**Show-up Score:**
-- Inputs: no-show / late-cancel rate, attendance streak, verified-attendance rate.
-- New users show **"unproven"** (score treated as 0.5 in ranking) — a state, not a penalty.
-- Visible to creators on applications; creators may set minimum thresholds; **90-day decay**; enforcement ladder for repeat offenders.
-- **Flake forgiveness:** member explains within 48h → creator accepts → record voided (kept in private log). No cap in v1.
-- **Symmetry:** a creator's own last-minute cancel hits the creator's score + auto-apology to members.
+**Show-up Score — Reliability 2.0 (Bayesian):**
+
+> **Score = (Σpoints + 3 × 0.5) / (n + 3)** over a rolling **90-day** window, where each finalised outcome contributes its point value and every account starts with a neutral prior (m = 3 pseudo-events at 0.5). A no-show costs the same whether you're new or a veteran — but one bad night never sinks a strong record, and ten clean events don't launder away a habit.
+
+**Point values (per finalised outcome):**
+
+| Outcome | Points |
+|---|---|
+| Showed up | **1.0** |
+| Bailed 24–48h before | **0.75** |
+| Bailed <24h before | **0.5** |
+| No-show | **0** |
+| Host cancelled (finalised by apology responses) | **0.2–0.8** (silence = 0.5) |
+| Host ghosted own confirmed spot | **0** + automatic 7-day hosting pause |
+| Reschedule proposal rejected | **0.75** (tap, not a crush — spot keeps its time) |
+
+- **Tiers:** **New** (n < 3 — chip only, no percentage shown) · **Reliable** (n ≥ 3, score ≥ 60%) · **Rock** (n ≥ 6, score ≥ 85%) → hosting capacity 1 → 3 → 5. Earned, never purchasable.
+- **Why Bayesian:** the old capped-additive model diluted — 10 shows + 1 no-show ranked the same as 100 shows + 1 no-show. The rate model fixes that: 10+1 ≈ 82%, 100+1 ≈ 98%. The prior m = 3 means a first no-show floors a new user at 37.5% (visible but recoverable in ~3 events) and time-to-Reliable is 7 events, not 23.
+- **Enforcement (counts axis — catches bursts that rates miss):** 1 no-show/30d = warning banner; 2 no-shows/30d **or** score <40% (only with n ≥ 3) = 7-day **application cooldown** (open spots still joinable — you can still show up, just not book ahead); 3 no-shows/30d **or** score <30% = 14-day **pause** (no join/apply/host/drops/coupons/new memberships; existing rooms stay readable). Hosts: 2 late host-cancels/30d or one ghost = hosting pause. Self-clearing rolling windows — no admin unban path needed.
+- **Flake forgiveness (unchanged):** member explains within 48h → creator accepts → **erased**, not counted (private log only). No cap in v1.
+- **Host accountability:** cancel posts an auto-apology; each member taps **It's fine / Not ok** within 72h (silence = neutral, excluded — never counted against the host). Final weight = 0.2 + 0.6 × forgiven share. Hosts can also **reschedule with consent** (>48h out free; ≤48h needs every member to accept by start−4h, else the spot keeps its time and the host takes a 0.75 tap) and **hand over the spot** (nominate or broadcast; first accepting member inherits hosting; if nobody takes it before start, the spot dissolves as a host cancel — stepping down is free, abandoning is not).
+- **Two ledgers:** Show-up Score = reliability of *physical attendance*. Conduct (Clean/Muted/Suspended chip, no number, 30-day clean reset) = behaviour. One never touches the other. Appeals are **free** (1 per 30d, admin-reviewed) — pay-to-appeal is a dark pattern we will never ship.
+- **Recognition (cosmetic, score-neutral):** 🔥 weekly-attendance streak chip; ❤️ hearts 5/day as reactions (flair at 10/50/100 received); 📍 **Venue Regular** badge at 3+ verified visits to one venue in 60d — the merchant flywheel's user-side engine. Rewards pay in privileges (hosting capacity, Rock-first queue sort), never points.
 - **No deposits.** Date-on-fill prevents shrinkage instead of compensating it.
+
+**Worked examples (May, member):**
+
+| History | n | Σpts | Score | Chip |
+|---|---|---|---|---|
+| Fresh account | 0 | — | 50% | New |
+| 1 show | 1 | 1.0 | (1+1.5)/4 = **62.5%** | New |
+| 3 shows | 3 | 3.0 | (3+1.5)/6 = **75%** | Reliable ✓ |
+| 7 shows | 7 | 7.0 | 8.5/10 = **85%** | Rock ✓ |
+| …then bails 30h out | 8 | 7.75 | 9.25/11 = **84%** | Rock (barely) |
+| …then bails 10h out | 9 | 8.25 | 9.75/12 = **81%** | Rock |
+| …then no-shows | 10 | 8.25 | 9.75/13 = **75%** | Rock, warning banner |
+| …explains, host forgives | — | — | erased | back to 81% |
+| (dark path) 2nd no-show | 11 | 8.25 | 9.75/14 = **70%** | cooldown 7d |
+| 3rd no-show | 12 | 8.25 | 9.75/15 = **65%** | paused 14d |
+
+**Worked examples (Ho, host):** clean ×6 → 85% Rock. Cancels a 6-member spot 10h out; 4 members tap *It's fine*, 1 taps *Not ok*, 1 silent → weight 0.2+0.6×(4/5) = 0.68 → score 75%. Same cancel with 5/6 forgiving (83% share) → 0.7 → 80%. Ghosts instead → 0-point event + 7-day hosting pause. Hands over instead of cancelling → stays at 85%.
 
 ### 5.4 Pokes and post-spot pokes
 

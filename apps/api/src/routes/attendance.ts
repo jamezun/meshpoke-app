@@ -125,9 +125,7 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
            where spot_id = ${req.params.id}::uuid and user_id = ${b.userId}::uuid and status in ('absent_host','absent_reported')
            returning user_id`));
         if (res.length > 0) {
-          await db.execute(sql`
-            insert into score_events (user_id, spot_id, type, weight)
-            values (${b.userId}::uuid, ${req.params.id}::uuid, 'forgiven', 0)`);
+          // Reliability 2.0: forgiveness = ERASED — no score event, private log only (attendance row keeps status)
         }
         return { forgiven: res.length > 0 };
       }
@@ -170,17 +168,15 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
          where spot_id = ${req.params.id}::uuid and finalized_at is null`));
 
       for (const a of unfinalised) {
+        // Reliability 2.0: forgiven = ERASED (no event). Host absent = host_ghost (0 + auto-pause), not no_show.
+        if (a.status === 'forgiven') continue;
+        const isHost = String(a.user_id) === String(s.host_user_id);
+        const type = a.status === 'attended' ? 'attended' : isHost ? 'host_ghost' : 'no_show';
         await db.execute(sql`
           insert into score_events (user_id, spot_id, type, weight)
-          values (${a.user_id}::uuid, ${req.params.id}::uuid,
-                  ${a.status === 'attended' || a.status === 'forgiven' ? 'attended' : 'no_show'}::score_event_type,
-                  ${a.status === 'attended' ? 0.1 : a.status === 'forgiven' ? 0 : -0.25})`);
-        if (a.status === 'attended') {
-          await db.execute(sql`
-            insert into score_events (user_id, spot_id, type, weight)
-            select ${a.user_id}::uuid, ${req.params.id}::uuid, 'verified_gps', 0.05
-             where exists (select 1 from attendance
-                            where spot_id = ${req.params.id}::uuid and user_id = ${a.user_id}::uuid and verified_gps)`);
+          values (${a.user_id}::uuid, ${req.params.id}::uuid, ${type}::score_event_type, ${type === 'attended' ? 1 : 0})`);
+        if (type === 'attended') {
+          // (GPS verification lives in attendance.verified_gps — no separate event; points stay one-per-outcome)
         }
       }
       await db.execute(sql`

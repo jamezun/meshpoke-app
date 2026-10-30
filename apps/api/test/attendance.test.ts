@@ -127,9 +127,9 @@ test('roll-call defaults attended; host absence flips b; 1 peer report no effect
   const types = events.map((e) => e.type);
   expect(types).toContain('attended');
   expect(types).toContain('no_show'); // c absent_reported
-  expect(types).toContain('forgiven'); // b
+  expect(types).not.toContain('forgiven'); // b — forgiven = ERASED (Reliability 2.0)
   const cEvents = events.filter((e) => e.user_id === users.c.id);
-  expect(cEvents.every((e) => Number(e.weight) <= 0)).toBe(true);
+  expect(cEvents.every((e) => Number(e.weight) === 0)).toBe(true); // no_show = 0 points
 });
 
   // T21.3: host-reward Pro days

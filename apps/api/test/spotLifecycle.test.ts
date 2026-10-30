@@ -121,7 +121,7 @@ describe('spot lifecycle', () => {
     expect(sch2.statusCode).toBe(200);
     const bail = await app.inject({ method: 'POST', url: `/v1/spots/${spot2}/bail`, headers: { authorization: `Bearer ${gA.tok}` } });
     expect(bail.statusCode).toBe(200);
-    expect(bail.json().penalty).toBe('late_cancel');
+    expect(bail.json().penalty).toBe('bailUnder24'); // 1h out → 0.5 points
     const se = await pool.query(`select type from score_events where user_id = $1 and spot_id = $2`, [gA.id, spot2]);
     expect(se.rows[0]?.type).toBe('late_cancel');
 

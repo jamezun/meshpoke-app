@@ -6,6 +6,7 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { sql } from 'drizzle-orm';
+import { enforcementState } from './score.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { notify } from '../notify.js';
@@ -72,6 +73,8 @@ export function registerCrm(app: FastifyInstance, dbUrl: string, qrSecret: strin
     const verified = verifyQrToken(b.qrPayload, qrSecret);
     if (!verified.ok) return reply.code(403).send({ problem: { title: verified.reason, status: 403 } });
     const guestId = verified.userId;
+    const en = await enforcementState(db, guestId);
+    if (en.action === 'hosting_paused') return reply.code(403).send({ problem: { title: 'Guest participation paused', status: 403, detail: en.reason } });
     const upd = rows(await db.execute(sql`
       update coupons set used_at = now()
        where id = ${b.couponId}::uuid and user_id = ${guestId}::uuid and venue_id = ${v.venue_id}::uuid

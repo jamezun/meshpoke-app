@@ -11,6 +11,7 @@ import { getDb, type Db } from '../db/client.js';
 import { MERCHANT_RULES } from '@meshpoke/shared/constants';
 import { notify } from '../notify.js';
 import { capture } from '../analytics.js';
+import { enforcementState } from './score.js';
 
 export function registerMemberships(app: FastifyInstance, dbUrl: string) {
   const db = getDb(dbUrl);
@@ -40,6 +41,8 @@ export function registerMemberships(app: FastifyInstance, dbUrl: string) {
     }
 
     // user-side cap: merchant spots joined per user — per PRD free 10/plus 30/pro ∞ via TIER_CAPS.merchantSpots
+    const en = await enforcementState(db, uid);
+    if (en.action === 'hosting_paused') return reply.code(403).send({ problem: { title: 'Participation paused', status: 403, detail: en.reason } });
     const { getCaps, getPlan } = await import('../entitlements.js');
     const plan = await getPlan(dbUrl, uid);
     const caps = getCaps(plan);

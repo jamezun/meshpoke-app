@@ -246,7 +246,7 @@ Implemented once in the backend and surfaced in all clients. Section numbers ref
 2. Min headcount reached → creator pins date + venue.
 3. Members confirm within **48h** or the spot auto-dissolves.
 4. Overbook buffer allowed; a bail triggers waitlist backfill.
-5. **24h bail grace** before event start; later bails = `late_cancel` score event.
+5. **Graduated bail ladder (Reliability 2.0):** >48h free · 24–48h = `late_cancel` 0.75 pts · <24h = 0.5 pts · no-show = 0.
 
 **Live:** from event start time to start + template default duration (editable). During `live`, attendees may tap **"I'm here"** (GPS accepted when the reported accuracy circle overlaps a 100 m radius around the venue pin).
 
@@ -256,15 +256,18 @@ Implemented once in the backend and surfaced in all clients. Section numbers ref
 1. At `live → done`, every confirmed member gets `attendance.status = attended` (default), `verified_gps = true` if they tapped "I'm here".
 2. **Host roll-call** (available for 24h after done): host can untick members → `absent_host`.
 3. **Peer reports** (24h window): any attendee can report another as absent; at **≥2 distinct reporters** → `absent_reported`.
-4. A member marked absent can submit a **flake-forgiveness** explanation within 48h → host accepts → `forgiven` (counts as attended for photo reveal and score; logged privately).
+4. A member marked absent can submit a **flake-forgiveness** explanation within 48h → host accepts → `forgiven` (counts for photo reveal; **erased from the score** — no event; logged privately).
 5. Attendance finalises at done + 24h (pg-boss job); score events are emitted then. People-you-met opens at `done` for members still `attended`, and closes for anyone later marked absent.
 
 **Merchant check-ins (QR):** used for drop redemption, group drops and member visits — see §3.9.
 
-**Show-up Score** (0–1, displayed as a 0–100 badge or "unproven"):
-- Inputs: attendance outcomes (attended / absent / late-cancel / forgiven), attendance streak, verified-GPS rate, host-cancellation events.
-- **Unproven** until 3 finalised event outcomes; ranking treats unproven as **0.5**.
-- 90-day decay (older events weighted less); enforcement ladder: repeated no-shows → warning → temporary application cooldown → hosting rights paused.
+**Show-up Score — Reliability 2.0 (Bayesian rate, see BM §5.3 for worked examples):**
+- `score = (Σpoints + 3·0.5) / (n + 3)` over a rolling 90-day window; `score_events.weight` stores each outcome's point value (show 1.0 · bail 24–48h 0.75 · bail <24h 0.5 · no-show 0 · host_cancel 0.2–0.8 finalised by apology responses · host_ghost 0 · reschedule_reject 0.75). `forgiven` emits **no** event (erased).
+- Tiers: **New** (n<3, chip only) · **Reliable** (n≥3 & ≥60%) · **Rock** (n≥6 & ≥85%) → hosting capacity 1/3/5 (earned, never purchasable).
+- Enforcement (counts axis, single source `enforcementState`): 1 NS/30d warning · 2 NS/30d or score<40% (n≥3 only) → 7d application cooldown (open-join still allowed) · 3 NS/30d or score<30% → 14d pause (blocks join/apply/host/claim/redeem/membership) · host: 2 late cancels/30d or ghost → hosting pause. Self-clearing.
+- **Host accountability:** cancel → auto-apology, members tap It's-fine/Not-ok within 72h (silence neutral) → weight 0.2+0.6·forgiven-share; reschedule consent (>48h free; ≤48h unanimous by start−4h or rejected + 0.75 tap, spot keeps time); **handover** (nominate/broadcast, first accepter inherits; expires → dissolve as host cancel; forming free).
+- **Two ledgers:** score = attendance reliability; conduct chip (Clean/Muted/Suspended, 30d clean reset, free appeal 1/30d) = behaviour. Never mixed.
+- **Recognition (score-neutral):** streak chip (consecutive attended HKT weeks), hearts 5/day (flair 10/50/100), Venue Regular badge (3+ visits/60d) — see §3.9.
 - **Symmetry:** host last-minute cancel → score event on host + auto-apology message to members.
 
 ### 3.7 Crews and Rebook
@@ -504,7 +507,7 @@ Global: **My QR** (full-screen rotating QR for merchant scans), activity feed, "
 
 ### 6.2 Authenticated Web Experience
 
-Included: profile/sketch editing, keywords, photos + hide-photo toggle, poke inbox with Poke back, chats (rooms, crews, DMs), spots district list (apply, RSVP, 48h confirm, 24h bail), host console (queue, date pinning with venue search, roll-call, member removal), People-you-met + connections, wallet (read-only), subscriptions with Stripe web checkout (incl. founding annual), referral link, settings, data export.
+Included: profile/sketch editing, keywords, photos + hide-photo toggle, poke inbox with Poke back, chats (rooms, crews, DMs), spots district list (apply, RSVP, 48h confirm, graduated bail ladder), host console (queue, date pinning with venue search, roll-call, member removal), People-you-met + connections, wallet (read-only), subscriptions with Stripe web checkout (incl. founding annual), referral link, settings, data export.
 
 Excluded (mobile-only, with "open in app"): map browsing, venue pin placement for new user venues, "I'm here", My QR, drop claiming.
 
@@ -834,7 +837,12 @@ POST /spots/{id}/apply {note}  POST /spots/{id}/join  POST /spots/{id}/leave
 GET  /spots/{id}/queue?sort=recommended|vibe|score|newest   (host)
 POST /applications/{id}/decision {accept|decline|waitlist, reason}
 POST /spots/{id}/schedule {starts_at, venue_id, group_drop_id?}   (host; date-on-fill)
-POST /spots/{id}/confirm   POST /spots/{id}/bail
+POST /spots/{id}/confirm   POST /spots/{id}/bail   (graduated ladder: free/0.75/0.5)
+POST /spots/{id}/cancel (host)  POST /spots/{id}/apology {accept|decline}
+POST /spots/{id}/reschedule {new_starts_at}   POST /spots/{id}/reschedule/respond {accept}
+POST /spots/{id}/handover {nominee_id?}   POST /spots/{id}/handover/accept   POST /spots/{id}/handover/withdraw
+GET  /me/streak   GET /me/regulars   GET /me/conduct   POST /me/appeal {reason}
+POST /rooms/{roomId}/messages/{id}/react   GET /me/hearts
 POST /spots/{id}/im-here {lat, lng, accuracy_m}
 GET  /spots/{id}/roll-call   POST /spots/{id}/roll-call {absent_user_ids[]}   (host, 24h)
 POST /spots/{id}/report-absent {user_id}

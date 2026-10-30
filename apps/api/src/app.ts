@@ -31,6 +31,7 @@ import { registerSpotLifecycle } from './routes/spotLifecycle.js';
 import { registerImHere } from './routes/imHere.js';
 import { registerAttendance } from './routes/attendance.js';
 import { registerScore } from './routes/score.js';
+import { registerRecognition } from './routes/recognition.js';
 import { registerPokeLedger } from './routes/pokeLedger.js';
 import { registerPokes } from './routes/pokes.js';
 import { registerSafety } from './routes/safety.js';
@@ -185,6 +186,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(async (r) => registerImHere(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerAttendance(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerScore(r, config.DATABASE_URL), { prefix: '/v1' });
+  await app.register(async (r) => registerRecognition(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerPokeLedger(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerPokes(r, config.DATABASE_URL), { prefix: '/v1' });
   await app.register(async (r) => registerSafety(r, config.DATABASE_URL), { prefix: '/v1' });

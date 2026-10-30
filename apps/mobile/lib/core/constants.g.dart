@@ -52,7 +52,7 @@ class Sort {
 
 class Spots {
   static const confirmWindowHours = 48;
-  static const bailGraceHours = 24;
+  static const bailGraceHours = undefined;
   static const rollCallWindowHours = 24;
   static const peerReportThreshold = 2;
   static const forgivenessWindowHours = 48;

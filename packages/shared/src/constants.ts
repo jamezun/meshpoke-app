@@ -77,7 +77,9 @@ export const TIE_BREAK = 'fifo' as const;
 // ── Spots & trust ───────────────────────────────────────────────
 export const SPOT_RULES = {
   confirmWindowHours: 48, // members confirm after date pin, else auto-dissolve
-  bailGraceHours: 24, // free bail before event start
+  bailFreeHours: 48, // free bail >48h before start (Reliability 2.0 graduated ladder)
+  bailPoints48to24: 0.75, // bail 24–48h before start
+  bailPointsUnder24: 0.5, // bail <24h before start; no-show = 0
   rollCallWindowHours: 24,
   peerReportThreshold: 2, // peer cross-reports trigger no-show record
   forgivenessWindowHours: 48, // member explains; creator accepts → voided
@@ -88,8 +90,27 @@ export const SPOT_RULES = {
 } as const;
 
 export const SCORE_RULES = {
-  unprovenThresholdEvents: 3, // below → "unproven"
-  decayDays: 90,
+  unprovenThresholdEvents: 3, // below → "New" chip (no % shown)
+  decayDays: 90, // rolling window
+  priorWeight: 3, // Bayesian prior: m pseudo-events
+  priorScore: 0.5, // prior mean — neutral start
+  // event POINTS (not deltas): show=1, late bail tiers, no-show=0
+  points: { show: 1, bail48to24: 0.75, bailUnder24: 0.5, noShow: 0, hostCancelBase: 0.2, hostCancelForgiven: 0.8 } as Record<string, number>,
+  reliableMinEvents: 3, reliableMinScore: 0.6, // "Reliable" tier
+  rockMinEvents: 6, rockMinScore: 0.85, // "Rock" tier → hosting 5
+  enforcement: {
+    warningNoShows30d: 1,
+    cooldownNoShows30d: 2, cooldownDays: 7, // applications blocked; open spots still joinable
+    cooldownScoreBelow: 0.4, cooldownScoreMinEvents: 3, // rate-gates only with history
+    pausedNoShows30d: 3, pausedDays: 14, // no join/apply/host/drops/coupons/memberships
+    pausedScoreBelow: 0.3,
+    hostCancelPausedCount30d: 2, // host cancels <24h out
+    hostGhostPauseDays: 7,
+    apologyWindowHours: 72,
+  },
+  conduct: { cleanResetDays: 30, appealPerDays: 30 },
+  streaks: { heartDailyLimit: 5, flairAt: [10, 50, 100] },
+  regularBadge: { minVisits: 3, windowDays: 60 },
 } as const;
 
 // ── Merchants ───────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { Pool, type PoolClient } from 'pg';
 import { z } from 'zod';
 import { MERCHANT_PER_SEAT_BANDS } from '@meshpoke/shared/constants';
 import { getDb } from '../db/client.js';
+import { enforcementState } from './score.js';
 
 const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
 const TIER_DROPS = { starter: { active: 1, perWeek: 1 }, growth: { active: 3, perWeek: 3 }, pro: { active: Infinity, perWeek: Infinity } } as const;
@@ -169,6 +170,8 @@ export function registerDrops(app: FastifyInstance, dbUrl: string, redisUrl: str
     // phone-verified gate
     const u = rows(await db.execute(sql`select phone_verified_at is not null as ok from users where id = ${me}::uuid`));
     if (!u[0]?.ok) return reply.code(403).send({ title: 'Phone verification required' });
+    const en = await enforcementState(db, me);
+    if (en.action === 'hosting_paused') return reply.code(403).send({ title: 'Participation paused', detail: en.reason });
 
     // row-lock capacity + exactly-once claim (unique index + FOR UPDATE)
     const pool = new Pool({ connectionString: dbUrl });
