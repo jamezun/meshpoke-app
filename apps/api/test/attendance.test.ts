@@ -50,6 +50,15 @@ async function mkLiveSpot(): Promise<string> {
   return spotId;
 }
 
+/** make a spot reward-eligible: GPS-tapped attendance (≥50%) + a real rating */
+async function qualify(spotId: string): Promise<void> {
+  for (const n of ['host', 'a', 'b']) {
+    await pool.query(`insert into attendance (spot_id, user_id, status, verified_gps) values ($1, $2, 'attended', true)
+      on conflict (spot_id, user_id) do update set verified_gps = true`, [spotId, users[n].id]);
+  }
+  await pool.query(`insert into safety_ratings (spot_id, rater_id, rated_user_id, rating) values ($1, $2, $3, 5)`, [spotId, users.a!.id, users.host!.id]);
+}
+
 beforeAll(async () => {
   const i = await infra;
   app = await buildApp({ config: {
@@ -134,7 +143,7 @@ test('roll-call defaults attended; host absence flips b; 1 peer report no effect
 
   // T21.3: host-reward Pro days
   it('T21.3 grants 2d pro on qualifying finalise, caps at 7d/30d', async () => {
-    const sid = await mkLiveSpot();
+    const sid = await mkLiveSpot(); await qualify(sid);
     const f = await app.inject({ method: 'POST', url: `/v1/spots/${sid}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
     expect(f.statusCode).toBe(200);
     expect(f.json().hostReward).toContain('granted 2 pro days');
@@ -142,15 +151,42 @@ test('roll-call defaults attended; host absence flips b; 1 peer report no effect
     expect(g.rowCount).toBe(1);
     const e = await pool.query(`select plan from entitlements where user_id = $1`, [users.host!.id]);
     expect(e.rows[0].plan).toBe('pro');
-    const sid2 = await mkLiveSpot();
+    const sid2 = await mkLiveSpot(); await qualify(sid2);
     const f2 = await app.inject({ method: 'POST', url: `/v1/spots/${sid2}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
     expect(f2.json().hostReward).toContain('granted 2 pro days');
     for (let k = 0; k < 3; k++) {
       await pool.query(`insert into grants (user_id, kind, starts_at, ends_at) values ($1, 'host_reward_pro', now(), now() + interval '1 day')`, [users.host!.id]);
     }
-    const sid3 = await mkLiveSpot();
+    const sid3 = await mkLiveSpot(); await qualify(sid3);
     const f3 = await app.inject({ method: 'POST', url: `/v1/spots/${sid3}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
     expect(f3.json().hostReward).toContain('capped');
+  });
+
+  it('B3 GPS tap overrides peer reports; B4 no roll-call → only GPS-tapped attendance scores', async () => {
+    const sid = await mkLiveSpot();
+    await pool.query(`insert into attendance (spot_id, user_id, status, verified_gps) values ($1, $2, 'attended', true)`, [sid, users.c!.id]);
+    for (const n of ['a', 'b']) {
+      await app.inject({ method: 'POST', url: `/v1/spots/${sid}/report-absent`, headers: { authorization: `Bearer ${users[n].tok}` }, payload: { userId: users.c!.id } });
+    }
+    const st = await pool.query(`select status from attendance where spot_id = $1 and user_id = $2`, [sid, users.c!.id]);
+    expect(st.rows[0].status).toBe('attended'); // 2 reports can't beat a GPS tap
+    await app.inject({ method: 'POST', url: `/v1/spots/${sid}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } });
+    const ev = await pool.query(`select user_id from score_events where spot_id = $1 and type = 'attended'`, [sid]);
+    expect(ev.rows.map((r) => r.user_id)).toEqual([users.c!.id]); // host skipped roll-call: unverified a/b don't score
+  });
+
+  it('B1 anti-farming: no reward without ratings, without GPS, or when every attendee is already connected', async () => {
+    const fin = async (sid: string) => (await app.inject({ method: 'POST', url: `/v1/spots/${sid}/finalise`, headers: { authorization: `Bearer ${users.admin.tok}` } })).json().hostReward;
+    expect(await fin(await mkLiveSpot())).toBeNull(); // default-attended, no GPS, no ratings
+    const s2 = await mkLiveSpot(); await qualify(s2);
+    await pool.query(`delete from safety_ratings where spot_id = $1`, [s2]);
+    expect(await fin(s2)).toBeNull(); // no ratings
+    const s3 = await mkLiveSpot(); await qualify(s3);
+    for (const n of ['a', 'b', 'c']) {
+      await pool.query(`insert into connections (user_a, user_b) values ($1, $2)`, [users.host!.id, users[n].id]);
+    }
+    expect(await fin(s3)).toBeNull(); // friends-only table
+    await pool.query(`delete from connections where user_a = $1`, [users.host!.id]);
   });
 
   it('T21.3 no reward when attendance ratio < 80%', async () => {

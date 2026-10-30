@@ -9,7 +9,7 @@
 1. Recommended sort = `0.2·tier + 0.5·vibe + 0.3·score` (additive) for application queues **and** poke inbox; absolute tier ordering removed everywhere.
 2. Drops and per-seat fees ship in **Phase 1**; founding-merchant free Growth clock starts when drops go live.
 3. Photo reveal rules rewritten per spot type (§3.1).
-4. Founding monthly pricing available on web **and** in-app; founding annual is web-only.
+4. Founding monthly and founding annual available on web **and** in-app (IAP annual HK$1,028 / 1,698).
 5. Pokes: Monday 00:00 HKT reset, no refund on expiry, no Accept button — **"Poke back · Free"**.
 6. Three billable merchant events: individual drop seat, group drop seat, new-member attribution visit (first 3 visits within 60 days).
 7. Separate caps per room type (event / chat room / merchant spot / crew).
@@ -255,17 +255,17 @@ Implemented once in the backend and surfaced in all clients. Section numbers ref
 **Event spot attendance (no QR):**
 1. At `live → done`, every confirmed member gets `attendance.status = attended` (default), `verified_gps = true` if they tapped "I'm here".
 2. **Host roll-call** (available for 24h after done): host can untick members → `absent_host`.
-3. **Peer reports** (24h window): any attendee can report another as absent; at **≥2 distinct reporters** → `absent_reported`.
+3. **Peer reports** (24h window): any attendee can report another as absent; at **≥ max(2, ⌈group/3⌉) distinct reporters** → `absent_reported`, unless the subject has `verified_gps` (GPS tap overrides reports). If the host never runs roll-call (`spots.roll_call_at` null), default-`attended` rows without `verified_gps` emit **no** score event.
 4. A member marked absent can submit a **flake-forgiveness** explanation within 48h → host accepts → `forgiven` (counts for photo reveal; **erased from the score** — no event; logged privately).
 5. Attendance finalises at done + 24h (pg-boss job); score events are emitted then. People-you-met opens at `done` for members still `attended`, and closes for anyone later marked absent.
 
 **Merchant check-ins (QR):** used for drop redemption, group drops and member visits — see §3.9.
 
 **Show-up Score — Reliability 2.0 (Bayesian rate, see BM §5.3 for worked examples):**
-- `score = (Σpoints + 3·0.5) / (n + 3)` over a rolling 90-day window; `score_events.weight` stores each outcome's point value (show 1.0 · bail 24–48h 0.75 · bail <24h 0.5 · no-show 0 · host_cancel 0.2–0.8 finalised by apology responses · host_ghost 0 · reschedule_reject 0.75). `forgiven` emits **no** event (erased).
-- Tiers: **New** (n<3, chip only) · **Reliable** (n≥3 & ≥60%) · **Rock** (n≥6 & ≥85%) → hosting capacity 1/3/5 (earned, never purchasable).
+- `score = (Σpoints + 3·0.5) / (n + 3)` over the last 20 events within 12 months (`SCORE_RULES.windowMaxEvents` / `decayDays 365`); `score_events.weight` stores each outcome's point value (show 1.0 · bail 24–48h 0.75 · bail <24h 0.5 · no-show 0 · host_cancel 0.2–0.8 finalised by apology responses · host_ghost 0 · reschedule_reject 0.75). `forgiven` emits **no** event (erased).
+- Tiers: **New** (n<3, chip only) · **Reliable** (n≥3 & ≥60%) · **Rock** (n≥7 & ≥85%) → hosting capacity 1/3/5 (earned, never purchasable).
 - Enforcement (counts axis, single source `enforcementState`): 1 NS/30d warning · 2 NS/30d or score<40% (n≥3 only) → 7d application cooldown (open-join still allowed) · 3 NS/30d or score<30% → 14d pause (blocks join/apply/host/claim/redeem/membership) · host: 2 late cancels/30d or ghost → hosting pause. Self-clearing.
-- **Host accountability:** cancel → auto-apology, members tap It's-fine/Not-ok within 72h (silence neutral) → weight 0.2+0.6·forgiven-share; reschedule consent (>48h free; ≤48h unanimous by start−4h or rejected + 0.75 tap, spot keeps time); **handover** (nominate/broadcast, first accepter inherits; expires → dissolve as host cancel; forming free).
+- **Host accountability:** cancel → auto-apology, members tap It's-fine/Not-ok within 72h (silence neutral) → weight 0.2+0.6·forgiven-share; reschedule consent (>48h free; ≤48h majority by start−4h — applies when yes > ½ members, rejects once no ≥ ½ or deadline passes (+0.75 host tap, spot keeps time); outvoted rejecters bail free); **handover** (nominate/broadcast, first accepter inherits; expires → dissolve as host cancel; forming free).
 - **Two ledgers:** score = attendance reliability; conduct chip (Clean/Muted/Suspended, 30d clean reset, free appeal 1/30d) = behaviour. Never mixed.
 - **Recognition (score-neutral):** streak chip (consecutive attended HKT weeks), hearts 5/day (flair 10/50/100), Venue Regular badge (3+ visits/60d) — see §3.9.
 - **Symmetry:** host last-minute cancel → score event on host + auto-apology message to members.
@@ -570,7 +570,8 @@ Trigger-gated: scam reports rising or sign-ups > a few hundred/month. Vendor SDK
 | 7-day pass (web / IAP) | — | 58 / 68 | 98 / 108 |
 | 3-mo, 6-mo (web / IAP) | — | 288, 488 / 328, 558 | 488, 788 / 558, 898 |
 | Founding monthly (first 500; web / IAP) | — | 88 / 98 | 148 / 168 |
-| Founding annual (web only) | — | 888 | 1,488 |
+| Founding annual (web / IAP) | — | 888 / 1,028 | 1,488 / 1,698 |
+| Annual, non-founding, at density (web / IAP) | — | 948 / 1,088 | 1,548 / 1,788 |
 | Event spots | 3 | 5 | 10 |
 | Chat room spots | 5 | 10 | 20 |
 | Merchant spots | 10 | 30 | Unlimited |
@@ -585,14 +586,14 @@ Trigger-gated: scam reports rising or sign-ups > a few hundred/month. Vendor SDK
 | Auto-claim drops (saved venues) | — | 1/wk | 3/wk |
 | Hosting capacity | 1→3→5 by Show-up Score | same | same |
 
-Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48 / 98); 7-day filter pass HK$18 (IAP 28). Referral pokes per §3.4. Host-reward Pro days (2 per qualifying spot, max 7/month, expire 60 days) — Phase 3.
+Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48 / 98); 7-day filter pass HK$18 (IAP 28). Referral pokes per §3.4. Host-reward Pro days (2 per qualifying spot, max 7/month, expire 60 days) — Phase 3. Qualifying (`SCORE_RULES.hostReward`): ≥4 attended and ≥ min headcount, ≥80% attendance, ≥50% GPS-tapped, ≥1 rating with avg ≥4, ≥1 attendee not already connected to the host.
 
 **Entitlement source of truth:** RevenueCat (IAP) + Stripe Billing (web) → webhooks → `entitlements` service. Highest active plan wins; passes and host-reward days are time-boxed grants; packs and referral pokes are ledger credits. Founding counter = first 500 founding purchases across both channels (atomic counter); founding price locked while the subscription stays active.
 
 ### 8.2 Dual-Channel Pricing Rules
 
 1. In-app purchase always offered (RevenueCat) at IAP price points.
-2. Web checkout (Stripe) at web prices; founding annual and coupon codes web only.
+2. Web checkout (Stripe) at web prices; coupon codes web only; founding annual sold on both channels.
 3. **Never mention web prices inside the app** — no copy, links or hints.
 4. Receipt emails state plan, price, renewal date, cancel URL. Instant cancel. No personalised offers.
 5. **Apple Small Business Program** enrolled before the first paid release; Google 15% subscription rate applies by default.
@@ -620,7 +621,7 @@ Packs (no subscription): 5 pokes HK$38 / 15 pokes HK$88 (IAP 48 / 98); 7-day fil
 | **Spots** | Event spot state machine, date-on-fill timers, headcount + overbook, waitlist backfill, hosting capacity, templates, chat room spots, cap enforcement (§3.10) |
 | **Applications** | Queue per spot, hard filters, Recommended sort (flag weights), accept/decline + reason, counts |
 | **Attendance** | "I'm here" GPS, default-attended at done, roll-call, peer reports (≥2), forgiveness, finalisation job, score events, People-you-met window |
-| **Score** | Show-up Score computation, unproven state, 90-day decay, enforcement ladder, host-cancel symmetry |
+| **Score** | Show-up Score computation, unproven state, last-20-events/12-month window, enforcement ladder, host-cancel symmetry |
 | **Poke/Connection** | Weekly allowance (lazy Monday reset), pack/referral credits, 7-day expiry (no refund), poke back (free, creates connection), post-spot free pokes, connections, disconnect |
 | **Chat** | Event spot rooms, chat rooms, crew chats, DMs over WS; read-only for unverified; link lock; scam filter; room decay; 60-day crew dormancy |
 | **Crews** | Spawn on done, keep/leave, rebook with date poll, open seats |
@@ -791,7 +792,7 @@ audit_log(id, actor_id, action, target, meta jsonb, created_at)
 | Spot confirm-deadline (48h dissolve), live/done transitions | Every minute |
 | Attendance finalisation (done + 24h) → score events, referral rewards | Every 15 min |
 | People-you-met window close (48h) | Hourly |
-| Score recompute + 90-day decay | Nightly |
+| Score recompute (last 20 events / 12 months) | Nightly |
 | Room decay (~2 weeks after done), crew dormancy (60d) | Nightly |
 | Membership level inactivity decay, release (60d no visit), attribution window expiry | Nightly |
 | Founding clock: shadow → live seats (month 2), guarantee check + extension (end of month 3), Growth start (month 4) | Nightly |
@@ -1006,6 +1007,7 @@ GET  /me/subscriptions   POST /billing/portal   → Stripe customer portal
 | 26 Oct 2026 | Drops + per-seat fees in Phase 1; founding Growth clock starts at drop go-live |
 | 26 Oct 2026 | Photo rules: chat rooms on join (opt-out), event spots after done for attendees, full profile on mutual poke |
 | 26 Oct 2026 | Founding monthly on web + in-app; founding annual web only |
+| 31 Oct 2026 | Founding annual on both channels; list annual raised to 948 / 1,548 (was below founding); score window → last 20 events / 12 months; Rock n≥7; host-reward anti-farming gates; peer-report threshold scales + GPS override; no roll-call → no unverified credit; reschedule by majority |
 | 26 Oct 2026 | Monday 00:00 HKT reset; no refund; "Poke back · Free"; no Accept button |
 | 26 Oct 2026 | Billable events: drop seat, group drop seat, new-member visits (first 3 in 60 days) |
 | 26 Oct 2026 | Caps per room type: event 3/5/10, chat 5/10/20, merchant 10/30/∞, crews 3/10/∞ |

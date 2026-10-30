@@ -46,7 +46,7 @@ export function registerCheckout(app: FastifyInstance, dbUrl: string, config: Co
     if (!p) return reply.code(422).send({ title: 'Unknown product' });
     if (p.priceWebHkd === null) return reply.code(422).send({ title: 'Not sold on web' });
 
-    // founding annual is web-only; founding monthly available until slots run out
+    // founding monthly + annual (both channels) available until slots run out
     const founding = productId?.includes('founding');
     let foundingReservation: string | null = null;
     if (founding) {

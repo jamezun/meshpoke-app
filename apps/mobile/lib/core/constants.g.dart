@@ -66,7 +66,7 @@ class Spots {
 
 class Score {
   static const unprovenThresholdEvents = 3;
-  static const decayDays = 90;
+  static const decayDays = 365;
 }
 
 class MerchantBands {

@@ -118,8 +118,8 @@ List prices start high (HK$128 Plus, HK$198 Pro) because lowering later reads as
 | **3-month** | — | HK$288 (≈96/mo) | HK$488 (≈163/mo) |
 | **6-month** | — | HK$488 (≈81/mo) | HK$788 (≈131/mo) |
 | **Founding monthly** (first 500, locked while continuously subscribed) | — | **HK$88/mo** | **HK$148/mo** |
-| **Founding annual** (web only, within the founding 500) | — | **HK$888/yr** (≈74/mo) | **HK$1,488/yr** (≈124/mo) |
-| Annual (non-founding) | — | Added at density (~788/yr) | Added at density (~1,288/yr) |
+| **Founding annual** (web + in-app, within the founding 500) | — | **HK$888/yr** (≈74/mo) | **HK$1,488/yr** (≈124/mo) |
+| Annual (non-founding) | — | Added at density (**HK$948/yr**, ≈79/mo) | Added at density (**HK$1,548/yr**, ≈129/mo) |
 | Map, sketches, browsing | Unlimited | Unlimited | Unlimited |
 | **Event spots** (active RSVPs; the spot's chat comes with it) | **3** | **5** | **10** |
 | **Chat room spots** (standing / community rooms) | **5** | **10** | **20** |
@@ -168,13 +168,15 @@ Follows the TradingView model: plans can be bought on the MeshPoke website or in
 | Plus 3-month / 6-month | HK$288 / 488 | HK$328 / 558 |
 | Pro 3-month / 6-month | HK$488 / 788 | HK$558 / 898 |
 | Founding Plus / Pro monthly | HK$88 / 148 | HK$98 / 168 |
-| Founding Plus / Pro annual | HK$888 / 1,488 | — (web only) |
+| Founding Plus / Pro annual | HK$888 / 1,488 | HK$1,028 / 1,698 |
+| Plus / Pro annual (non-founding, at density) | HK$948 / 1,548 | HK$1,088 / 1,788 |
 | 5 / 15 pokes | HK$38 / 88 | HK$48 / 98 |
 | 7-day filter pass | HK$18 | HK$28 |
 
 Rules:
 - In-app purchase is always offered in the apps (HK is in Apple's in-app-only group); in-app prices are set so the net after store fees ≈ the web net.
-- **Founding monthly pricing is available on both web and in-app.** Founding annual and coupon codes are web only.
+- **Founding monthly and annual are sold on both web and in-app**, so the in-app paywall can sell an annual plan (most buyers never visit the website). Coupon codes stay web only.
+- **Price ladder rule:** per month, annual < 6-month < 3-month < monthly on every channel, and founding annual < list annual. (The earlier list annual of HK$788 undercut the founding HK$888 — a promise-breaker for the founding 500 — so it was raised to HK$948.)
 - **The app never mentions or links to the cheaper web price.** Web pricing is promoted outside the app: website, Instagram, WhatsApp, merchant QR standees.
 - Merchant SaaS and per-seat fees are billed on the web only.
 - **Enrol in the Apple App Store Small Business Program** (15% commission instead of 30% while under US$1M/yr) before the first paid launch. Google Play charges 15% on subscriptions by default.
@@ -221,7 +223,8 @@ Creator-admin (democratised Timeleft ops):
 
 **Attendance for event spots (low friction, no QR):**
 - Every confirmed member is **marked attended by default** when the event ends.
-- A member is recorded as a **no-show** if the **host marks them absent** in the end-of-event roll-call, **or 2+ other attendees report them absent** (within 24h of the event).
+- A member is recorded as a **no-show** if the **host marks them absent** in the end-of-event roll-call, **or enough other attendees report them absent** (within 24h): at least 2 and at least ⅓ of the group, so two people can't gang up on a third. A GPS "I'm here" tap overrides peer reports.
+- **No roll-call, no unverified credit:** if the host skips roll-call, default-attended members without a GPS tap get no score event from that spot (peer-reported no-shows still count). This stops lazy hosts from inflating everyone's score.
 - An optional **"I'm here" GPS tap** during the event gives a verified-attendance badge (GPS accepted when the location's accuracy radius overlaps the venue).
 - Disputes go through flake forgiveness (below).
 
@@ -229,7 +232,7 @@ Creator-admin (democratised Timeleft ops):
 
 **Show-up Score — Reliability 2.0 (Bayesian):**
 
-> **Score = (Σpoints + 3 × 0.5) / (n + 3)** over a rolling **90-day** window, where each finalised outcome contributes its point value and every account starts with a neutral prior (m = 3 pseudo-events at 0.5). A no-show costs the same whether you're new or a veteran — but one bad night never sinks a strong record, and ten clean events don't launder away a habit.
+> **Score = (Σpoints + 3 × 0.5) / (n + 3)** over the **last 20 finalised events within 12 months**, where each finalised outcome contributes its point value and every account starts with a neutral prior (m = 3 pseudo-events at 0.5). A no-show costs the same whether you're new or a veteran — but one bad night never sinks a strong record, and ten clean events don't launder away a habit. The window is counted in events, not days: a three-month holiday no longer resets a Rock member to New.
 
 **Point values (per finalised outcome):**
 
@@ -239,15 +242,15 @@ Creator-admin (democratised Timeleft ops):
 | Bailed 24–48h before | **0.75** |
 | Bailed <24h before | **0.5** |
 | No-show | **0** |
-| Host cancelled (finalised by apology responses) | **0.2–0.8** (silence = 0.5) |
+| Host cancelled (finalised by apology responses) | **0.2–0.8** (silent members excluded; all silent = 0.5) |
 | Host ghosted own confirmed spot | **0** + automatic 7-day hosting pause |
 | Reschedule proposal rejected | **0.75** (tap, not a crush — spot keeps its time) |
 
-- **Tiers:** **New** (n < 3 — chip only, no percentage shown) · **Reliable** (n ≥ 3, score ≥ 60%) · **Rock** (n ≥ 6, score ≥ 85%) → hosting capacity 1 → 3 → 5. Earned, never purchasable.
+- **Tiers:** **New** (n < 3 — chip only, no percentage shown) · **Reliable** (n ≥ 3, score ≥ 60%) · **Rock** (n ≥ 7, score ≥ 85% — seven perfect events is the minimum that reaches 85%) → hosting capacity 1 → 3 → 5. Earned, never purchasable.
 - **Why Bayesian:** the old capped-additive model diluted — 10 shows + 1 no-show ranked the same as 100 shows + 1 no-show. The rate model fixes that: 10+1 ≈ 82%, 100+1 ≈ 98%. The prior m = 3 means a first no-show floors a new user at 37.5% (visible but recoverable in ~3 events) and time-to-Reliable is 7 events, not 23.
 - **Enforcement (counts axis — catches bursts that rates miss):** 1 no-show/30d = warning banner; 2 no-shows/30d **or** score <40% (only with n ≥ 3) = 7-day **application cooldown** (open spots still joinable — you can still show up, just not book ahead); 3 no-shows/30d **or** score <30% = 14-day **pause** (no join/apply/host/drops/coupons/new memberships; existing rooms stay readable). Hosts: 2 late host-cancels/30d or one ghost = hosting pause. Self-clearing rolling windows — no admin unban path needed.
 - **Flake forgiveness (unchanged):** member explains within 48h → creator accepts → **erased**, not counted (private log only). No cap in v1.
-- **Host accountability:** cancel posts an auto-apology; each member taps **It's fine / Not ok** within 72h (silence = neutral, excluded — never counted against the host). Final weight = 0.2 + 0.6 × forgiven share. Hosts can also **reschedule with consent** (>48h out free; ≤48h needs every member to accept by start−4h, else the spot keeps its time and the host takes a 0.75 tap) and **hand over the spot** (nominate or broadcast; first accepting member inherits hosting; if nobody takes it before start, the spot dissolves as a host cancel — stepping down is free, abandoning is not).
+- **Host accountability:** cancel posts an auto-apology; each member taps **It's fine / Not ok** within 72h (silence = neutral, excluded — never counted against the host). Final weight = 0.2 + 0.6 × forgiven share. Hosts can also **reschedule with consent** (>48h out free; ≤48h needs a **majority** of members to accept by start−4h; outvoted members may leave free; if a majority becomes impossible or the deadline passes, the spot keeps its time and the host takes a 0.75 tap — one member can't veto alone) and **hand over the spot** (nominate or broadcast; first accepting member inherits hosting; if nobody takes it before start, the spot dissolves as a host cancel — stepping down is free, abandoning is not).
 - **Two ledgers:** Show-up Score = reliability of *physical attendance*. Conduct (Clean/Muted/Suspended chip, no number, 30-day clean reset) = behaviour. One never touches the other. Appeals are **free** (1 per 30d, admin-reviewed) — pay-to-appeal is a dark pattern we will never ship.
 - **Recognition (cosmetic, score-neutral):** 🔥 weekly-attendance streak chip; ❤️ hearts 5/day as reactions (flair at 10/50/100 received); 📍 **Venue Regular** badge at 3+ verified visits to one venue in 60d — the merchant flywheel's user-side engine. Rewards pay in privileges (hosting capacity, Rock-first queue sort), never points.
 - **No deposits.** Date-on-fill prevents shrinkage instead of compensating it.
@@ -260,14 +263,14 @@ Creator-admin (democratised Timeleft ops):
 | 1 show | 1 | 1.0 | (1+1.5)/4 = **62.5%** | New |
 | 3 shows | 3 | 3.0 | (3+1.5)/6 = **75%** | Reliable ✓ |
 | 7 shows | 7 | 7.0 | 8.5/10 = **85%** | Rock ✓ |
-| …then bails 30h out | 8 | 7.75 | 9.25/11 = **84%** | Rock (barely) |
-| …then bails 10h out | 9 | 8.25 | 9.75/12 = **81%** | Rock |
-| …then no-shows | 10 | 8.25 | 9.75/13 = **75%** | Rock, warning banner |
+| …then bails 30h out | 8 | 7.75 | 9.25/11 = **84%** | Reliable (just under Rock's 85%) |
+| …then bails 10h out | 9 | 8.25 | 9.75/12 = **81%** | Reliable |
+| …then no-shows | 10 | 8.25 | 9.75/13 = **75%** | Reliable, warning banner |
 | …explains, host forgives | — | — | erased | back to 81% |
 | (dark path) 2nd no-show | 11 | 8.25 | 9.75/14 = **70%** | cooldown 7d |
 | 3rd no-show | 12 | 8.25 | 9.75/15 = **65%** | paused 14d |
 
-**Worked examples (Ho, host):** clean ×6 → 85% Rock. Cancels a 6-member spot 10h out; 4 members tap *It's fine*, 1 taps *Not ok*, 1 silent → weight 0.2+0.6×(4/5) = 0.68 → score 75%. Same cancel with 5/6 forgiving (83% share) → 0.7 → 80%. Ghosts instead → 0-point event + 7-day hosting pause. Hands over instead of cancelling → stays at 85%.
+**Worked examples (Ho, host):** clean ×7 → 8.5/10 = **85% Rock**. Cancels a 6-member spot 10h out; 4 members tap *It's fine*, 1 taps *Not ok*, 1 silent (excluded) → weight 0.2+0.6×(4/5) = 0.68 → 9.18/11 = **83.5%**, Reliable; two more clean hosts → 11.18/13 = **86%**, Rock again. Same cancel with 5/6 forgiving → 0.70 → **83.6%**. If every member stays silent the weight is the neutral 0.5. Ghosts instead → 0-point event, 8.5/11 = **77%** + 7-day hosting pause. Hands over instead of cancelling → stays at **85%**.
 
 ### 5.4 Pokes and post-spot pokes
 
@@ -318,7 +321,7 @@ Crews can link a WhatsApp group, but date polls, venue perks, attendance streaks
 
 ### 5.7 Host rewards
 
-- **2 days of Pro per qualifying spot hosted.** Qualifying = reached min headcount, ≥80% of confirmed members marked attended, average rating ≥4 stars.
+- **2 days of Pro per qualifying spot hosted.** Qualifying = **≥4 attendees** (and ≥ min headcount), ≥80% of confirmed members attended, **≥50% of attendees GPS-tapped "I'm here"**, **at least one rating exists** with an average ≥4 stars, and **at least one attendee wasn't already connected to the host**. These gates stop a host and a friend farming free Pro with a pretend two-person spot.
 - **Cap: 7 Pro days per month.** Earned days expire after 60 days.
 - Optional merchant-funded host perks (e.g. a free drink for the host at the venue) — zero cost to MeshPoke.
 

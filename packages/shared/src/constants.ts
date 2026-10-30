@@ -46,13 +46,13 @@ export const TIER_CAPS: Record<
 // ── Consumer prices (HKD) ───────────────────────────────────────
 // web = Stripe checkout price; iap = App/Play (RevenueCat) price. Never show web prices in-app.
 export const PRICES = {
-  plus: { web: { monthly: 128, pass7d: 58, term3mo: 288, term6mo: 488, annual: 788, foundingMonthly: 88, foundingAnnual: 888 }, iap: { monthly: 148, pass7d: 68, term3mo: 328, term6mo: 558, annual: 888, foundingMonthly: 98 } },
-  pro: { web: { monthly: 198, pass7d: 98, term3mo: 488, term6mo: 788, annual: 1288, foundingMonthly: 148, foundingAnnual: 1488 }, iap: { monthly: 228, pass7d: 108, term3mo: 558, term6mo: 898, annual: 1388, foundingMonthly: 168 } },
+  plus: { web: { monthly: 128, pass7d: 58, term3mo: 288, term6mo: 488, annual: 948, foundingMonthly: 88, foundingAnnual: 888 }, iap: { monthly: 148, pass7d: 68, term3mo: 328, term6mo: 558, annual: 1088, foundingMonthly: 98, foundingAnnual: 1028 } },
+  pro: { web: { monthly: 198, pass7d: 98, term3mo: 488, term6mo: 788, annual: 1548, foundingMonthly: 148, foundingAnnual: 1488 }, iap: { monthly: 228, pass7d: 108, term3mo: 558, term6mo: 898, annual: 1788, foundingMonthly: 168, foundingAnnual: 1698 } },
   pokePack5: { web: 38, iap: 48 },
   pokePack15: { web: 88, iap: 98 },
   filterPass7d: { web: 18, iap: 28 }, // standalone pass (Free tier); included in Plus/Pro
   foundingSlots: 500,
-  foundingAnnualWebOnly: true,
+  foundingAnnualWebOnly: false, // annual sold on both channels; IAP ≈ web net after store fee
 } as const;
 
 export const FOUNDING_SLOTS = 500;
@@ -91,13 +91,14 @@ export const SPOT_RULES = {
 
 export const SCORE_RULES = {
   unprovenThresholdEvents: 3, // below → "New" chip (no % shown)
-  decayDays: 90, // rolling window
+  decayDays: 365, // window: last windowMaxEvents events within 12 months (a holiday never resets a record)
+  windowMaxEvents: 20,
   priorWeight: 3, // Bayesian prior: m pseudo-events
   priorScore: 0.5, // prior mean — neutral start
   // event POINTS (not deltas): show=1, late bail tiers, no-show=0
   points: { show: 1, bail48to24: 0.75, bailUnder24: 0.5, noShow: 0, hostCancelBase: 0.2, hostCancelForgiven: 0.8 } as Record<string, number>,
   reliableMinEvents: 3, reliableMinScore: 0.6, // "Reliable" tier
-  rockMinEvents: 6, rockMinScore: 0.85, // "Rock" tier → hosting 5
+  rockMinEvents: 7, rockMinScore: 0.85, // "Rock" tier → hosting 5
   enforcement: {
     warningNoShows30d: 1,
     cooldownNoShows30d: 2, cooldownDays: 7, // applications blocked; open spots still joinable
@@ -111,6 +112,8 @@ export const SCORE_RULES = {
   conduct: { cleanResetDays: 30, appealPerDays: 30 },
   streaks: { heartDailyLimit: 5, flairAt: [10, 50, 100] },
   regularBadge: { minVisits: 3, windowDays: 60 },
+  // host reward anti-farming: real group, mostly GPS-verified, rated, ≥1 attendee not already connected to host
+  hostReward: { minAttended: 4, minGpsShare: 0.5, minRating: 4, days: 2, capDays30d: 7 },
 } as const;
 
 // ── Merchants ───────────────────────────────────────────────────

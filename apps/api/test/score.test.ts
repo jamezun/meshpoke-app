@@ -36,8 +36,13 @@ describe('computeScore unit (Bayesian)', () => {
     const small = computeScore([...Array(10).fill(1).map((weight) => ({ weight, createdAt: daysAgo(1) })), { weight: 0, createdAt: daysAgo(2) }]);
     expect(small.score).toBeCloseTo((10 + 1.5) / 14, 2);
   });
-  test('window: >90d events excluded entirely', () => {
-    expect(computeScore([{ weight: 1, createdAt: daysAgo(100) }]).eventsCount).toBe(0);
+  test('window: last 20 events within 12 months — a 3-month holiday keeps the record', () => {
+    expect(computeScore([{ weight: 1, createdAt: daysAgo(100) }]).eventsCount).toBe(1);
+    expect(computeScore([{ weight: 1, createdAt: daysAgo(400) }]).eventsCount).toBe(0);
+    const many = Array.from({ length: 25 }, (_, i) => ({ weight: i < 5 ? 0 : 1, createdAt: daysAgo(i < 5 ? 200 : i) }));
+    const r = computeScore(many); // 5 old no-shows fall outside the newest 20
+    expect(r.eventsCount).toBe(20);
+    expect(r.score).toBeCloseTo(21.5 / 23, 3);
   });
 });
 
@@ -83,11 +88,12 @@ describe.skip('legacy unit (superseded by Bayesian)', () => {
 });
 
 describe('proven state + capacity', () => {
-  test('unproven until 3 events; proven at 0.6/3; top at 0.85/6', () => {
+  test('unproven until 3 events; proven at 0.6/3; top at 0.85/7', () => {
     expect(provenStateFor(0.9, 2)).toBe('unproven');
     expect(provenStateFor(0.6, 3)).toBe('proven');
     expect(provenStateFor(0.85, 5)).toBe('proven');
-    expect(provenStateFor(0.85, 6)).toBe('top');
+    expect(provenStateFor(0.85, 6)).toBe('proven');
+    expect(provenStateFor(0.85, 7)).toBe('top'); // 7 perfect events = (7+1.5)/10 = 85%
     expect(provenStateFor(0.59, 10)).toBe('unproven'); // low score stays unproven
   });
   test('capacity 1→3→5', () => {

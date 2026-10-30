@@ -5,7 +5,7 @@ import { getDb } from '../db/client.js';
 import { referralOnFirstAttendance } from './referrals.js';
 import { notify } from '../notify.js';
 import { recomputeEntitlement } from '../billing/consumer.js';
-import { SPOT_RULES } from '@meshpoke/shared';
+import { SPOT_RULES, SCORE_RULES } from '@meshpoke/shared';
 
 /**
  * T10.2 attendance lifecycle: roll-call, peer absent reports, forgiveness,
@@ -16,7 +16,7 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
   const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
 
   const getSpot = async (id: string) =>
-    rows(await db.execute(sql`select id, host_user_id, state, starts_at, min_headcount from spots where id = ${id}::uuid`));
+    rows(await db.execute(sql`select id, host_user_id, state, starts_at, min_headcount, roll_call_at from spots where id = ${id}::uuid`));
 
   /** host roll-call — GET list (all attended by default), POST mark absences */
   app.get<{ Params: { id: string } }>('/spots/:id/roll-call', { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -62,6 +62,7 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
           update attendance set status = 'absent_host'
            where spot_id = ${req.params.id}::uuid and user_id = ${uid}::uuid`);
       }
+      await db.execute(sql`update spots set roll_call_at = now() where id = ${req.params.id}::uuid`);
       return { marked: absentIds.length };
     },
   );
@@ -93,13 +94,20 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
       const count = rows(await db.execute(sql`
         select count(distinct reporter_id)::int as n from absence_reports
          where spot_id = ${req.params.id}::uuid and subject_id = ${b.userId}::uuid`))[0].n as number;
-      if (count >= SPOT_RULES.peerReportThreshold) {
+      // threshold scales with group size (2 can't gang up on 1 in a trio); a GPS "I'm here" tap overrides reports
+      const groupSize = Number(rows(await db.execute(sql`
+        select count(*)::int as n from spot_members where spot_id = ${req.params.id}::uuid and state = 'active' and role in ('host','member')`))[0].n);
+      const threshold = Math.max(SPOT_RULES.peerReportThreshold, Math.ceil(groupSize / 3));
+      const gps = rows(await db.execute(sql`
+        select 1 from attendance where spot_id = ${req.params.id}::uuid and user_id = ${b.userId}::uuid and verified_gps = true`));
+      const flipped = count >= threshold && gps.length === 0;
+      if (flipped) {
         await db.execute(sql`
           insert into attendance (spot_id, user_id, status)
           values (${req.params.id}::uuid, ${b.userId}::uuid, 'absent_reported')
           on conflict (spot_id, user_id) do update set status = 'absent_reported'`);
       }
-      return { reports: count, threshold: SPOT_RULES.peerReportThreshold, flipped: count >= SPOT_RULES.peerReportThreshold };
+      return { reports: count, threshold, flipped };
     },
   );
 
@@ -164,20 +172,19 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
         on conflict (spot_id, user_id) do nothing`);
 
       const unfinalised = rows(await db.execute(sql`
-        select user_id, status from attendance
+        select user_id, status, verified_gps from attendance
          where spot_id = ${req.params.id}::uuid and finalized_at is null`));
 
       for (const a of unfinalised) {
         // Reliability 2.0: forgiven = ERASED (no event). Host absent = host_ghost (0 + auto-pause), not no_show.
         if (a.status === 'forgiven') continue;
         const isHost = String(a.user_id) === String(s.host_user_id);
+        // no roll-call → a default "attended" is unverified: only GPS-tapped attendance earns a show
+        if (a.status === 'attended' && !s.roll_call_at && !a.verified_gps) continue;
         const type = a.status === 'attended' ? 'attended' : isHost ? 'host_ghost' : 'no_show';
         await db.execute(sql`
           insert into score_events (user_id, spot_id, type, weight)
           values (${a.user_id}::uuid, ${req.params.id}::uuid, ${type}::score_event_type, ${type === 'attended' ? 1 : 0})`);
-        if (type === 'attended') {
-          // (GPS verification lives in attendance.verified_gps — no separate event; points stay one-per-outcome)
-        }
       }
       await db.execute(sql`
         update attendance set finalized_at = now()
@@ -193,13 +200,25 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
       let hostReward: string | null = null;
       if (s.host_user_id) {
         const att = unfinalised.length > 0 ? unfinalised : rows(await db.execute(sql`
-          select user_id, status from attendance where spot_id = ${req.params.id}::uuid`));
-        const attended = att.filter((a) => a.status === 'attended' || a.status === 'forgiven').length;
+          select user_id, status, verified_gps from attendance where spot_id = ${req.params.id}::uuid`));
+        const HR = SCORE_RULES.hostReward;
+        const present = att.filter((a) => a.status === 'attended' || a.status === 'forgiven');
+        const attended = present.length;
         const ratio = att.length > 0 ? attended / att.length : 0;
+        const gpsShare = attended > 0 ? present.filter((a) => a.verified_gps).length / attended : 0;
+        // ≥1 attendee who wasn't already connected to the host — stops friends farming Pro days
+        const stranger = rows(await db.execute(sql`
+          select 1 from attendance a
+           where a.spot_id = ${req.params.id}::uuid and a.status in ('attended','forgiven') and a.user_id <> ${s.host_user_id}::uuid
+             and not exists (select 1 from connections c where c.active
+                   and least(c.user_a, c.user_b) = least(a.user_id, ${s.host_user_id}::uuid)
+                   and greatest(c.user_a, c.user_b) = greatest(a.user_id, ${s.host_user_id}::uuid))
+           limit 1`)).length > 0;
         const avgRating = rows(await db.execute(sql`
           select avg(rating)::float as avg from safety_ratings where spot_id = ${req.params.id}::uuid`));
         const hasRatings = avgRating[0]?.avg != null; const rating = Number(avgRating[0]?.avg ?? 0);
-        const qualifies = attended >= Number(s.min_headcount) && ratio >= 0.8 && (!hasRatings || rating >= 4);
+        const qualifies = attended >= Math.max(HR.minAttended, Number(s.min_headcount)) && ratio >= 0.8
+          && gpsShare >= HR.minGpsShare && hasRatings && rating >= HR.minRating && stranger;
         if (qualifies) {
           // cap: ≤7 rewarded days per rolling 30d per host
           const granted = rows(await db.execute(sql`
@@ -207,10 +226,10 @@ export function registerAttendance(app: FastifyInstance, dbUrl: string) {
               from grants
              where kind = 'host_reward_pro' and user_id = ${s.host_user_id}::uuid
                and starts_at > now() - interval '30 days'`));
-          if (Number(granted[0]?.days ?? 0) < 7) {
+          if (Number(granted[0]?.days ?? 0) < HR.capDays30d) {
             await db.execute(sql`
               insert into grants (user_id, kind, starts_at, ends_at)
-              values (${s.host_user_id}::uuid, 'host_reward_pro', now(), now() + interval '2 days')`);
+              values (${s.host_user_id}::uuid, 'host_reward_pro', now(), now() + make_interval(days => ${HR.days}))`);
             hostReward = 'granted 2 pro days';
             await notify(dbUrl, String(s.host_user_id), 'spots', 'host_reward', { spotId: req.params.id }).catch(() => {});
             await recomputeEntitlement(db, String(s.host_user_id));

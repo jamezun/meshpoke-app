@@ -153,6 +153,21 @@ describe('reliability 2.0', () => {
     expect(new Date(sp.rows[0].starts_at).getTime()).toBeLessThan(Date.now() + 31 * 3600_000);
   });
 
+  it('reschedule majority: 1 of 3 rejects → still applies on 2 accepts; outvoted member leaves free', async () => {
+    const host = await mkUser(); const m = [await mkUser(), await mkUser(), await mkUser()];
+    const s = await mkSpot(host.tok); await forceConfirmed(s, [host.id, ...m.map((x) => x.id)], 30);
+    await app.inject({ method: 'POST', url: `/v1/spots/${s}/reschedule`, headers: hdr(host.tok), payload: { newStartsAt: new Date(Date.now() + 40 * 3600_000).toISOString() } });
+    let r = await app.inject({ method: 'POST', url: `/v1/spots/${s}/reschedule/respond`, headers: hdr(m[0].tok), payload: { accept: false } });
+    expect(r.json().rejected).toBeUndefined(); // one voice can't veto
+    await app.inject({ method: 'POST', url: `/v1/spots/${s}/reschedule/respond`, headers: hdr(m[1].tok), payload: { accept: true } });
+    r = await app.inject({ method: 'POST', url: `/v1/spots/${s}/reschedule/respond`, headers: hdr(m[2].tok), payload: { accept: true } });
+    expect(r.json().applied).toBe(true);
+    r = await app.inject({ method: 'POST', url: `/v1/spots/${s}/bail`, headers: hdr(m[0].tok) });
+    expect(r.statusCode).toBe(200);
+    const ev = await pool.query(`select 1 from score_events where spot_id=$1 and user_id=$2`, [s, m[0].id]);
+    expect(ev.rowCount).toBe(0); // free exit
+  });
+
   it('handover: broadcast, first member accepts and inherits; expired → dissolved + host_cancel', async () => {
     const host = await mkUser(); const members = [await mkUser(), await mkUser()];
     const s = await mkSpot(host.tok); await forceConfirmed(s, [host.id, ...members.map((m) => m.id)], 30);

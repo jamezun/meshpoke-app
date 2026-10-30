@@ -136,7 +136,11 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
 
     // Reliability 2.0 graduated bail ladder: >48h free · 24–48h 0.75 · <24h 0.5 · no-show 0
     let penalty: 'free' | 'bail48to24' | 'bailUnder24' = 'free';
-    if ((s.state === 'confirmed' || s.state === 'live') && hoursOut <= SPOT_RULES.bailFreeHours) {
+    // outvoted on a reschedule (rejected a proposal the majority applied) → free exit
+    const outvoted = rows(await db.execute(sql`
+      select 1 from reschedule_responses r join reschedule_proposals p on p.id = r.proposal_id
+       where p.spot_id = ${s.id}::uuid and p.status = 'applied' and r.member_id = ${userId} and r.accepted = false limit 1`));
+    if (outvoted.length === 0 && (s.state === 'confirmed' || s.state === 'live') && hoursOut <= SPOT_RULES.bailFreeHours) {
       penalty = hoursOut > 24 ? 'bail48to24' : 'bailUnder24';
       const pts = penalty === 'bail48to24' ? SPOT_RULES.bailPoints48to24 : SPOT_RULES.bailPointsUnder24;
       await db.execute(sql`insert into score_events (user_id, spot_id, type, weight) values (${userId}, ${s.id}::uuid, 'late_cancel', ${pts})`);
@@ -250,16 +254,18 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
       insert into reschedule_responses (proposal_id, member_id, accepted)
       values (${pr.id}, ${me}, ${b.accept})
       on conflict (proposal_id, member_id) do update set accepted = ${b.accept}, responded_at = now()`);
-    if (!b.accept) return rejectProposal(db, pr);
-    // all active members accepted? → apply
-    const need = rows(await db.execute(sql`select count(*)::int as n from spot_members where spot_id = ${pr.spot_id}::uuid and state = 'active' and role = 'member'`));
-    const got = rows(await db.execute(sql`select count(*)::int as n from reschedule_responses where proposal_id = ${pr.id} and accepted = true`));
-    if (Number(got[0].n) >= Number(need[0].n)) {
+    // majority rule: >½ of active members accept → apply (outvoted members may leave free);
+    // once rejects make a majority impossible → reject (one member can't veto alone)
+    const need = Number(rows(await db.execute(sql`select count(*)::int as n from spot_members where spot_id = ${pr.spot_id}::uuid and state = 'active' and role = 'member'`))[0].n);
+    const tally = rows(await db.execute(sql`select count(*) filter (where accepted)::int as yes, count(*) filter (where not accepted)::int as no from reschedule_responses where proposal_id = ${pr.id}`))[0];
+    const yes = Number(tally.yes); const no = Number(tally.no);
+    if (no >= need / 2) return rejectProposal(db, pr);
+    if (yes > need / 2) {
       await db.execute(sql`update spots set starts_at = ${new Date(String(pr.new_starts_at)).toISOString()} where id = ${pr.spot_id}::uuid`);
       await db.execute(sql`update reschedule_proposals set status = 'applied' where id = ${pr.id}`);
       return { applied: true, startsAt: pr.new_starts_at };
     }
-    return { accepted: true, waitingOn: Number(need[0].n) - Number(got[0].n) };
+    return { accepted: b.accept, waitingOn: Math.floor(need / 2) + 1 - yes };
   });
 
   async function rejectProposal(db: ReturnType<typeof getDb>, pr: Record<string, unknown>) {

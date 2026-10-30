@@ -5,19 +5,22 @@ import { SCORE_RULES } from '@meshpoke/shared';
 
 /**
  * Reliability 2.0 — Bayesian Show-up Score (BM §4.4).
- * score = (Σpoints + m·μ) / (n + m), m=3 prior events at μ=0.5, 90-day rolling
- * window. score_events.weight now stores the event's POINT VALUE (0–1):
+ * score = (Σpoints + m·μ) / (n + m), m=3 prior events at μ=0.5, over the last
+ * 20 events within 12 months (a 3-month holiday no longer resets a Rock to New). score_events.weight now stores the event's POINT VALUE (0–1):
  * show=1 · bail 24-48h=0.75 · bail <24h=0.5 · no-show=0 · host_cancel=0.2–0.8
  * (finalised by apology responses) · host_ghost=0. forgiven → NO event (erased).
- * Tiers: New n<3 · Reliable n≥3 & ≥60% · Rock n≥6 & ≥85% → hosting 1/3/5.
+ * Tiers: New n<3 · Reliable n≥3 & ≥60% · Rock n≥7 & ≥85% → hosting 1/3/5.
  * Enforcement: counts-axis ladder (catches bursts rates miss) + rate gates
  * only with n≥3 history. Two axes → see conduct (safety.ts) for the other ledger.
  */
-const { priorWeight: M, priorScore: MU, decayDays } = SCORE_RULES;
+const { priorWeight: M, priorScore: MU, decayDays, windowMaxEvents } = SCORE_RULES;
 const E = SCORE_RULES.enforcement;
 
 export function computeScore(events: { weight: number; createdAt: Date }[], now = new Date()): { score: number; eventsCount: number } {
-  const inWindow = events.filter((e) => (now.getTime() - e.createdAt.getTime()) / 86400_000 <= decayDays);
+  const inWindow = events
+    .filter((e) => (now.getTime() - e.createdAt.getTime()) / 86400_000 <= decayDays)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    .slice(0, windowMaxEvents);
   const n = inWindow.length;
   const sum = inWindow.reduce((acc, e) => acc + Math.min(1, Math.max(0, e.weight)), 0); // points, clamped
   const score = Math.min(1, Math.max(0, (sum + M * MU) / (n + M)));

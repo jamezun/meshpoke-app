@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TIER_CAPS, PRICES, SORT_WEIGHTS, SORT_TIER_VALUES, MERCHANT_PER_SEAT_BANDS, POKE_RULES, SPOT_RULES } from '../src/constants.js';
+import { TIER_CAPS, PRICES, SORT_WEIGHTS, SORT_TIER_VALUES, MERCHANT_PER_SEAT_BANDS, POKE_RULES, SPOT_RULES, SCORE_RULES } from '../src/constants.js';
 
 describe('constants snapshot (business numbers are load-bearing — changes must be deliberate)', () => {
   it('tier caps match BM §4 matrix', () => {
@@ -35,7 +35,8 @@ describe('constants snapshot (business numbers are load-bearing — changes must
     expect(POKE_RULES.postSpotWindowHours).toBe(48);
     expect(POKE_RULES.referral).toMatchObject({ rewardPokes: 5, refereePokes: 5, rewardedCapPerMonth: 10 });
     expect(SPOT_RULES.confirmWindowHours).toBe(48);
-    expect(SPOT_RULES.bailGraceHours).toBe(24);
+    expect(SPOT_RULES.bailFreeHours).toBe(48);
+    expect(SCORE_RULES).toMatchObject({ decayDays: 365, windowMaxEvents: 20, rockMinEvents: 7, hostReward: { minAttended: 4, minGpsShare: 0.5 } });
     expect(SPOT_RULES.hostingCapacity).toEqual({ unproven: 1, proven: 3, top: 5 });
   });
 });

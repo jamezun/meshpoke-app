@@ -49,6 +49,7 @@ export const spots = pgTable('spots', {
   startsAt: timestamp('starts_at', { withTimezone: true }),
   endsAt: timestamp('ends_at', { withTimezone: true }),
   confirmDeadline: timestamp('confirm_deadline', { withTimezone: true }),
+  rollCallAt: timestamp('roll_call_at', { withTimezone: true }),
   externalLink: varchar('external_link', { length: 500 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
