@@ -20,6 +20,120 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
   String? _error;
   bool _busy = false;
 
+  List<Widget> _hospitality(SpotDetail s) {
+    if (s.myRole == null) return const [];
+    final diet = ref.watch(spotDietaryProvider(s.id));
+    return [
+      const Divider(height: 24),
+      Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('The plan', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 6),
+            if (s.paymentStyle != null)
+              Text('💳 ${_paymentLabels[s.paymentStyle] ?? s.paymentStyle}'),
+            if (s.paymentStyle == 'other' && (s.paymentRules?.isNotEmpty ?? false))
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(s.paymentRules!),
+              ),
+            if (s.findHint?.isNotEmpty ?? false)
+              Text('🧭 How to find us: ${s.findHint}'),
+            if (s.icebreaker?.isNotEmpty ?? false)
+              Text('💬 Icebreaker: ${s.icebreaker}'),
+          ]),
+        ),
+      ),
+      if (diet.value != null) ...[
+        const SizedBox(height: 8),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Dietary (host sees this)', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 6),
+              Text(diet.value!['summary'] as String? ?? ''),
+            ]),
+          ),
+        ),
+      ],
+    ];
+  }
+
+  Widget _proposalCard(SpotDetail s) {
+    final p = s.pendingProposal!;
+    final isVenue = p['kind'] == 'venue';
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Card(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(isVenue ? 'Host proposes moving to ${p['venueName']}' : 'Host proposes a new time',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            if (p['newStartsAt'] != null && !isVenue)
+              Text('New time: ${DateTime.parse(p['newStartsAt'] as String).toLocal()}'),
+            Text('Respond by ${p['deadline'] != null ? DateTime.parse(p['deadline'] as String).toLocal() : 'start - 4h'} — silence keeps the original plan'),
+            const SizedBox(height: 8),
+            Row(children: [
+              FilledButton(
+                onPressed: _busy ? null : () => _respond(true),
+                child: const Text('Accept'),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton(
+                onPressed: _busy ? null : () => _respond(false),
+                child: const Text('Decline'),
+              ),
+            ]),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _respond(bool accept) async {
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(apiClientProvider);
+      await dio.post('/spots/${widget.spotId}/reschedule/respond', data: {'accept': accept});
+      ref.invalidate(spotDetailProvider(widget.spotId));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(accept ? 'Accepted' : 'Declined — original plan stands')));
+      }
+    } catch (e) {
+      if (mounted) setState(() => _error = '$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _changeVenue() async {
+    final picked = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      builder: (_) => const _VenuePickerSheet(),
+    );
+    if (picked == null) return;
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(apiClientProvider);
+      final res = await dio.post('/spots/${widget.spotId}/venue-change', data: {'venueId': picked['id']});
+      ref.invalidate(spotDetailProvider(widget.spotId));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.data['mode'] == 'proposal' ? 'Sent to members for consent (<48h)' : 'Venue moved')));
+      }
+    } catch (e) {
+      if (mounted) setState(() => _error = '$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _act(String path, {Map<String, dynamic>? body}) async {
     setState(() { _busy = true; _error = null; });
     try {
@@ -121,6 +235,8 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
               ),
             if (s.minScore != null) Text('Host requires Show-up Score ≥ ${s.minScore}'),
             if (s.priceRange != null) Text('Price: ${s.priceRange} (informational)'),
+            ..._hospitality(s),
+            if (s.pendingProposal != null && s.myRole == 'member') _proposalCard(s),
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
@@ -145,6 +261,15 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
             MaterialPageRoute(builder: (_) => HostQueueScreen(spotId: s.id)),
           ),
         ),
+        if (s.state == 'confirmed')
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.place_outlined),
+              label: const Text('Change venue'),
+              onPressed: _busy ? null : _changeVenue,
+            ),
+          ),
         const SizedBox(height: 8),
         OutlinedButton(
           onPressed: () => _act('cancel'),
@@ -182,5 +307,57 @@ class _SpotDetailScreenState extends ConsumerState<SpotDetailScreen> {
       ]);
     }
     return const SizedBox.shrink();
+  }
+}
+
+const _paymentLabels = <String, String>{
+  'share': 'Order together & split',
+  'individual': 'Order individually — pay what you ordered',
+  'host_pays': 'Host pays (members pay nothing)',
+  'other': 'Host rules apply',
+};
+
+class _VenuePickerSheet extends ConsumerStatefulWidget {
+  const _VenuePickerSheet();
+  @override
+  ConsumerState<_VenuePickerSheet> createState() => _VenuePickerSheetState();
+}
+
+class _VenuePickerSheetState extends ConsumerState<_VenuePickerSheet> {
+  final _q = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    final results = _q.text.isEmpty
+        ? const AsyncValue<List<Map<String, dynamic>>>.data([])
+        : ref.watch(venueSearchProvider(_q.text));
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(children: [
+        TextField(
+          controller: _q,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Search venues', prefixIcon: Icon(Icons.search)),
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 8),
+        results.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (e, _) => Text('$e'),
+          data: (list) => Expanded(
+            child: list.isEmpty
+                ? const Center(child: Text('Type to search'))
+                : ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (_, i) => ListTile(
+                      title: Text(list[i]['display_name'] as String? ?? ''),
+                      subtitle: Text(list[i]['address_en'] as String? ?? ''),
+                      onTap: () => Navigator.of(context).pop(list[i]),
+                    ),
+                  ),
+          ),
+        ),
+      ]),
+    );
   }
 }

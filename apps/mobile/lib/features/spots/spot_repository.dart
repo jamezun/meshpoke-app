@@ -77,6 +77,11 @@ class SpotDetail {
   final String? myRole;
   final List<Map<String, dynamic>> members;
   final String? myApplication;
+  final String? paymentStyle;
+  final String? paymentRules;
+  final String? findHint;
+  final String? icebreaker;
+  final Map<String, dynamic>? pendingProposal;
   SpotDetail({
     required this.id,
     required this.name,
@@ -96,6 +101,11 @@ class SpotDetail {
     this.myRole,
     this.members = const [],
     this.myApplication,
+    this.paymentStyle,
+    this.paymentRules,
+    this.findHint,
+    this.icebreaker,
+    this.pendingProposal,
   });
 
   factory SpotDetail.fromJson(Map<String, dynamic> j) => SpotDetail(
@@ -116,6 +126,11 @@ class SpotDetail {
     memberCount: (j['member_count'] as num?)?.toInt() ?? 0,
     myRole: j['my_role'],
     myApplication: j['my_application'],
+    paymentStyle: j['payment_style'],
+    paymentRules: j['payment_rules'],
+    findHint: j['find_hint'],
+    icebreaker: j['icebreaker'],
+    pendingProposal: (j['pending_proposal'] as Map?) == null ? null : Map<String, dynamic>.from(j['pending_proposal'] as Map),
   );
 }
 
@@ -124,4 +139,15 @@ final spotDetailProvider = FutureProvider.autoDispose
       final dio = ref.watch(apiClientProvider);
       final res = await dio.get('/spots/$id');
       return SpotDetail.fromJson(res.data as Map<String, dynamic>);
+    });
+
+final spotDietaryProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>?, String>((ref, id) async {
+      final dio = ref.watch(apiClientProvider);
+      try {
+        final res = await dio.get('/spots/$id/dietary');
+        return Map<String, dynamic>.from(res.data as Map);
+      } catch (_) {
+        return null; // non-members / non-spot -> hide card
+      }
     });

@@ -118,7 +118,7 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
   app.get('/me', { preHandler: [app.authenticate] }, async (req) => {
     const rows = await db.execute(sql`
       SELECT u.id, u.display_name, u.date_of_birth::text AS date_of_birth, u.referral_code, u.phone_verified_at IS NOT NULL AS phone_verified,
-             p.industry, p.role_oneliner, p.hide_photo_in_rooms
+             p.industry, p.role_oneliner, p.hide_photo_in_rooms, p.dietary, p.dietary_note AS dietary_note
       FROM users u LEFT JOIN profiles p ON p.user_id = u.id
       WHERE u.id = ${req.user!.id}`);
     const row = (rows as unknown as { rows: Record<string, unknown>[] }).rows[0];

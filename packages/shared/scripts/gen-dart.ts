@@ -74,7 +74,9 @@ class Sort {
 
 class Spots {
   static const confirmWindowHours = ${SPOT_RULES.confirmWindowHours};
-  static const bailGraceHours = ${SPOT_RULES.bailGraceHours};
+  static const bailFreeHours = ${SPOT_RULES.bailFreeHours};
+  static const bailPoints48to24 = ${SPOT_RULES.bailPoints48to24};
+  static const bailPointsUnder24 = ${SPOT_RULES.bailPointsUnder24};
   static const rollCallWindowHours = ${SPOT_RULES.rollCallWindowHours};
   static const peerReportThreshold = ${SPOT_RULES.peerReportThreshold};
   static const forgivenessWindowHours = ${SPOT_RULES.forgivenessWindowHours};

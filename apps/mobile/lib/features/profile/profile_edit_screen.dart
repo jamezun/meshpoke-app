@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meshpoke/core/api_client.dart';
 
 /// Sketch + keywords editor (PRD §3.1, §5.3).
 /// Industry dropdown, 40-char one-liner, 10 keywords with 1–10 levels (max 3 at 8+).
@@ -28,8 +29,65 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   String? _industry;
   final _oneliner = TextEditingController();
   final Map<String, int> _keywords = {}; // keyword → level
+  final Set<String> _dietary = {};
+  final _dietaryNote = TextEditingController();
+  bool _saving = false;
 
   String? _error;
+
+  static const _dietaryTags = [
+    'vegetarian', 'vegan', 'halal', 'no_alcohol', 'no_spicy', 'other',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final dio = ref.read(apiClientProvider);
+      final me = (await dio.get('/me')).data as Map;
+      final kws = ((await dio.get('/me/keywords')).data['keywords'] as List? ?? []);
+      if (!mounted) return;
+      setState(() {
+        _industry = me['industry'] as String?;
+        _oneliner.text = me['role_oneliner'] as String? ?? '';
+        _dietaryNote.text = me['dietary_note'] as String? ?? '';
+        _dietary
+          ..clear()
+          ..addAll([for (final d in (me['dietary'] as List? ?? [])) d.toString()]);
+        _keywords
+          ..clear()
+          ..addEntries([
+            for (final k in kws)
+              MapEntry((k as Map)['keyword'].toString(), (k['level'] as num).toInt()),
+          ]);
+      });
+    } catch (_) {/* first-run / offline: blank form */}
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      final dio = ref.read(apiClientProvider);
+      await dio.patch('/me', data: {
+        if (_industry != null) 'industry': _industry,
+        'role_oneliner': _oneliner.text.trim(),
+        'dietary': _dietary.toList(),
+        if (_dietaryNote.text.trim().isNotEmpty) 'dietary_note': _dietaryNote.text.trim(),
+      });
+      await dio.put('/me/keywords', data: {
+        'keywords': [
+          for (final e in _keywords.entries) {'keyword': e.key, 'level': e.value},
+        ],
+      });
+      if (mounted) context.pop(true);
+    } catch (e) {
+      if (mounted) setState(() { _error = '$e'; _saving = false; });
+    }
+  }
 
   /// Mirrors the DB trigger (T1.1): max 10 keywords, max 3 at level ≥ 8.
   static String? validateKeywords(Map<String, int> kws) {
@@ -88,6 +146,30 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               counterText: '',
             ),
           ),
+          const SizedBox(height: 16),
+          Text('Dietary (hosts see counts before picking a restaurant)',
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Wrap(
+            spacing: 6,
+            children: [
+              for (final t in _dietaryTags)
+                FilterChip(
+                  label: Text(t.replaceAll('_', ' ')),
+                  selected: _dietary.contains(t),
+                  onSelected: (on) => setState(
+                    () => on ? _dietary.add(t) : _dietary.remove(t),
+                  ),
+                ),
+            ],
+          ),
+          TextField(
+            controller: _dietaryNote,
+            maxLength: 80,
+            decoration: const InputDecoration(
+              labelText: 'Dietary note (optional, e.g. "allergic to shellfish")',
+              counterText: '',
+            ),
+          ),
           const SizedBox(height: 24),
           Text(
             'Keywords — what are you about? (${_keywords.length}/10, $highCount/3 at 8+)',
@@ -113,13 +195,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: _error == null
-                ? () =>
-                      context.pop(
-                        true,
-                      ) // caller persists via PATCH /me + PUT /me/keywords
-                : null,
-            child: const Text('Save'),
+            onPressed: _error == null && !_saving ? _save : null,
+            child: _saving
+                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Save'),
           ),
         ],
       ),

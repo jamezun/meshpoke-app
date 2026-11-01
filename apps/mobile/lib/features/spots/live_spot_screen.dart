@@ -69,6 +69,43 @@ class _LiveSpotScreenState extends ConsumerState<LiveSpotScreen> {
     }
   }
 
+  Widget _arrivalsCard() {
+    return Card(
+      margin: const EdgeInsets.only(top: 8, bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text('Arrival board', style: Theme.of(context).textTheme.titleSmall),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.refresh, size: 18),
+              onPressed: () => setState(() {}),
+            ),
+          ]),
+          FutureBuilder(
+            future: ref.read(apiClientProvider).get('/spots/${widget.spotId}/arrivals'),
+            builder: (context, snap) {
+              if (snap.connectionState != ConnectionState.done) {
+                return const LinearProgressIndicator(minHeight: 2);
+              }
+              if (snap.hasError) return Text('${snap.error}', style: const TextStyle(fontSize: 12));
+              final d = (snap.data?.data ?? {}) as Map;
+              final arrivals = (d['arrivals'] as List? ?? []);
+              return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('${d['here'] ?? 0} here / ${d['total'] ?? 0} total',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                for (final a in arrivals)
+                  Text('${a['imHereAt'] != null ? '✅' : '⏳'}  ${a['displayName']} (${a['role']})',
+                      style: const TextStyle(fontSize: 13)),
+              ]);
+            },
+          ),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final d = ref.watch(spotDetailProvider(widget.spotId));
@@ -83,6 +120,7 @@ class _LiveSpotScreenState extends ConsumerState<LiveSpotScreen> {
           final isLive = spot.state == 'live';
           return ListView(padding: const EdgeInsets.all(16), children: [
             Text(spot.name, style: Theme.of(context).textTheme.titleLarge),
+            _arrivalsCard(),
             const SizedBox(height: 4),
             Text('${spot.template} · ${spot.state?.toUpperCase() ?? ''}'),
             const SizedBox(height: 16),

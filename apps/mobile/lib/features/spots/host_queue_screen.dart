@@ -139,7 +139,7 @@ class _ScheduleSheetState extends ConsumerState<_ScheduleSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final venues = ref.watch(_venueSearchProvider(''));
+    final venues = ref.watch(venueSearchProvider(''));
     return Padding(
       padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -192,7 +192,7 @@ class _ScheduleSheetState extends ConsumerState<_ScheduleSheet> {
   }
 }
 
-final _venueSearchProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>((ref, q) async {
+final venueSearchProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>((ref, q) async {
   final dio = ref.watch(apiClientProvider);
   final res = await dio.get('/venues/search', queryParameters: {'q': q.isEmpty ? 'a' : q});
   return [for (final v in (res.data['venues'] as List? ?? <dynamic>[])) Map<String, dynamic>.from(v as Map)];

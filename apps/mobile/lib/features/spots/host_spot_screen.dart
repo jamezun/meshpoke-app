@@ -18,6 +18,10 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
   final List<TextEditingController> _keywords = [];
   double _minScore = 0;
   String _priceRange = 'free';
+  String _paymentStyle = 'share';
+  final _paymentRules = TextEditingController();
+  final _findHint = TextEditingController();
+  final _icebreaker = TextEditingController();
   String? _districtId;
   int _minHeadcount = 3;
   int _maxHeadcount = 6;
@@ -86,6 +90,42 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
                     DropdownMenuItem(value: '\$\$\$', child: Text('\$\$\$ (300+)')),
                   ],
                   onChanged: (v) => setState(() => _priceRange = v!),
+                ),
+                DropdownButtonFormField<String>(
+                  initialValue: _paymentStyle,
+                  decoration: const InputDecoration(labelText: 'Payment style (informational)'),
+                  items: const [
+                    DropdownMenuItem(value: 'share', child: Text('Order together & split')),
+                    DropdownMenuItem(value: 'individual', child: Text('Order individually — pay what you ordered')),
+                    DropdownMenuItem(value: 'host_pays', child: Text('Host pays (members pay nothing)')),
+                    DropdownMenuItem(value: 'other', child: Text('Other — my rules')),
+                  ],
+                  onChanged: (v) => setState(() => _paymentStyle = v!),
+                ),
+                if (_paymentStyle == 'other')
+                  TextFormField(
+                    controller: _paymentRules,
+                    maxLength: 200,
+                    decoration: const InputDecoration(
+                      labelText: 'Your payment rules (shown to members)',
+                      counterText: '',
+                    ),
+                  ),
+                TextFormField(
+                  controller: _findHint,
+                  maxLength: 200,
+                  decoration: const InputDecoration(
+                    labelText: 'How to find the table (optional, e.g. "2F by the window")',
+                    counterText: '',
+                  ),
+                ),
+                TextFormField(
+                  controller: _icebreaker,
+                  maxLength: 200,
+                  decoration: const InputDecoration(
+                    labelText: 'Icebreaker question (optional)',
+                    counterText: '',
+                  ),
                 ),
               ]),
             ),
@@ -177,6 +217,11 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
         'overbookBuffer': _overbook,
         'dateStart': _dateStart.toUtc().toIso8601String(),
         'dateEnd': _dateEnd.toUtc().toIso8601String(),
+        if (_paymentStyle == 'other' && _paymentRules.text.trim().isNotEmpty)
+          'paymentRules': _paymentRules.text.trim(),
+        if (_findHint.text.trim().isNotEmpty) 'findHint': _findHint.text.trim(),
+        if (_icebreaker.text.trim().isNotEmpty) 'icebreaker': _icebreaker.text.trim(),
+        'paymentStyle': _paymentStyle,
       });
       if (!mounted) return;
       Navigator.of(context).pop(res.data['id']);

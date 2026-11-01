@@ -264,6 +264,9 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
               itemCount: _messages.length,
               itemBuilder: (_, i) {
                 final m = _messages[i];
+                final flags = m['flags'];
+                final isPack = flags is Map && flags['kind'] == 'pre_event_pack';
+                final isSystem = flags is Map && flags['system'] == true;
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
@@ -271,9 +274,35 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Theme.of(context).dividerColor),
+                      border: Border.all(
+                        color: isPack
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).dividerColor,
+                      ),
+                      color: isPack ? Theme.of(context).colorScheme.primaryContainer : null,
                     ),
-                    child: Text(m['body'] as String? ?? ''),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      if (isPack) ...[
+                        Row(children: [
+                          Icon(Icons.emoji_events_outlined,
+                              size: 16, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 6),
+                          Text('PRE-EVENT PACK',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              )),
+                        ]),
+                        const SizedBox(height: 4),
+                      ],
+                      Text(
+                        m['body'] as String? ?? '',
+                        style: isSystem && !isPack
+                            ? Theme.of(context).textTheme.bodySmall
+                            : null,
+                      ),
+                    ]),
                   ),
                 );
               },
