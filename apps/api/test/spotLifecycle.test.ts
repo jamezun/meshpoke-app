@@ -157,7 +157,6 @@ describe('spot lifecycle', () => {
     const hse = await pool.query(`select type from score_events where user_id = $1 and spot_id = $2`, [host4.id, spot4]);
     expect(hse.rows[0]?.type).toBe('host_cancel');
     const apology = await pool.query(`select m.body from messages m join rooms r on r.id = m.room_id where r.spot_id = $1 and m.flags->>'system' = 'true'`, [spot4]);
-    expect(apology.rows.length).toBeGreaterThanOrEqual(1);
-    expect(String(apology.rows[0].body)).toContain('sorry');
+    expect(apology.rows.some((r) => String(r.body).includes('sorry'))).toBe(true);
   });
 });

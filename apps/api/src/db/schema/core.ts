@@ -58,6 +58,8 @@ export const profiles = pgTable('profiles', {
   shareBirthMonth: boolean('share_birth_month').notNull().default(false), // T21.7 birthday treat opt-in (default off)
   socials: jsonb('socials'), // { instagram?, linkedin? } revealed only at full-profile moment
   workBadge: workBadgeEnum('work_badge').notNull().default('none'),
+  dietary: text('dietary').array().notNull().default([]), // M23: veg/vegan/halal/no_alcohol/no_spicy/other
+  dietaryNote: varchar('dietary_note', { length: 80 }),
 });
 
 export const keywords = pgTable('keywords', {

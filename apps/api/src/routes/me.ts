@@ -33,6 +33,8 @@ const patchMeSchema = z.object({
   role_oneliner: z.string().trim().max(40).optional(),
   hide_photo_in_rooms: z.boolean().optional(),
   share_birth_month: z.boolean().optional(),
+  dietary: z.array(z.enum(['vegetarian', 'vegan', 'halal', 'no_alcohol', 'no_spicy', 'other'])).max(6).optional(),
+  dietary_note: z.string().trim().max(80).optional(),
 });
 
 function referralCode(): string {
@@ -128,15 +130,19 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
     if (!parsed.success) {
       return reply.code(422).send({ type: 'about:blank', title: 'Unprocessable Entity', status: 422, errors: parsed.error.issues });
     }
-    const { display_name, industry, role_oneliner, hide_photo_in_rooms, share_birth_month } = parsed.data;
+    const { display_name, industry, role_oneliner, hide_photo_in_rooms, share_birth_month, dietary, dietary_note } = parsed.data;
     const updated = await withTx(db, async (tx) => {
       if (display_name !== undefined || industry !== undefined || hide_photo_in_rooms !== undefined || share_birth_month !== undefined) {
         await tx.update(users).set({ ...(display_name !== undefined ? { displayName: display_name } : {}) }).where(eq(users.id, req.user!.id));
+      }
+      if (industry !== undefined || role_oneliner !== undefined || hide_photo_in_rooms !== undefined || share_birth_month !== undefined || dietary !== undefined || dietary_note !== undefined) {
         await tx.update(profiles).set({
           ...(industry !== undefined ? { industry } : {}),
           ...(role_oneliner !== undefined ? { roleOneliner: role_oneliner } : {}),
           ...(hide_photo_in_rooms !== undefined ? { hidePhotoInRooms: hide_photo_in_rooms } : {}),
           ...(share_birth_month !== undefined ? { shareBirthMonth: share_birth_month } : {}),
+          ...(dietary !== undefined ? { dietary } : {}),
+          ...(dietary_note !== undefined ? { dietaryNote: dietary_note } : {}),
         }).where(eq(profiles.userId, req.user!.id));
       }
       return true;

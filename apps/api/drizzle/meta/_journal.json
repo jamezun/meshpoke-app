@@ -135,6 +135,13 @@
       "when": 1793400000000,
       "tag": "0019_roll_call_at",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793000000000,
+      "tag": "0020_competitor_response",
+      "breakpoints": true
     }
   ]
 }

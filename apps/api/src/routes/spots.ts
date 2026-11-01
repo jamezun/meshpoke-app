@@ -19,6 +19,10 @@ const CreateEvent = z
     minScore: z.number().min(0).max(1).optional(),
     priceRange: z.enum(['free', '$', '$$', '$$$']).optional(), // informational only
     joinMode: z.enum(['open', 'application']).default('application'),
+    paymentStyle: z.enum(['share', 'individual', 'host_pays', 'other']).optional(),
+    paymentRules: z.string().trim().max(200).optional(),
+    findHint: z.string().trim().max(200).optional(),
+    icebreaker: z.string().trim().max(200).optional(),
     districtId: z.string().uuid(),
     minHeadcount: z.number().int().min(2),
     maxHeadcount: z.number().int(),
@@ -83,10 +87,12 @@ export function registerSpots(app: FastifyInstance, dbUrl: string) {
     const res = await db.execute(sql`
       with s as (insert into spots
                    (kind, host_user_id, template, name, required_keywords, min_score, price_range, join_mode,
-                    district_id, min_headcount, max_headcount, overbook_buffer, date_range, state)
+                    district_id, min_headcount, max_headcount, overbook_buffer, date_range, state,
+                    payment_style, payment_rules, find_hint, icebreaker)
                  values ('event', ${userId}::uuid, ${v.template}::spot_template, ${v.name}, ${keywords}::text[],
                          ${v.minScore !== undefined ? String(v.minScore) : null}::numeric, ${v.priceRange ?? null}, ${v.joinMode}::join_mode,
-                         ${v.districtId}::uuid, ${v.minHeadcount}, ${v.maxHeadcount}, ${v.overbookBuffer ?? 0}, ${dateRange}, 'forming')
+                         ${v.districtId}::uuid, ${v.minHeadcount}, ${v.maxHeadcount}, ${v.overbookBuffer ?? 0}, ${dateRange}, 'forming',
+                         ${v.paymentStyle ?? null}, ${v.paymentRules ?? null}, ${v.findHint ?? null}, ${v.icebreaker ?? null})
                  returning id),
            r as (insert into rooms (kind, spot_id) select 'event', id from s returning id)
       insert into spot_members (spot_id, user_id, role) select id, ${userId}, 'host' from s returning spot_id`);
@@ -94,5 +100,31 @@ export function registerSpots(app: FastifyInstance, dbUrl: string) {
     await db.execute(sql`insert into room_members (room_id, user_id, role) select id, ${userId}, 'host' from rooms where spot_id = ${spotId} on conflict do nothing`);
     capture('spot_created', req.user!.id, { template: v.template, joinMode: v.joinMode });
     return { spotId, state: 'forming' };
+  });
+
+  // host edits hospitality fields while the spot is still forming (venue/pack content)
+  app.patch<{ Params: { id: string }; Body: unknown }>('/spots/:id', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const userId = req.user!.id;
+    const parsed = z.object({
+      paymentStyle: z.enum(['share', 'individual', 'host_pays', 'other']).optional(),
+      paymentRules: z.string().trim().max(200).optional(),
+      findHint: z.string().trim().max(200).optional(),
+      icebreaker: z.string().trim().max(200).optional(),
+    }).safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ problem: { title: 'Invalid edit', status: 422 } });
+    const d = parsed.data;
+    const spot = rows(await db.execute(sql`select id, state, host_user_id from spots where id = ${req.params.id}::uuid`));
+    if (spot.length === 0) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
+    const s = spot[0];
+    if (s.host_user_id !== userId) return reply.code(403).send({ problem: { title: 'Host only', status: 403 } });
+    if (s.state !== 'forming') return reply.code(422).send({ problem: { title: `Spot is ${s.state} — locked at confirm`, status: 422 } });
+    await db.execute(sql`
+      update spots set
+        payment_style = coalesce(${d.paymentStyle ?? null}, payment_style),
+        payment_rules = coalesce(${d.paymentRules ?? null}, payment_rules),
+        find_hint    = coalesce(${d.findHint ?? null}, find_hint),
+        icebreaker   = coalesce(${d.icebreaker ?? null}, icebreaker)
+      where id = ${s.id}::uuid`);
+    return { updated: true };
   });
 }

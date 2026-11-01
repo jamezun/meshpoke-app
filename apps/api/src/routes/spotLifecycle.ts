@@ -96,6 +96,37 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
              group_drop_id = ${parsed.data.groupDropId ?? null}, confirm_deadline = ${deadline}
        where id = ${s.id}::uuid`);
     await db.execute(sql`update applications set status = 'closed' where spot_id = ${s.id}::uuid and status = 'pending'`);
+
+    // M23 pre-event pack: pinned system card — venue, find-it hint, price, payment style, dietary, icebreaker
+    const pack = rows(await db.execute(sql`
+      select s.name, s.price_range, s.find_hint, s.icebreaker, s.payment_style, s.payment_rules,
+             v.display_name as venue, v.address_en as address, v.address_zh
+        from spots s left join venues v on v.id = s.venue_id where s.id = ${s.id}::uuid`))[0];
+    const diet = rows(await db.execute(sql`
+      select p.dietary from spot_members m join profiles p on p.user_id = m.user_id
+       where m.spot_id = ${s.id}::uuid and m.state = 'active' and m.role in ('host','member')`));
+    const dietCounts: Record<string, number> = {};
+    for (const d of diet as { dietary: string[] | null }[]) for (const t of d.dietary ?? []) dietCounts[t] = (dietCounts[t] ?? 0) + 1;
+    const payLabel: Record<string, string> = { share: 'Order together & split', individual: 'Order individually — pay for what you ordered', host_pays: 'Host pays (members pay nothing)', other: 'Host’s custom rules' };
+    const body = [
+      `📍 ${String(pack.venue ?? 'Venue TBA')}`,
+      pack.address ? String(pack.address) : null,
+      pack.address_zh ? String(pack.address_zh) : null,
+      pack.find_hint ? `How to find us: ${String(pack.find_hint)}` : null,
+      pack.price_range ? `Price: ${String(pack.price_range)}` : null,
+      pack.payment_style ? `Payment: ${payLabel[String(pack.payment_style)] ?? String(pack.payment_style)}${pack.payment_rules ? ` — ${String(pack.payment_rules)}` : ''}` : null,
+      Object.keys(dietCounts).length > 0 ? `Dietary: ${Object.entries(dietCounts).map(([t, n]) => `${n} ${t}`).join(', ')} (notes on the spot page)` : null,
+      pack.icebreaker ? `Icebreaker: ${String(pack.icebreaker)}` : null,
+    ].filter(Boolean).join('\n');
+    await db.execute(sql`
+      insert into messages (room_id, user_id, body, flags)
+      select r.id, ${userId}, ${body}, jsonb_build_object('kind','pre_event_pack','system',true,
+            'venueName', ${String(pack.venue ?? '')}::text, 'address', ${String(pack.address ?? '')}::text,
+            'findHint', ${String(pack.find_hint ?? '')}::text, 'priceRange', ${String(pack.price_range ?? '')}::text,
+            'paymentStyle', ${String(pack.payment_style ?? '')}::text, 'paymentRules', ${String(pack.payment_rules ?? '')}::text,
+            'icebreaker', ${String(pack.icebreaker ?? '')}::text, 'dietary', ${JSON.stringify(dietCounts)}::jsonb)
+        from rooms r where r.spot_id = ${s.id}::uuid`);
+
     const membersToPing = rows(await db.execute(sql`
       select user_id from spot_members where spot_id = ${s.id}::uuid and state = 'active' and role <> 'host'`));
     for (const m of membersToPing) {
@@ -203,8 +234,26 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
         select r.id, ${userId}, ${'Host cancelled this spot — sorry everyone. Members: tap the apology in notifications to respond (It\'s fine / Not ok).'}, '{"system":true}'::jsonb
           from rooms r where r.spot_id = ${s.id}::uuid`);
     }
+    await backfillMembers(s.id as string);
     return { state: 'cancelled' };
   });
+
+  // M23 cancel-backfill: when a spot dies, point stranded members at similar spots tonight nearby
+  async function backfillMembers(spotId: string) {
+    const s = rows(await db.execute(sql`select template, district_id from spots where id = ${spotId}::uuid`))[0];
+    if (!s?.district_id) return;
+    const similar = rows(await db.execute(sql`
+      select s2.id from spots s2
+       where s2.template = ${s.template}::spot_template and s2.district_id = ${s.district_id}
+         and s2.id <> ${spotId}::uuid
+         and s2.state in ('forming','confirmed')
+         and (s2.starts_at is null or s2.starts_at < now() + interval '24 hours')
+       order by s2.starts_at nulls last limit 3`));
+    if (similar.length === 0) return;
+    const ids = similar.map((x) => String(x.id));
+    const members = rows(await db.execute(sql`select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role <> 'host'`));
+    for (const m of members) await notify(dbUrl, String(m.user_id), 'spots', 'cancel_backfill', { spotId, suggestions: ids });
+  }
 
   // ── reschedule: >48h out = free change w/ notify; ≤48h = consent proposal ──
   app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/reschedule', { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -242,7 +291,7 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     if (typeof b.accept !== 'boolean') return reply.code(422).send({ problem: { title: 'accept (boolean) required', status: 422 } });
     const me = req.user!.id;
     const p = rows(await db.execute(sql`
-      select p.id, p.spot_id, p.new_starts_at, p.deadline_at, p.proposed_by, p.status,
+      select p.id, p.spot_id, p.new_starts_at, p.new_venue_id, p.deadline_at, p.proposed_by, p.status,
              s.host_user_id, s.starts_at
         from reschedule_proposals p join spots s on s.id = p.spot_id
        where p.spot_id = ${req.params.id}::uuid and p.status = 'pending' for update of p`));
@@ -261,9 +310,20 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     const yes = Number(tally.yes); const no = Number(tally.no);
     if (no >= need / 2) return rejectProposal(db, pr);
     if (yes > need / 2) {
-      await db.execute(sql`update spots set starts_at = ${new Date(String(pr.new_starts_at)).toISOString()} where id = ${pr.spot_id}::uuid`);
+      const appliedVenue = pr.new_venue_id ? rows(await db.execute(sql`select display_name from venues where id = ${pr.new_venue_id}::uuid`))[0]?.display_name : null;
+      await db.execute(sql`update spots set starts_at = ${new Date(String(pr.new_starts_at)).toISOString()},
+                            venue_id = coalesce(${(pr.new_venue_id as string | null) ?? null}::uuid, venue_id)
+                       where id = ${pr.spot_id}::uuid`);
       await db.execute(sql`update reschedule_proposals set status = 'applied' where id = ${pr.id}`);
-      return { applied: true, startsAt: pr.new_starts_at };
+      if (appliedVenue) {
+        await db.execute(sql`
+          insert into messages (room_id, user_id, body, flags)
+          select r.id, ${pr.proposed_by}, ${`Change accepted — moving to ${appliedVenue}.`}, '{"system":true}'::jsonb
+            from rooms r where r.spot_id = ${pr.spot_id}::uuid`);
+        const toPing = rows(await db.execute(sql`select user_id from spot_members where spot_id = ${pr.spot_id}::uuid and state = 'active' and role <> 'host'`));
+        for (const m of toPing) await notify(dbUrl, String(m.user_id), 'spots', 'venue_changed', { spotId: pr.spot_id, venue: appliedVenue });
+      }
+      return { applied: true, startsAt: pr.new_starts_at, venue: appliedVenue };
     }
     return { accepted: b.accept, waitingOn: Math.floor(need / 2) + 1 - yes };
   });
@@ -274,10 +334,53 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
     await db.execute(sql`insert into score_events (user_id, spot_id, type, weight) values (${pr.proposed_by}, ${pr.spot_id}::uuid, 'reschedule_reject', 0.75)`);
     await db.execute(sql`
       insert into messages (room_id, user_id, body, flags)
-      select r.id, ${pr.proposed_by}, 'Proposal declined — spot keeps its original time.', '{"system":true}'::jsonb
+      select r.id, ${pr.proposed_by}, 'Proposal declined — spot keeps its original plan.', '{"system":true}'::jsonb
         from rooms r where r.spot_id = ${pr.spot_id}::uuid`);
     return { rejected: true };
   }
+
+  // ── M23 venue change: >48h out = free change w/ notify; ≤48h = member consent (majority, same as time) ──
+  app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/venue-change', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const b = (req.body ?? {}) as { venueId?: string };
+    if (!b.venueId) return reply.code(422).send({ problem: { title: 'venueId required', status: 422 } });
+    const spot = rows(await db.execute(sql`select id, state, host_user_id, starts_at, venue_id from spots where id = ${req.params.id}::uuid for update`));
+    const s = spot[0];
+    if (!s) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
+    if (s.host_user_id !== req.user!.id) return reply.code(403).send({ problem: { title: 'Host only', status: 403 } });
+    if (s.state !== 'confirmed') return reply.code(422).send({ problem: { title: `Cannot change venue of a ${s.state} spot`, status: 422 } });
+    if (s.venue_id === b.venueId) return reply.code(422).send({ problem: { title: 'That is already the venue', status: 422 } });
+    const venue = rows(await db.execute(sql`select display_name from venues where id = ${b.venueId}::uuid`));
+    if (venue.length === 0) return reply.code(422).send({ problem: { title: 'Unknown venue', status: 422 } });
+    const venueName = String(venue[0].display_name);
+    const cur = new Date(String(s.starts_at)).getTime();
+    const hoursOut = (cur - Date.now()) / 3600_000;
+    if (hoursOut > SPOT_RULES.bailFreeHours) {
+      // free change — trigger re-derives district from the new venue pin
+      await db.execute(sql`update spots set venue_id = ${b.venueId}::uuid where id = ${s.id}::uuid`);
+      await db.execute(sql`
+        insert into messages (room_id, user_id, body, flags)
+        select r.id, ${req.user!.id}, ${`Venue updated: ${venueName}. See the pinned card for details.`}, '{"system":true}'::jsonb
+          from rooms r where r.spot_id = ${s.id}::uuid`);
+      const toPing = rows(await db.execute(sql`select user_id from spot_members where spot_id = ${s.id}::uuid and state = 'active' and role <> 'host'`));
+      for (const m of toPing) await notify(dbUrl, String(m.user_id), 'spots', 'venue_changed', { spotId: s.id, venue: venueName });
+      return { changed: 'free', venue: venueName };
+    }
+    // ≤48h: member consent via the proposal flow (majority accept by start−4h)
+    const deadline = new Date(cur - 4 * 3600_000);
+    if (deadline <= new Date()) return reply.code(422).send({ problem: { title: 'Too late to propose — within 4h of start', status: 422 } });
+    const ins = rows(await db.execute(sql`
+      insert into reschedule_proposals (spot_id, proposed_by, new_venue_id, new_starts_at, deadline_at)
+      values (${s.id}::uuid, ${req.user!.id}, ${b.venueId}::uuid, ${new Date(cur).toISOString()}, ${deadline.toISOString()})
+      on conflict do nothing returning id`));
+    if (ins.length === 0) return reply.code(409).send({ problem: { title: 'A proposal is already pending (one per 24h)', status: 409 } });
+    await db.execute(sql`
+      insert into messages (room_id, user_id, body, flags)
+      select r.id, ${req.user!.id}, ${`Host proposes moving this spot to ${venueName} — accept in the spot page before ${deadline.toISOString()}.`}, '{"system":true}'::jsonb
+        from rooms r where r.spot_id = ${s.id}::uuid`);
+    const toPing = rows(await db.execute(sql`select user_id from spot_members where spot_id = ${s.id}::uuid and state = 'active' and role <> 'host'`));
+    for (const m of toPing) await notify(dbUrl, String(m.user_id), 'spots', 'venue_change_proposed', { spotId: s.id, venue: venueName, deadline: deadline.toISOString() });
+    return { proposal: 'pending', venue: venueName, deadline: deadline.toISOString() };
+  });
 
   // ── host handover: step down, first accepter inherits the spot ──
   app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/handover', { preHandler: [app.authenticate] }, async (req, reply) => {
@@ -350,6 +453,7 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
          and (select count(*) from spot_members m where m.spot_id = s.id and m.state = 'active' and m.confirm_state = 'confirmed')
              < s.min_headcount
        returning id`));
+    for (const d of dissolved) await backfillMembers(String(d.id));
     const toLive = rows(await db.execute(sql`
       update spots set state = 'live' where state = 'confirmed' and starts_at <= now() returning id`));
     const toDone = rows(await db.execute(sql`

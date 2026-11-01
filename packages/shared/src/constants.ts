@@ -161,6 +161,12 @@ export const GEO_RULES = {
   duplicateVenueRadiusM: 50, // POI dedup
 } as const;
 
+export const PAYMENT_STYLES = ['share', 'individual', 'host_pays', 'other'] as const;
+export type PaymentStyle = (typeof PAYMENT_STYLES)[number];
+
+export const DIETARY_TAGS = ['vegetarian', 'vegan', 'halal', 'no_alcohol', 'no_spicy', 'other'] as const;
+export type DietaryTag = (typeof DIETARY_TAGS)[number];
+
 export const QR_RULES = {
   rotationSeconds: 30,
   clockToleranceSeconds: 1,

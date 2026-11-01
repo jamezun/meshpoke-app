@@ -71,4 +71,26 @@ export function registerImHere(app: FastifyInstance, dbUrl: string) {
       return { status: res[0].status, verifiedGps: res[0].verified_gps, imHereAt: res[0].im_here_at };
     },
   );
+
+  // M23 arrival board: who's on site — kills "which table / who has arrived / agent no-show"
+  app.get<{ Params: { id: string } }>('/spots/:id/arrivals', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const userId = req.user!.id;
+    const member = rows(await db.execute(sql`
+      select 1 from spot_members where spot_id = ${req.params.id}::uuid and user_id = ${userId}::uuid and state = 'active' and role in ('host','member')`));
+    if (member.length === 0) return reply.code(403).send({ problem: { title: 'Members only', status: 403 } });
+    const s = rows(await db.execute(sql`select state from spots where id = ${req.params.id}::uuid`));
+    if (s.length === 0) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
+    if (s[0].state !== 'live' && s[0].state !== 'done') {
+      return reply.code(422).send({ problem: { title: `Arrivals open when the spot is live (currently ${s[0].state})`, status: 422 } });
+    }
+    const list = rows(await db.execute(sql`
+      select m.user_id as "userId", u.display_name as "displayName", m.role,
+             a.im_here_at as "imHereAt", a.verified_gps as "verifiedGps"
+        from spot_members m
+        join users u on u.id = m.user_id
+        left join attendance a on a.spot_id = m.spot_id and a.user_id = m.user_id
+       where m.spot_id = ${req.params.id}::uuid and m.state = 'active' and m.role in ('host','member')
+       order by a.im_here_at nulls last, u.display_name`));
+    return { arrivals: list, here: list.filter((x) => x.imHereAt).length, total: list.length };
+  });
 }

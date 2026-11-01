@@ -133,9 +133,15 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
       select s.id, s.kind, s.template, s.name, s.state, s.join_mode, s.required_keywords, s.min_score,
              s.price_range, s.min_headcount, s.max_headcount, s.overbook_buffer, s.starts_at, s.ends_at,
              s.confirm_deadline, s.district_id, d.name_en as district, s.venue_id, v.display_name as venue_name,
+             s.payment_style, s.payment_rules, s.find_hint, s.icebreaker,
              (select count(*)::int from spot_members m where m.spot_id = s.id and m.state = 'active' and m.role in ('host','member')) as member_count,
              (select m2.role from spot_members m2 where m2.spot_id = s.id and m2.user_id = ${userId} and m2.state = 'active') as my_role,
-             (select a.status from applications a where a.spot_id = s.id and a.user_id = ${userId} and a.status = 'pending') as my_application
+             (select a.status from applications a where a.spot_id = s.id and a.user_id = ${userId} and a.status = 'pending') as my_application,
+             (select json_build_object('id', p.id, 'newStartsAt', p.new_starts_at, 'newVenueId', p.new_venue_id,
+                                      'venueName', v2.display_name, 'deadline', p.deadline_at,
+                                      'kind', case when p.new_venue_id is not null then 'venue' else 'time' end)
+                from reschedule_proposals p left join venues v2 on v2.id = p.new_venue_id
+               where p.spot_id = s.id and p.status = 'pending' limit 1) as pending_proposal
         from spots s
         left join districts d on d.id = s.district_id
         left join venues v on v.id = s.venue_id
@@ -151,6 +157,27 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
              where (b.blocker_id = ${userId}::uuid and b.blocked_id = m.user_id)
                 or (b.blocker_id = m.user_id and b.blocked_id = ${userId}::uuid))`));
     return { ...spot[0], members };
+  });
+
+  // M23: dietary summary for active members — host + members only (never public)
+  app.get<{ Params: { id: string } }>('/spots/:id/dietary', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const userId = req.user!.id;
+    const member = rows(await db.execute(sql`
+      select 1 from spot_members where spot_id = ${req.params.id}::uuid and user_id = ${userId}::uuid and state = 'active' and role in ('host','member')`));
+    if (member.length === 0) return reply.code(403).send({ problem: { title: 'Members only', status: 403 } });
+    const r = rows(await db.execute(sql`
+      select p.dietary, p.dietary_note, u.display_name
+        from spot_members m
+        join profiles p on p.user_id = m.user_id
+        join users u on u.id = m.user_id
+       where m.spot_id = ${req.params.id}::uuid and m.state = 'active' and m.role in ('host','member')`));
+    const counts: Record<string, number> = {};
+    const notes: { displayName: string; note: string }[] = [];
+    for (const row of r as { dietary: string[] | null; dietary_note: string | null; display_name: string }[]) {
+      for (const t of row.dietary ?? []) counts[t] = (counts[t] ?? 0) + 1;
+      if (row.dietary_note) notes.push({ displayName: row.display_name, note: row.dietary_note });
+    }
+    return { counts, notes, membersWithTags: (r as { dietary: string[] | null }[]).filter((x) => (x.dietary ?? []).length > 0).length };
   });
 
   // T9.3 queue view: sorted-never-hidden (Recommended default), counts per status,
