@@ -4,11 +4,16 @@ import 'package:meshpoke/features/profile/profile_edit_screen.dart';
 
 void main() {
   testWidgets('keyword validation: max 10, max 3 at 8+ (live)', (tester) async {
+    // Tall surface: the editor's ListView is lazy — keyword input must be within
+    // cache extent without scrolling.
+    tester.view.physicalSize = const Size(800, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(const MaterialApp(home: ProfileEditScreen()));
 
     // add 10 keywords via input
     for (var i = 1; i <= 10; i++) {
-      await tester.enterText(find.byType(TextField).last, 'kw$i');
+      await tester.enterText(find.byKey(const ValueKey('keyword-input')), 'kw$i');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
     }

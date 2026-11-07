@@ -164,6 +164,22 @@ export const GEO_RULES = {
 export const PAYMENT_STYLES = ['share', 'individual', 'host_pays', 'other'] as const;
 export type PaymentStyle = (typeof PAYMENT_STYLES)[number];
 
+export const VIBE_PROMPTS: ReadonlyArray<{ en: string; zh: string }> = [
+  // Themes proven fun by HK dinner-social apps (DineFirst 約飯先 study, 2026-11) — keep neutral, networking-safe.
+  { en: 'Share a childhood memory', zh: '分享一個童年回憶' },
+  { en: 'Your comfort food and why', zh: '你嘅 comfort food 係咩？點解？' },
+  { en: 'Dream travel destination', zh: '你最想去邊度旅行？' },
+  { en: 'Best / worst film or show recently', zh: '最近睇過最正／最伏嘅電影或劇？' },
+  { en: 'A superpower only for chores — which?', zh: '一種超能力但只可以用嚟做家務，你揀咩？' },
+  { en: 'Favourite cartoon as a kid', zh: '細個最鍾意睇邊套卡通片？' },
+  { en: 'Your ideal Friday night', zh: '你理想嘅星期五夜晚係點？' },
+  { en: 'A goal you want to hit this year', zh: '今年想達成咩目標？' },
+  { en: 'Biggest misconception people have about you', zh: '新朋友通常對你有咩最大誤解？' },
+  { en: 'Two celebrities you’d want as friends', zh: '你最想邊兩位明星做朋友？' },
+  { en: 'Your go-to late-night snack', zh: '宵夜通常會揀食咩？' },
+  { en: 'One rule you’d make everyone follow (5 min/day)', zh: '全人類每日必須做一件事（5分鐘），你會定咩規矩？' },
+];
+
 export const DIETARY_TAGS = ['vegetarian', 'vegan', 'halal', 'no_alcohol', 'no_spicy', 'other'] as const;
 export type DietaryTag = (typeof DIETARY_TAGS)[number];
 

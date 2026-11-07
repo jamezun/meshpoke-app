@@ -4,7 +4,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { TIER_CAPS, PRICES, POKE_RULES, SORT_WEIGHTS, SORT_TIER_VALUES, SORT_NEUTRAL, SPOT_RULES, SCORE_RULES, MERCHANT_PER_SEAT_BANDS, MERCHANT_PRICES, MERCHANT_RULES, NOTIFICATION_RULES, GEO_RULES, QR_RULES } from '../src/constants.js';
+import { TIER_CAPS, PRICES, POKE_RULES, VIBE_PROMPTS, SORT_WEIGHTS, SORT_TIER_VALUES, SORT_NEUTRAL, SPOT_RULES, SCORE_RULES, MERCHANT_PER_SEAT_BANDS, MERCHANT_PRICES, MERCHANT_RULES, NOTIFICATION_RULES, GEO_RULES, QR_RULES } from '../src/constants.js';
 
 const root = join(import.meta.dirname, '../../..');
 const outDir = join(root, 'apps/mobile/lib/core');
@@ -70,6 +70,10 @@ class Sort {
   static const weightScore = ${dartNum(SORT_WEIGHTS.score)};
   static const unprovenScore = ${dartNum(SORT_NEUTRAL.unprovenScore)};
   static const neutralVibe = ${dartNum(SORT_NEUTRAL.neutralVibe)};
+}
+
+class VibePrompts {
+  static const all = <String>[${VIBE_PROMPTS.map((v) => `'${v.en}|${v.zh}'`).join(', ')}];
 }
 
 class Spots {

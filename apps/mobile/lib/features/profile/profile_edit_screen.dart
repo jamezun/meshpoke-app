@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meshpoke/core/api_client.dart';
+import 'package:meshpoke/core/constants.g.dart';
 
 /// Sketch + keywords editor (PRD §3.1, §5.3).
 /// Industry dropdown, 40-char one-liner, 10 keywords with 1–10 levels (max 3 at 8+).
@@ -30,6 +31,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   final _oneliner = TextEditingController();
   final Map<String, int> _keywords = {}; // keyword → level
   final Set<String> _dietary = {};
+  // 3 optional vibe-prompt slots: picked question (full 'en|zh' string) + answer.
+  final List<String?> _promptKeys = [null, null, null];
+  final List<TextEditingController> _promptAnswers = [
+    TextEditingController(), TextEditingController(), TextEditingController(),
+  ];
   final _dietaryNote = TextEditingController();
   bool _saving = false;
 
@@ -58,6 +64,13 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         _dietary
           ..clear()
           ..addAll([for (final d in (me['dietary'] as List? ?? [])) d.toString()]);
+        final pr = (me['prompts'] as List? ?? []);
+        for (var i = 0; i < 3 && i < pr.length; i++) {
+          final e = pr[i] as Map;
+          final q = e['prompt'] as String? ?? '';
+          _promptKeys[i] = VibePrompts.all.where((v) => v.startsWith(q)).firstOrNull;
+          _promptAnswers[i].text = e['answer'] as String? ?? '';
+        }
         _keywords
           ..clear()
           ..addEntries([
@@ -77,6 +90,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         'role_oneliner': _oneliner.text.trim(),
         'dietary': _dietary.toList(),
         if (_dietaryNote.text.trim().isNotEmpty) 'dietary_note': _dietaryNote.text.trim(),
+        'prompts': [
+          for (var i = 0; i < 3; i++)
+            if (_promptKeys[i] != null && _promptAnswers[i].text.trim().isNotEmpty)
+              {'prompt': _promptKeys[i]!.split('|').first, 'answer': _promptAnswers[i].text.trim()},
+        ],
       });
       await dio.put('/me/keywords', data: {
         'keywords': [
@@ -171,6 +189,30 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             ),
           ),
           const SizedBox(height: 24),
+          Text('Vibe prompts (pick up to 3 — shown on your sketch)',
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          for (var i = 0; i < 3; i++)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                DropdownButtonFormField<String>(
+                  initialValue: _promptKeys[i],
+                  decoration: InputDecoration(labelText: 'Prompt ${i + 1}', isDense: true),
+                  items: [
+                    for (final v in VibePrompts.all)
+                      DropdownMenuItem(value: v, child: Text(v.split('|').last, overflow: TextOverflow.ellipsis)),
+                  ],
+                  onChanged: (v) => setState(() => _promptKeys[i] = v),
+                ),
+                if (_promptKeys[i] != null)
+                  TextField(
+                    controller: _promptAnswers[i],
+                    maxLength: 80,
+                    decoration: const InputDecoration(labelText: 'Your answer', counterText: '', isDense: true),
+                  ),
+              ]),
+            ),
+          const SizedBox(height: 24),
           Text(
             'Keywords — what are you about? (${_keywords.length}/10, $highCount/3 at 8+)',
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -221,6 +263,7 @@ class _KeywordInputState extends State<_KeywordInput> {
       children: [
         Expanded(
           child: TextField(
+            key: const ValueKey('keyword-input'),
             controller: _c,
             decoration: const InputDecoration(
               hintText: 'e.g. tennis, coffee, fintech',

@@ -35,6 +35,7 @@ const patchMeSchema = z.object({
   share_birth_month: z.boolean().optional(),
   dietary: z.array(z.enum(['vegetarian', 'vegan', 'halal', 'no_alcohol', 'no_spicy', 'other'])).max(6).optional(),
   dietary_note: z.string().trim().max(80).optional(),
+  prompts: z.array(z.object({ prompt: z.string().trim().min(1).max(120), answer: z.string().trim().min(1).max(80) })).max(3).optional(),
 });
 
 function referralCode(): string {
@@ -118,7 +119,7 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
   app.get('/me', { preHandler: [app.authenticate] }, async (req) => {
     const rows = await db.execute(sql`
       SELECT u.id, u.display_name, u.date_of_birth::text AS date_of_birth, u.referral_code, u.phone_verified_at IS NOT NULL AS phone_verified,
-             p.industry, p.role_oneliner, p.hide_photo_in_rooms, p.dietary, p.dietary_note AS dietary_note
+             p.industry, p.role_oneliner, p.hide_photo_in_rooms, p.dietary, p.dietary_note AS dietary_note, p.prompts
       FROM users u LEFT JOIN profiles p ON p.user_id = u.id
       WHERE u.id = ${req.user!.id}`);
     const row = (rows as unknown as { rows: Record<string, unknown>[] }).rows[0];
@@ -130,12 +131,12 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
     if (!parsed.success) {
       return reply.code(422).send({ type: 'about:blank', title: 'Unprocessable Entity', status: 422, errors: parsed.error.issues });
     }
-    const { display_name, industry, role_oneliner, hide_photo_in_rooms, share_birth_month, dietary, dietary_note } = parsed.data;
+    const { display_name, industry, role_oneliner, hide_photo_in_rooms, share_birth_month, dietary, dietary_note, prompts } = parsed.data;
     const updated = await withTx(db, async (tx) => {
       if (display_name !== undefined || industry !== undefined || hide_photo_in_rooms !== undefined || share_birth_month !== undefined) {
         await tx.update(users).set({ ...(display_name !== undefined ? { displayName: display_name } : {}) }).where(eq(users.id, req.user!.id));
       }
-      if (industry !== undefined || role_oneliner !== undefined || hide_photo_in_rooms !== undefined || share_birth_month !== undefined || dietary !== undefined || dietary_note !== undefined) {
+      if (industry !== undefined || role_oneliner !== undefined || hide_photo_in_rooms !== undefined || share_birth_month !== undefined || dietary !== undefined || dietary_note !== undefined || prompts !== undefined) {
         await tx.update(profiles).set({
           ...(industry !== undefined ? { industry } : {}),
           ...(role_oneliner !== undefined ? { roleOneliner: role_oneliner } : {}),
@@ -143,6 +144,7 @@ export function registerMe(app: FastifyInstance, dbUrl: string, redis: { del(key
           ...(share_birth_month !== undefined ? { shareBirthMonth: share_birth_month } : {}),
           ...(dietary !== undefined ? { dietary } : {}),
           ...(dietary_note !== undefined ? { dietaryNote: dietary_note } : {}),
+          ...(prompts !== undefined ? { prompts } : {}),
         }).where(eq(profiles.userId, req.user!.id));
       }
       return true;

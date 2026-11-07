@@ -50,6 +50,10 @@ class Sort {
   static const neutralVibe = 0.5;
 }
 
+class VibePrompts {
+  static const all = <String>['Share a childhood memory|分享一個童年回憶', 'Your comfort food and why|你嘅 comfort food 係咩？點解？', 'Dream travel destination|你最想去邊度旅行？', 'Best / worst film or show recently|最近睇過最正／最伏嘅電影或劇？', 'A superpower only for chores — which?|一種超能力但只可以用嚟做家務，你揀咩？', 'Favourite cartoon as a kid|細個最鍾意睇邊套卡通片？', 'Your ideal Friday night|你理想嘅星期五夜晚係點？', 'A goal you want to hit this year|今年想達成咩目標？', 'Biggest misconception people have about you|新朋友通常對你有咩最大誤解？', 'Two celebrities you’d want as friends|你最想邊兩位明星做朋友？', 'Your go-to late-night snack|宵夜通常會揀食咩？', 'One rule you’d make everyone follow (5 min/day)|全人類每日必須做一件事（5分鐘），你會定咩規矩？'];
+}
+
 class Spots {
   static const confirmWindowHours = 48;
   static const bailFreeHours = 48;

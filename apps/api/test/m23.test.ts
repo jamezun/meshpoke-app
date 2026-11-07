@@ -75,6 +75,18 @@ afterAll(async () => {
 });
 
 describe('M23 payment style + dietary', () => {
+  it('vibe prompts: patch roundtrip + max 3 (DineFirst study)', async () => {
+    const u = await mkUser();
+    const four = [1, 2, 3, 4].map((i) => ({ prompt: `Q${i}`, answer: `A${i}` }));
+    let res = await app.inject({ method: 'PATCH', url: '/v1/me', headers: H(u.tok), payload: { prompts: four } });
+    expect(res.statusCode, res.body).toBe(422);
+    const three = four.slice(0, 3);
+    res = await app.inject({ method: 'PATCH', url: '/v1/me', headers: H(u.tok), payload: { prompts: three } });
+    expect(res.statusCode, res.body).toBe(200);
+    res = await app.inject({ method: 'GET', url: '/v1/me', headers: H(u.tok) });
+    expect((res.json() as { prompts: unknown[] }).prompts).toEqual(three);
+  });
+
   it('profile dietary patch + spot dietary summary (members only)', async () => {
     const host = await mkUser(); const m1 = await mkUser();
     await app.inject({ method: 'PATCH', url: '/v1/me', headers: H(m1.tok), payload: { dietary: ['vegetarian', 'no_alcohol'], dietary_note: 'no cilantro' } });
