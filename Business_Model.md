@@ -1,6 +1,6 @@
 # MeshPoke Business Model v6
 
-26 Oct 2026 · James
+26 Oct 2026 · James · Revised 8 Nov 2026 (DineFirst study follow-ups §5.8, M23 spot-logistics mechanics §5.8, privacy promise §3.5)
 
 HKD pricing · group formation · Show-up Score · per-seat merchant billing · membership ladders · verification ladder. Supersedes v5; incorporates the 26 Oct 2026 review. **This is the business model of record; PRD v2.1 implements it. Any conflict → this document wins.**
 
@@ -64,9 +64,10 @@ Five lanes; MeshPoke never holds or processes guest or event money.
 | Industry | Dropdown: Finance / Tech / Design / Media / Medical / Legal / Education / Hospitality / Student / Other |
 | Role one-liner | 40 chars, free text ("FX trader by day, board-game shark by night") |
 | Keywords | One set of 10 per user, each with a self-declared level 1–10; max 3 at level 8+ |
-| Vibe prompts | 3 short answers ("Perfect Friday night…", "Table topic I'll hijack…", "Ask me about…") |
+| Vibe prompts | Up to 3 short answers (≤80 chars) picked from a **curated bilingual list of 12** (EN / 繁中) — "Your ideal Friday night", "Your comfort food and why", "A superpower only for chores — which?", "Favourite cartoon as a kid"… Ice-breakers only: never scored, never used for matching. The list is field-proven in HK dinner-social apps (DineFirst 約飯先 study) and stays networking-safe (no dating or identity-gated prompts) |
 | Date of birth | Required at sign-up; **18+ hard gate**; never displayed |
 | Verification badges | HK phone-verified (required to poke, join spots, DM, post or host); optional work-email / LinkedIn industry badge; liveness badge added at a later stage (§6.3) |
+| Dietary needs | Optional tags (vegetarian / vegan / halal / no alcohol / no spicy / other) + 80-char note. Never on the sketch; hosts and members of a spot see **aggregate counts** in the pre-event card (§5.8) |
 
 - Brand line: **"poke by vibe, not looks."**
 - Keywords may become **peer-verified** (2+ endorsements, weighted by the endorser's own level). Verified vs self-declared is shown to viewers.
@@ -100,10 +101,12 @@ Faces are earned by context, never purchased.
 | --- | --- |
 | Map, spot cards, application queues, poke inbox | Sketch only (no photo) |
 | **Chat room spot** (standing / community room) | Primary photo visible to room members once they join — unless the user turns on **"Hide my photo in chat rooms"** (default off) |
-| **Event spot** | Sketch only while forming / confirmed / live. **After the event is completed, attendees see each other's primary photo** (only people marked attended — no-shows get no reveal) |
-| **Mutual poke (connected)** | Full profile: all photos + socials (Instagram / LinkedIn), from any context |
+| **Event spot** | Sketch only while forming / confirmed / live. **Once the event has ended, attendees see each other's FULL profile** — all photos, prompts and socials (Instagram / LinkedIn). Only people marked attended qualify — no-shows (including forgiven) get no reveal, in either direction |
+| **Mutual poke (connected)** | Full profile: all photos + socials (Instagram / LinkedIn), from any context — including people you never attended an event with |
 
 Photos are stored privately and served only through short-lived signed links.
+
+**Privacy promise (user-facing copy at phone verification, on the profile page and in the FAQ).** Browsing is invisible — nobody is notified when you look at a spot or a profile. The map, spot listings and application queues only ever show your sketch, never a photo. Your phone number is never shown. Hosts and members of a spot you join can see that you joined. Once an event you attended has ended, the other attendees can see your full profile (all photos and socials); until then, and for everyone else, it stays a sketch. This copy must always be checked against the photo rules above and the resolver in the PRD (§3.1) before it ships — HK's "will my colleagues see me?" worry is real, so an over-promise is worse than silence.
 
 ## 4. Consumer pricing (HKD)
 
@@ -201,7 +204,7 @@ There are three kinds of spot:
 
 | Type | What it is | Photo rule (§3.5) |
 | --- | --- | --- |
-| **Event spot** | A one-off group meetup with a date (dinner, hike, tennis…) created by a user or a merchant | Faces after the event, to attendees only |
+| **Event spot** | A one-off group meetup with a date (dinner, hike, tennis…) created by a user or a merchant | Full profile after the event ends, to attendees only |
 | **Chat room spot** | An always-on community room (a run club, a board-game regulars room, a merchant's standing room, a city room) | Faces on join (opt-out toggle) |
 | **Merchant spot** | A venue's membership — the way users get member discounts and perks | Venue content only |
 
@@ -217,6 +220,7 @@ Creator-admin (democratised Timeleft ops):
 
 - A spot forms without a date; **when min headcount is reached, the creator pins the date**; all members confirm within a **48h window** or the spot auto-dissolves.
 - **Overbook buffer:** creator may accept above min to absorb flakes; bail → waitlist backfill.
+- **Smart time defaults (suggestions only, never enforced):** the host stepper and the schedule sheet pre-fill HK's social rhythm — **Fri 19:30** for dinner / drinks / mingle / board games, **Sat 08:00** hike and run, **Sat 10:00** tennis / pickleball / badminton, **Sat 15:00** coffee; the create window defaults to the coming Fri–Sun (evening templates) or Sat–Mon (daytime templates). One tap to change.
 - **Graduated bail ladder:** bail >48h out = free · 24–48h out = 0.75 points · <24h out = 0.5 · no-show = 0 (§5.3 table). Every tier is forgiveness-eligible.
 
 ### 5.3 Attendance and Show-up Score (money-free anti-flake teeth)
@@ -325,6 +329,23 @@ Crews can link a WhatsApp group, but date polls, venue perks, attendance streaks
 - **Cap: 7 Pro days per month.** Earned days expire after 60 days.
 - Optional merchant-funded host perks (e.g. a free drink for the host at the venue) — zero cost to MeshPoke.
 
+### 5.8 Spot logistics, nudges and the post-event venue pulse
+
+Small mechanics that remove the specific failures competitors' reviews complain about (Timeleft HK: "went to the right address, the restaurant had no booking"; "no idea who has arrived"; hidden costs). All are free for every tier and none touches money.
+
+| Mechanic | Rule |
+| --- | --- |
+| **Payment style** (host sets once) | Share / individual / host pays / other, plus ≤200-char rules. **Informational only** — MeshPoke never handles event money (§8) |
+| **Find-it hint + icebreaker** | Optional ≤200-char "how to find us" and an opening question, both shown in the pre-event card |
+| **Pre-event pack** | A pinned system card posted in the spot room when the date is pinned: venue + address (EN/繁中), find-it hint, price range, payment style, **aggregate** dietary counts, icebreaker. No one has to ask the host |
+| **Arrival board** | Members of a live spot see who has tapped "I'm here" (n of N) — ends "who has arrived / which table?" |
+| **Venue change = same consent as time** | More than 48h out: free change with a notification. Within 48h: member consent by majority before start − 4h; silence or rejection keeps the original venue (same ladder as reschedule) |
+| **Cancel-backfill** | If a spot dissolves or is cancelled, stranded members get up to 3 similar spots (same template and district, forming or confirmed, undated or starting within 24h) |
+| **Nearly-full nudge** | When a spot reaches **one seat left**, push + activity item to waitlisters and users who saved the venue — or, while the spot is still forming and has no venue, saved venues in its district. Never the joiner, host or members; never blocked pairs; **once per user per spot and at most one nudge per user per 24h**; quiet hours apply (pushes defer to 08:00). Velocity information only — same facts, faster; free users get it too. Goal: lift forming → confirmed conversion |
+| **Venue pulse** | After a spot is done, attendees get a 2-tap "How was the venue?" 👍 / 👎 (optional ≤80-char note, **private — never shown**) for 48h. The venue page shows only the aggregate "87% enjoyed · n ratings", published **once at least 3 ratings exist** (stops 1-vote 100% and host self-rating). Free for every venue, claimed or not — it is supply-side proof for merchants, not a paid gate. Venue ratings only: people are never rated by other members (the Show-up Score covers behaviour) |
+
+Rejected from the DineFirst study: 40% lifetime referral (unit economics and spam), mystery-venue mode (conflicts with "know exactly where"), LLM matching (keyword vibe stays transparent), identity-gated tables (高收入 / religious). Deferred: opt-in mystery spot, auto-generated table-topic cards. Full study: `docs/research/2026-11-01-dinefirst-analysis.md`.
+
 ## 6. Trust and safety (v1, all tiers, never paywalled)
 
 Hong Kong loses tens of millions of HKD a month to romance and investment scams that start on dating apps, so safety ships in v1 — built from low-cost checks at launch, with paid liveness verification added later.
@@ -366,7 +387,7 @@ A vendor selfie-video check (with deepfake detection) confirming a real, live pe
 
 ### 6.4 Notifications and promotional consent
 
-- **Activity feed** (bell icon, like Instagram's heart): every alert — pokes, application decisions, date confirmations, crew polls, drops, venue offers — is listed in-app whether or not a push was sent.
+- **Activity feed** (bell icon, like Instagram's heart): every alert — pokes, application decisions, date confirmations, crew polls, drops, venue offers, nearly-full spots, venue changes — is listed in-app whether or not a push was sent.
 - **Promotional pushes** (venue offers, sponsored drops) are sent **only to users who explicitly opt in** via consent language in the app, with an in-app opt-out at any time (Apple guideline 4.5.4). Users can **mute any individual merchant**.
 - **Nearby perks (proximity alerts), opt-in:** only for venues the user has **joined or saved**, framed as a user benefit ("Your member perk at Café X is 50 m away"). Requires "Always" location on iOS / background location on Android (subject to store review). **Maximum one proximity alert per user per day across all merchants**; per-merchant mute applies. Offered as a Pro-merchant feature — but never to users who haven't joined or saved that venue.
 - Quiet hours 23:00–08:00 HKT for all non-urgent pushes.
@@ -503,6 +524,7 @@ Rules:
 - **Everything else** (parks, trailheads, courts, rooftops, bars): pins added by users, with duplicate detection and "report wrong pin".
 - **Merchants claim** their venue (Business Registration certificate) and correct the display name, pin and details.
 - No scraping of OpenRice or other platforms.
+- **Venue pulse** (§5.8) appears on every venue page as an aggregate once ≥3 attendees have rated. Surfacing it in the merchant portal as a Growth / Pro stat is planned (the number is the merchant's ROI proof for keeping a discount ladder alive); the public aggregate is never gated.
 
 ## 8. Secondary revenue and what is never monetised
 
@@ -574,7 +596,7 @@ Merchant revenue is the floor: ~30 paying venues in one district covers the whol
 
 - **Consumer:** paid conversion %, web vs in-app billing share, poke → poke-back rate, post-spot poke → connection rate, 30-day retention, time-to-first-spot for new users (target ≤7 days), referral → first-attendance rate.
 - **Crews:** crew formation rate, **rebook-the-crew rate (crews meeting 2+ times)**, dormant-crew rate.
-- **Formation health:** confirmed-spot fill rate, attendance rate, no-show rate by tier, host-marked vs peer-reported no-shows, flake-forgiveness usage, auto-dissolve rate.
+- **Formation health:** confirmed-spot fill rate, attendance rate, no-show rate by tier, host-marked vs peer-reported no-shows, flake-forgiveness usage, auto-dissolve rate, **nearly-full → confirmed conversion**, venue-pulse response rate.
 - **Hosts:** active hosts, host churn, host-reward days issued vs paid Pro conversion among hosts.
 - **Merchant:** founding → paid conversion, verified seats per drop (individual / group), new-member attribution visits, cost per verified seat, member level progression, member repeat-visit rate, band reassignment rate, churn.
 - **Trust:** report rate per 1k pokes, scam interstitial triggers per 1k DMs, safety ratings, promo opt-in and per-merchant mute rates, **free-tier acceptance rate vs paid (within 10%)**.
@@ -590,7 +612,7 @@ Merchant revenue is the floor: ~30 paying venues in one district covers the whol
 | Paid ordering alienates free users and hosts | Additive formula (paid ≤ +0.2), hard filters first, user-switchable sort, visible counts, 10% fairness launch gate |
 | Crews leak to WhatsApp | Allow WhatsApp links; keep polls, perks, streaks, backfill and rebook in-app |
 | Romance / investment scams | HK phone verification (one account per number), 18+, trust signals, unverified read-only, scam interstitials, link lock before first attended event, Scameter in report flow; vendor liveness when triggers are hit |
-| Women's safety | Public group meetings, faces only after events (attendees) or mutual poke, "hide my photo in chat rooms", share-my-spot, private safety ratings, fast report/block; seed women-led hosts. Gender-based spot rules deferred pending legal review (HK Sex Discrimination Ordinance) |
+| Women's safety | Public group meetings, full profile only after an event ends (attendees) or on mutual poke, "hide my photo in chat rooms", share-my-spot, private safety ratings, fast report/block; seed women-led hosts. Gender-based spot rules deferred pending legal review (HK Sex Discrimination Ordinance) |
 | Host burnout or churn | Capped Pro-day rewards, merchant-funded host perks, host churn tracked |
 | Merchants game check-ins or price bands | Staff scan of rotating guest QR + GPS + 1/day; low-confidence check-ins never billed; manual quarterly band audit (automated later); 7-day disputes |
 | Merchants under-scan regulars to avoid fees | Repeat member visits are never charged after the 60-day attribution window, so scanning regulars is always free |
@@ -604,6 +626,9 @@ Merchant revenue is the floor: ~30 paying venues in one district covers the whol
 | Third-party data terms | No Google Places storage, no OpenRice scraping; government open data + user/merchant pins |
 | Latency from a non-HK server | Cloudflare CDN for web and media; server-time targets; add HK/SG region when cash allows |
 | Scope creep (global search, degree graphs) | Discovery stays district/spot-scoped until multi-city density |
+| Venue pulse gamed or review-bombed | Attendees only (verified attendance), 48h window, notes private, aggregate hidden below 3 ratings, venue ratings only |
+| Nearly-full pushes become spam | Audience = people who asked (waitlist, saved venues); once per user per spot, max one per user per 24h; quiet hours |
+| Privacy copy over-promises | Copy is audited against the photo-reveal resolver before each release; claims limited to what the server enforces |
 | Stale competitor benchmarks | User-verified store checkouts only |
 
 ### Competitor price reference (HKD, verified Oct 2026 — user store checkouts)
@@ -618,6 +643,8 @@ Merchant revenue is the floor: ~30 paying venues in one district covers the whol
 | Bumble Premium+ | 298 | 688 | — | 158 |
 | CMB Premium | 388 | 688 | 1,288 | — |
 | CMB Platinum | 488 | 1,288 | 1,888 | — |
+
+**Other HK competitors (Nov 2026):** DineFirst 約飯先 — team-curated mystery dinners (4–6 per table, venue revealed 3–5 days out), subscriptions + HK$20 credits + 40% lifetime referral; too new for reviews, so the study mined its site bundle. Its central-ops model is the Timeleft supply bottleneck again; we adopted its field-proven Cantonese ice-breaker themes, scarcity framing and post-event follow-up, and rejected its referral economics and mystery venue (see §5.8).
 
 ---
 

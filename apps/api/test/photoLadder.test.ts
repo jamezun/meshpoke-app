@@ -75,8 +75,8 @@ const MATRIX: Record<ViewContext, Partial<Record<Rel, string>>> = {
   queue:        { strangers: 'sketch', connected: 'sketch' },
   inbox:        { strangers: 'sketch', connected: 'sketch' },
   chat_room:    { strangers: 'primary', connected: 'full' },
-  event_room:   { strangers: 'primary', connected: 'full' },
-  event_done:   { strangers: 'primary', event_only_viewer: 'primary', event_both_attended: 'full' },
+  event_room:   { strangers: 'sketch', connected: 'full', event_both_attended: 'sketch' },
+  event_done:   { strangers: 'sketch', event_only_viewer: 'sketch', event_both_attended: 'full' },
   profile:      { strangers: 'sketch', connected: 'full', event_both_attended: 'sketch' },
 };
 // blocked overrides everything → 'none' in all contexts
@@ -195,9 +195,9 @@ describe('T3.3 photo ladder — FULL MATRIX (launch gate)', () => {
     expect(sketch.json().user.photos).toBeUndefined();
     expect(sketch.json().user.socials).toBeUndefined();
 
-    // connected in chat_room → full actually; use event_done w/o attendance for primary:
-    await setupRelation('event_only_viewer');
-    const prim = await app!.inject({ method: 'GET', url: `/v1/users/${subject.id}?context=event_done&contextId=${spotId}`, headers: viewer.headers });
+    // the only remaining primary context is a shared chat room (photos on join):
+    await setupRelation('strangers');
+    const prim = await app!.inject({ method: 'GET', url: `/v1/users/${subject.id}?context=chat_room&contextId=${roomId}`, headers: viewer.headers });
     expect(prim.json().level).toBe('primary');
     expect(prim.json().user.primary_photo.url).toContain('sig=get');
     expect(prim.json().user.photos).toBeUndefined();

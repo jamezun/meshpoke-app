@@ -9,6 +9,9 @@ import { getDb } from '../db/client.js';
 
 const CATEGORIES = ['restaurant', 'cafe', 'bar', 'dessert', 'fast_food', 'convenience', 'gym', 'sports', 'park', 'library', 'coworking', 'other'] as const;
 
+/** Venue pulse % is only published once this many ratings exist (stops 1-vote 100%/0% and host-gaming). */
+const PULSE_MIN_RESPONSES = 3;
+
 export function registerVenues(app: FastifyInstance, dbUrl: string) {
   const db = getDb(dbUrl);
 
@@ -19,7 +22,7 @@ export function registerVenues(app: FastifyInstance, dbUrl: string) {
       select v.id, v.display_name, v.category, v.address_en as address, v.claimed_by_merchant_id,
              coalesce(a.activity7d, 0) as activity_7d,
              (select count(*)::int from venue_pulse p where p.venue_id = v.id) as pulse_count,
-             (select round(100.0 * count(*) filter (where p2.enjoyed) / greatest(count(*),1))::int
+             (select case when count(*) >= ${PULSE_MIN_RESPONSES} then round(100.0 * count(*) filter (where p2.enjoyed) / count(*))::int end
                 from venue_pulse p2 where p2.venue_id = v.id) as pulse_pct,
              (select count(*)::int from memberships m where m.venue_id = v.id and m.status = 'active' and m.kind = 'member') as member_count
         from venues v

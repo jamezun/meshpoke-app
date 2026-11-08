@@ -36,6 +36,8 @@ export function registerDataOwner(app: FastifyInstance, dbUrl: string, redis: { 
     const authored = await db.select().from(messages).where(eq(messages.userId, id));
     const myMemberships = await db.select().from(memberships).where(eq(memberships.userId, id));
     const mySubs = await db.select().from(subscriptions).where(eq(subscriptions.userId, id));
+    const pulseRows = (await db.execute(sql`
+      select spot_id, venue_id, enjoyed, note, created_at from venue_pulse where user_id = ${id}::uuid`)) as unknown as { rows: Record<string, unknown>[] };
 
     return {
       exported_at: new Date().toISOString(),
@@ -46,6 +48,7 @@ export function registerDataOwner(app: FastifyInstance, dbUrl: string, redis: { 
       messages_authored: authored.map((x) => ({ roomId: x.roomId, body: x.body, createdAt: x.createdAt })),
       memberships: myMemberships,
       subscriptions: mySubs,
+      venue_pulse: pulseRows.rows,
     };
   });
 }

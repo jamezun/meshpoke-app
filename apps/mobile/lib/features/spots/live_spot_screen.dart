@@ -135,7 +135,7 @@ class _LiveSpotScreenState extends ConsumerState<LiveSpotScreen> {
             ],
             if (isDone) ...[
               const Divider(),
-              const _VenuePulseCard(),
+              _VenuePulseCard(spotId: widget.spotId),
             ],
             if (isDone && isHost) ...[
               const Divider(),
@@ -243,7 +243,8 @@ class _RollCallState extends ConsumerState<_RollCall> {
 
 /// DineFirst #2: two-tap venue pulse on done spots (48h window, attendees only).
 class _VenuePulseCard extends ConsumerStatefulWidget {
-  const _VenuePulseCard();
+  const _VenuePulseCard({required this.spotId});
+  final String spotId;
 
   @override
   ConsumerState<_VenuePulseCard> createState() => _VenuePulseCardState();
@@ -257,7 +258,7 @@ class _VenuePulseCardState extends ConsumerState<_VenuePulseCard> {
 
   Future<void> _send(bool enjoyed) async {
     setState(() { _busy = true; _enjoyed = enjoyed; });
-    final spotId = (context as Element).findAncestorStateOfType<_LiveSpotScreenState>()!.widget.spotId;
+    final spotId = widget.spotId;
     try {
       await ref.read(apiClientProvider).post('/spots/$spotId/venue-pulse', data: {'enjoyed': enjoyed});
       if (mounted) setState(() => _sent = true);
@@ -274,9 +275,9 @@ class _VenuePulseCardState extends ConsumerState<_VenuePulseCard> {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(children: [
-          Icon(_enjoyed! ? Icons.thumb_up : Icons.thumb_down, size: 18, color: Colors.green),
+          Icon(_enjoyed! ? Icons.thumb_up : Icons.thumb_down, size: 18),
           const SizedBox(width: 8),
-          const Text('Thanks — venue noted 👍'),
+          const Text('Thanks — noted. Only the overall % is ever shown.'),
         ]),
       );
     }

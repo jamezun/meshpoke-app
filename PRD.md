@@ -1,6 +1,6 @@
-# MeshPoke Product Requirements Document (PRD) — v2.1
+# MeshPoke Product Requirements Document (PRD) — v2.2
 
-**Status:** Approved for build · **Supersedes:** PRD v2.0
+**Status:** Approved for build · **Supersedes:** PRD v2.1 (v2.2 = 8 Nov 2026: M23 spot-logistics + DineFirst follow-ups documented — §3.1, §3.5, §3.11, §5.4, §11.1, §12, §19)
 **Business model of record:** `Business_Model.md` v6 (this PRD implements it; pricing tables are copied, not re-derived)
 **Build plan:** `BUILD_PLAN.md` (task-by-task implementation order)
 **Positioning:** Networking-first. Not dating, not dinners. *"Poke the mesh. Watch your network ripple."* — A live map for meeting people in real life.
@@ -181,7 +181,8 @@ Implemented once in the backend and surfaced in all clients. Section numbers ref
 | Industry | Dropdown: Finance / Tech / Design / Media / Medical / Legal / Education / Hospitality / Student / Other |
 | Role one-liner | 40 chars free text |
 | Keywords | One set of 10 per user, each self-declared level 1–10; **max 3 at level 8+** (server-enforced) |
-| Vibe prompts | 3 short answers: "Perfect Friday night…", "Table topic I'll hijack…", "Ask me about…" |
+| Vibe prompts | Up to 3 `{prompt ≤120, answer ≤80}` picked from `VIBE_PROMPTS` (packages/shared — 12 bilingual EN / 繁中 ice-breakers, e.g. "Your ideal Friday night"). Stored as the English prompt text; the mobile editor shows the 繁中 label. `PATCH /me {prompts}` (>3 → 422). Never scored or used for matching |
+| Dietary | `dietary` ⊂ {vegetarian, vegan, halal, no_alcohol, no_spicy, other} + `dietary_note ≤80`. Not on the sketch; exposed only as aggregate counts / notes to active members of a shared spot (§3.5) |
 | Date of birth | Required at sign-up; **age < 18 → account creation blocked**; never displayed |
 | Photos | Up to 6; first = primary. Private in R2, served via 10-minute signed URLs |
 | Hide my photo in chat rooms | Boolean, default `false` |
@@ -195,10 +196,14 @@ Implemented once in the backend and surfaced in all clients. Section numbers ref
 | --- | --- |
 | Map, spot cards, application queues, poke inbox, People-you-met list (before event done) | Sketch only |
 | Chat room spot member list / messages | Primary photo if both are members of the room **and** `subject.hide_photo_in_rooms = false` |
-| Event spot (forming / confirmed / live) | Sketch only |
-| Event spot `done` | Primary photo visible between users who are **both** `attendance.status ∈ {attended, forgiven}` for that spot |
+| Event spot (forming / confirmed / live) | Sketch only — co-membership is not attendance; no photos before the event ends (**owner decision 8 Nov 2026**) |
+| Event spot `done` (event ended) | **Full profile — all photos, prompts, socials** — between users who both attended that spot (**owner decision 8 Nov 2026**: "the profile will be fully disclosed once the event has ended"). Implemented as `event_done` → `full`, which requires `attendance.status = 'attended'` for both. `forgiven` no-shows are excluded both ways — they did not attend (**owner decision 8 Nov 2026**) |
 | Connected (mutual poke) | All photos + socials, in every context |
 | Blocked either way | Nothing beyond display name |
+
+**Resolved 8 Nov 2026 (owner decision — "only those who attend can view"):** `event_done` → **full profile** between two `attended` users (already the code). `event_room` (forming / confirmed / live) → **sketch only** — the previous primary-photo path was REMOVED so co-membership alone never unlocks photos while the event is live. `forgiven` no-shows are excluded in both directions (they did not attend). The matrix in `test/photoLadder.test.ts` is the launch gate.
+
+**Privacy copy (phone-verify screen, profile page, web FAQ):** browsing is invisible (nobody is notified when you view a spot or profile); map / listings / queues show sketch only, never photos; phone number never shown; hosts and members of a spot you join can see that you joined; people in the same chat room may see your main photo (hide it via Settings); during an event spot, members see only your sketch — the full profile unlocks to fellow attendees once the event has ended. Every change to the resolver must update this copy in the same commit.
 
 ### 3.2 Discovery (local-scoped, never global)
 
@@ -247,6 +252,14 @@ Implemented once in the backend and surfaced in all clients. Section numbers ref
 3. Members confirm within **48h** or the spot auto-dissolves.
 4. Overbook buffer allowed; a bail triggers waitlist backfill.
 5. **Graduated bail ladder (Reliability 2.0):** >48h free · 24–48h = `late_cancel` 0.75 pts · <24h = 0.5 pts · no-show = 0.
+
+**Spot logistics (M23).** `spots.payment_style` ∈ {share, individual, host_pays, other} + `payment_rules ≤200` (informational — no money handled), `find_hint ≤200`, `icebreaker ≤200` (set on create / `PATCH /spots/{id}`). When the date is pinned the API posts a **pre-event pack** system message in the spot room (venue + EN/繁中 address, find-it hint, price, payment style, aggregate dietary counts, icebreaker). Live/done spots expose an **arrival board** (members only; "I'm here" n of N). **Venue change:** host-only on a `confirmed` spot; >48h out = free change + `venue_changed` notification; ≤48h = a `reschedule_proposals` row with `new_venue_id`, majority consent by start−4h (same rules as reschedule). **Cancel-backfill:** on dissolve / cancel, stranded members get a `cancel_backfill` notification listing ≤3 forming/confirmed spots of the same template + district that are undated or start within 24h.
+
+**Smart time defaults (client-side suggestions).** Schedule sheet default = next Fri 19:30 (dinner, drinks, industry mingle, board games, open sport), Sat 08:00 (hike, run), Sat 10:00 (tennis, pickleball, badminton), Sat 15:00 (coffee); picking a date keeps the time of day. Create stepper pre-fills the coming Fri–Sun (evening) or Sat–Mon (daytime) window until the host edits a date; end is bumped when start passes it.
+
+**Nearly-full nudge.** `notifyNearlyFull()` runs after a successful join or application-accept. Trigger: active host+member count = `max_headcount − 1`. Audience: active waitlisters ∪ users who saved the spot's venue (spot has no venue while forming → users who saved any venue in the spot's district), excluding the joiner, current members, deleted users and pairs with a block to the joiner or host. Dedupe: skip any user who already has a `spot_nearly_full` activity item for that spot **or any in the last 24h** (`notify()` has no general daily push cap — the 1/day cap exists only for proximity). Best-effort: errors are logged and never fail the join. Activity category `spots`, push via the normal outbox (opt-out + quiet-hours rules apply).
+
+**Venue pulse.** `POST /spots/{id}/venue-pulse {enjoyed, note ≤80}` — spot `done`, caller `attended|forgiven`, within `POKE_RULES.postSpotWindowHours` (48h) of `starts_at`; upsert per (spot, user). `GET /venues/{id}` returns `pulse_count` always and `pulse_pct` only when `pulse_count ≥ 3` (else `null`). Notes are private (data export only). Mobile: 2-tap card on the done screen; venue page shows "% enjoyed · n ratings" when `pulse_pct` is non-null.
 
 **Live:** from event start time to start + template default duration (editable). During `live`, attendees may tap **"I'm here"** (GPS accepted when the reported accuracy circle overlaps a 100 m radius around the venue pin).
 
@@ -338,7 +351,7 @@ Worked example (must be a unit test): Amy Free 0.8/0.7 → **0.61**; Cara Plus 0
 ### 3.11 Notifications and Activity Feed
 
 - **Activity feed** (bell): every user-relevant event is written to `activity_items` regardless of push.
-- **Push categories:** `social` (pokes, poke backs, connections), `spots` (applications, date pins, confirmations, reminders, crew polls), `venue` (drops at saved/joined venues, membership level changes), `promo` (sponsored drops, venue offers), `proximity`.
+- **Push categories:** `social` (pokes, poke backs, connections), `spots` (applications, date pins, confirmations, reminders, crew polls, nearly-full spots, venue changes / proposals, cancel-backfill suggestions), `venue` (drops at saved/joined venues, membership level changes), `promo` (sponsored drops, venue offers), `proximity`.
 - `promo` and `proximity` are **off by default**; enabled only via explicit in-app consent screens; toggles in Settings; **per-merchant mute** list.
 - **Proximity (nearby perks):** opt-in + OS "Always"/background location; native geofences registered only for joined/saved venues (iOS max 20 regions → nearest 20, refreshed on significant location change). Server enforces **max 1 proximity push per user per day** and per-merchant mute; only Pro merchants' venues are eligible.
 - Quiet hours 23:00–08:00 HKT for non-urgent pushes (feed still updates).
@@ -425,7 +438,7 @@ Global: **My QR** (full-screen rotating QR for merchant scans), activity feed, "
 5. After: roll-call screen (untick no-shows) within 24h; crew prompt.
 
 **Attend & after the event**
-1. Spot ends → status `done` → "Do it again?" (Keep crew / Leave) → People-you-met list with free pokes (48h) → attendees' primary photos revealed.
+1. Spot ends → status `done` → "Do it again?" (Keep crew / Leave) → People-you-met list with free pokes (48h) → attendees' full profiles revealed.
 2. Report someone absent (24h); if reported/marked absent, receive explanation prompt (flake forgiveness).
 
 **Poke → connection**
@@ -471,6 +484,9 @@ Global: **My QR** (full-screen rotating QR for merchant scans), activity feed, "
 | Event starting soon (2h) | spots | Reminder + "I'm here" prompt at start |
 | Post-spot window opened | spots | "You met 5 new people — poke them free for 48h" |
 | Crew rebook poll | spots | "{crew} is rebooking — vote" |
+| Spot nearly full (1 seat left) | spots | "{spot} · {district} — 1 seat left" (waitlist + saved-venue users; ≤1 per user per 24h) |
+| Venue changed / change proposed | spots | "Venue updated: {venue}" / "Host proposes {venue} — accept before {deadline}" |
+| Spot cancelled → similar spots | spots | "{spot} was cancelled — 3 similar spots nearby" |
 | Drop at saved/joined venue, level up | venue | Informational |
 | Sponsored drop / venue offer | promo (opt-in) | Labelled "Sponsored" |
 | Nearby perk | proximity (opt-in) | "Your member perk at {venue} is 50 m away" (max 1/day) |
@@ -661,6 +677,7 @@ users(id uuid pk = auth.users.id, email, auth_provider, display_name, date_of_bi
 
 -- Profile
 profiles(user_id pk, industry enum(10), role_oneliner varchar(40), prompts jsonb,
+         dietary text[] default '{}', dietary_note varchar(80),
          photos jsonb, hide_photo_in_rooms bool default false, socials jsonb,
          work_badge enum(none,email,linkedin) default 'none')
 keywords(id, user_id, keyword citext, level smallint CHECK (level BETWEEN 1 AND 10),
@@ -683,6 +700,8 @@ saved_venues(user_id, venue_id, created_at, pk(user_id, venue_id))
 spots(id, kind enum(event,chat), host_user_id null, host_merchant_id null,
       template enum(11) null, name, required_keywords text[] CHECK (cardinality <= 3),
       min_score numeric null, price_range text null, join_mode enum(open,application),
+      payment_style varchar(20) null, payment_rules varchar(200) null,
+      find_hint varchar(200) null, icebreaker varchar(200) null,
       district_id, venue_id null, group_drop_id null,
       state enum(forming,confirmed,live,done,dissolved,cancelled) null,  -- event only
       min_headcount, max_headcount, overbook_buffer, date_range tstzrange null,
@@ -693,6 +712,8 @@ spot_members(spot_id, user_id, role enum(host,member,waitlist), state enum(activ
              joined_at, pk(spot_id, user_id))
 applications(id, spot_id, user_id, note varchar(500), status enum(pending,accepted,waitlisted,declined,closed),
              decline_reason null, decided_at null, created_at)
+venue_pulse(spot_id, user_id, venue_id, enjoyed bool, note varchar(80) null, created_at,
+            pk(spot_id,user_id), idx(venue_id, created_at))   -- migration 0021; aggregate-only public
 attendance(spot_id, user_id, status enum(attended,absent_host,absent_reported,forgiven),
            verified_gps bool default false, im_here_at null, finalized_at null,
            forgiveness_note null, pk(spot_id, user_id))
@@ -810,7 +831,7 @@ Base: `https://api.meshpoke.com/v1` · Auth: `Authorization: Bearer <GoTrue JWT>
 ```
 (GoTrue)  OAuth Apple/Google · email+password · phone OTP (+852)
 POST /me/onboard              {date_of_birth, referral_code?}   → 422 if under 18
-GET  /me  PATCH /me           sketch, prompts, hide_photo_in_rooms
+GET  /me  PATCH /me           sketch, prompts (≤3), dietary, dietary_note, hide_photo_in_rooms
 PUT  /me/keywords             (max 10; max 3 at 8+ → 422)
 POST /me/photos               presigned R2 upload   DELETE /me/photos/{i}
 GET  /me/score  GET /me/caps  GET /me/entitlements
@@ -824,7 +845,7 @@ GET  /users/{id}              visibility resolved per §3.1
 GET  /map/viewport?bbox=&filters=      venues + spots in bbox (district-scoped)
 GET  /districts  GET /districts/{id}/spots
 GET  /venues/search?q=&district=       our venues table only
-GET  /venues/{id}
+GET  /venues/{id}                      + pulse_count, pulse_pct (null until ≥3 ratings)
 POST /venues                           user-added pin {name, category, lat, lng} → dedupe suggestions
 POST /venues/{id}/report               {kind, details}
 POST /venues/{id}/save   DELETE /venues/{id}/save
@@ -845,6 +866,10 @@ POST /spots/{id}/handover {nominee_id?}   POST /spots/{id}/handover/accept   POS
 GET  /me/streak   GET /me/regulars   GET /me/conduct   POST /me/appeal {reason}
 POST /rooms/{roomId}/messages/{id}/react   GET /me/hearts
 POST /spots/{id}/im-here {lat, lng, accuracy_m}
+GET  /spots/{id}/arrivals  GET /spots/{id}/dietary   (members only)
+PATCH /spots/{id} {payment_style, payment_rules, find_hint, icebreaker, …}   (host)
+POST /spots/{id}/venue-change {venue_id}   (host; >48h free, ≤48h consent)
+POST /spots/{id}/venue-pulse {enjoyed, note?}   (attendee, done, 48h)
 GET  /spots/{id}/roll-call   POST /spots/{id}/roll-call {absent_user_ids[]}   (host, 24h)
 POST /spots/{id}/report-absent {user_id}
 POST /spots/{id}/forgiveness {note}   POST /spots/{id}/forgiveness/{user_id}/accept (host)
@@ -1016,9 +1041,13 @@ GET  /me/subscriptions   POST /billing/portal   → Stripe customer portal
 | 26 Oct 2026 | Reuse existing Hetzner 8 GB box; separate DB + own GoTrue |
 | 26 Oct 2026 | Attendance default-attended + host roll-call + 2 peer reports + optional GPS; merchant visits via staff scan of user QR |
 | 26 Oct 2026 | No gender features; 18+ only; unverified read-only in rooms |
+| 8 Nov 2026 | M23 competitor response (Timeleft HK pain points): payment style + find-hint + icebreaker, dietary tags, pre-event pack, arrival board, venue change with ≤48h consent, cancel-backfill — all informational / free, no money handled |
+| 8 Nov 2026 | DineFirst study adopted: bilingual vibe prompts (12), nearly-full nudge, venue pulse (aggregate only, ≥3 ratings, private notes), smart Fri/Sat time defaults, privacy copy. Rejected: 40% lifetime referral, mystery venue, LLM matching, identity-gated tables |
+| 8 Nov 2026 | Nearly-full nudge capped at 1 per user per 24h and once per spot (notify() has no general daily cap; district fallback while the spot is forming) |
+| 8 Nov 2026 | Photo reveal final: **only verified attendees view full profiles once the event has ended** — `event_room` primary-while-live removed (sketch until done), `event_done` full between two `attended`, `forgiven` excluded (owner: non-attendees must not take advantage) |
 | 26 Oct 2026 | Referral pokes 5 + 5 (on first attendance), cap 10/month; founding annual plans; Apple SBP |
 | 26 Oct 2026 | Ladders: visits + tenure, templates + customisation, no discount cap, >20% info note |
 
 ---
 
-*PRD v2.1 implements Business_Model.md v6. Any conflict → Business Model wins; fix the PRD.*
+*PRD v2.2 implements Business_Model.md v6. Any conflict → Business Model wins; fix the PRD.*

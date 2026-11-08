@@ -33,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   const Text(
-                    'What others see: sketch only — industry, one-liner, keywords, trust chips. Faces & full profile unlock after you both poke.',
+                    'What others see: on the map, in listings and in queues — sketch only (industry, one-liner, keywords, trust chips), never your photo. People in a chat room with you can see your main photo (hide it in Settings). During an event, members see only your sketch — your full profile unlocks to attendees once the event has ended, or after you both poke.',
                     style: TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],

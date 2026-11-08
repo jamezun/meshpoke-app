@@ -95,12 +95,87 @@ describe('DineFirst #1: nearly-full push', () => {
     expect(notified).not.toContain(host.id);
     expect(notified).not.toContain(stranger.id);
   });
+
+  it('forming spot (no venue yet) falls back to district-saved venues; skips blocked pairs; pings once', async () => {
+    const host = await mkUser();
+    const joiner = await mkUser();
+    const joiner2 = await mkUser();
+    const saver = await mkUser();
+    const blockedSaver = await mkUser();
+    const venueId = await mkVenue('District Fallback Venue');
+    await pool.query(`insert into saved_venues (user_id, venue_id) values ($1,$3),($2,$3)`, [saver.id, blockedSaver.id, venueId]);
+    await pool.query(`insert into blocks (blocker_id, blocked_id) values ($1, $2)`, [blockedSaver.id, joiner.id]);
+
+    const res = await app.inject({
+      method: 'POST', url: '/v1/spots/events', headers: H(host.tok),
+      payload: {
+        template: 'dinner', name: 'FB dinner ' + crypto.randomUUID().slice(0, 6), joinMode: 'open',
+        districtId, minHeadcount: 2, maxHeadcount: 3,
+        dateStart: '2026-12-01T12:00:00Z', dateEnd: '2026-12-01T15:00:00Z',
+      },
+    });
+    expect(res.statusCode, res.body).toBe(200);
+    const spotId = res.json().spotId as string;
+
+    const j = await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/join`, headers: H(joiner.tok) });
+    expect(j.statusCode, j.body).toBe(200);
+    const q = () => pool.query(`select user_id from activity_items where type = 'spot_nearly_full' and payload->>'spotId' = $1`, [spotId]);
+    const notified = (await q()).rows.map((r) => r.user_id);
+    expect(notified).toContain(saver.id);
+    expect(notified).not.toContain(blockedSaver.id); // blocked the joiner
+
+    // leave + re-fill to max-1 again → no second ping for the same user
+    await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/leave`, headers: H(joiner.tok) });
+    await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/join`, headers: H(joiner2.tok) });
+    const again = (await q()).rows.filter((r) => r.user_id === saver.id);
+    expect(again).toHaveLength(1);
+
+    // a different spot hitting one-seat-left within 24h → still no second nudge for the same user
+    const h2 = await mkUser(); const j3 = await mkUser();
+    const r2 = await app.inject({
+      method: 'POST', url: '/v1/spots/events', headers: H(h2.tok),
+      payload: {
+        template: 'drinks', name: 'FB2 drinks ' + crypto.randomUUID().slice(0, 6), joinMode: 'open',
+        districtId, minHeadcount: 2, maxHeadcount: 3,
+        dateStart: '2026-12-02T12:00:00Z', dateEnd: '2026-12-02T15:00:00Z',
+      },
+    });
+    const spot2 = r2.json().spotId as string;
+    await app.inject({ method: 'POST', url: `/v1/spots/${spot2}/join`, headers: H(j3.tok) });
+    const day = await pool.query(`select 1 from activity_items where user_id = $1 and type = 'spot_nearly_full'`, [saver.id]);
+    expect(day.rows).toHaveLength(1);
+  });
+
+  it('notify failure never breaks the join', async () => {
+    const host = await mkUser();
+    const joiner = await mkUser();
+    const res = await app.inject({
+      method: 'POST', url: '/v1/spots/events', headers: H(host.tok),
+      payload: {
+        template: 'coffee', name: 'Safe join ' + crypto.randomUUID().slice(0, 6), joinMode: 'open',
+        districtId, minHeadcount: 2, maxHeadcount: 3,
+        dateStart: '2026-12-01T12:00:00Z', dateEnd: '2026-12-01T15:00:00Z',
+      },
+    });
+    const spotId = res.json().spotId as string;
+    const saver = await mkUser();
+    const venueId = await mkVenue('Boom Venue');
+    await pool.query(`insert into saved_venues (user_id, venue_id) values ($1, $2)`, [saver.id, venueId]);
+    await pool.query(`alter table activity_items rename to activity_items_x`); // force notify() to throw
+    try {
+      const j = await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/join`, headers: H(joiner.tok) });
+      expect(j.statusCode, j.body).toBe(200);
+    } finally {
+      await pool.query(`alter table activity_items_x rename to activity_items`);
+    }
+  });
 });
 
 describe('DineFirst #2: venue pulse', () => {
   it('attendee rates venue within window; stranger blocked; aggregate on venue detail', async () => {
     const host = await mkUser();
     const member = await mkUser();
+    const third = await mkUser();
     const outsider = await mkUser();
     const venueId = await mkVenue('Pulse Venue VP');
 
@@ -115,6 +190,7 @@ describe('DineFirst #2: venue pulse', () => {
     expect(res.statusCode, res.body).toBe(200);
     const spotId = res.json().spotId as string;
     await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/join`, headers: H(member.tok) });
+    await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/join`, headers: H(third.tok) });
 
     // fast-forward: confirm, schedule, live→done (white-box)
     await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/confirm`, headers: H(member.tok) });
@@ -123,7 +199,7 @@ describe('DineFirst #2: venue pulse', () => {
       payload: { startsAt: new Date(Date.now() + 2 * 3600_000).toISOString(), venueId },
     });
     await pool.query(`update spots set state = 'done' where id = $1`, [spotId]);
-    for (const u of [host.id, member.id]) {
+    for (const u of [host.id, member.id, third.id]) {
       await pool.query(`insert into attendance (spot_id, user_id, status) values ($1, $2, 'attended')`, [spotId, u]);
     }
 
@@ -138,7 +214,21 @@ describe('DineFirst #2: venue pulse', () => {
 
     const v = await app.inject({ method: 'GET', url: `/v1/venues/${venueId}`, headers: H(member.tok) });
     expect(v.statusCode).toBe(200);
+    // below the 3-response floor the % stays hidden (count still shown)
     expect(v.json().venue.pulse_count).toBe(2);
-    expect(v.json().venue.pulse_pct).toBe(50);
+    expect(v.json().venue.pulse_pct).toBeNull();
+
+    const ok3 = await app.inject({ method: 'POST', url: `/v1/spots/${spotId}/venue-pulse`, headers: H(third.tok), payload: { enjoyed: true } });
+    expect(ok3.statusCode, ok3.body).toBe(200);
+    const v2 = await app.inject({ method: 'GET', url: `/v1/venues/${venueId}`, headers: H(member.tok) });
+    expect(v2.json().venue.pulse_count).toBe(3);
+    expect(v2.json().venue.pulse_pct).toBe(67); // 2 of 3 enjoyed
+
+    // PDPO: the member's own pulse (incl. private note) is in their data export
+    const exp = await app.inject({ method: 'GET', url: '/v1/me/export', headers: H(member.tok) });
+    expect(exp.statusCode, exp.body).toBe(200);
+    const mine = exp.json().venue_pulse as { note: string; enjoyed: boolean }[];
+    expect(mine).toHaveLength(1);
+    expect(mine[0]).toMatchObject({ enjoyed: true, note: 'great vibe' });
   });
 });

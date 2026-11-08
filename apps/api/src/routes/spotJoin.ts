@@ -16,31 +16,56 @@ const Apply = z.object({ note: z.string().trim().max(500).optional() });
 
 const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
 
-/** DineFirst #1: fire a nearly-full push when one seat remains (waitlisters + saved-venue users). */
+/**
+ * DineFirst #1: fire a nearly-full push when one seat remains.
+ * Audience = waitlisters + users who saved the spot's venue. A forming spot has no venue yet
+ * (venue is pinned on confirm), so we fall back to users who saved any venue in the spot's district.
+ * Never the joiner / host / current members, never blocked pairs or deleted accounts, and at most
+ * once per user per spot and at most one nudge per user per 24h (the district fallback is broad, and
+ * notify() has no general daily push cap). Best-effort: a notify failure must
+ * not turn an already-committed join into a 500.
+ */
 export async function notifyNearlyFull(dbUrl: string, spotId: string, joinerId: string): Promise<void> {
-  const db = getDb(dbUrl);
-  const sp = rows(await db.execute(sql`
-    select s.id, s.name, s.max_headcount, s.venue_id, d.name_en as district
-      from spots s left join districts d on d.id = s.district_id
-     where s.id = ${spotId}::uuid`));
-  if (sp.length === 0) return;
-  const spot = sp[0];
-  const n = rows(await db.execute(sql`
-    select count(*)::int as n from spot_members
-     where spot_id = ${spotId}::uuid and state = 'active' and role in ('host','member')`))[0].n as number;
-  if (n !== (spot.max_headcount as number) - 1) return; // only at exactly 1 seat left
-  const audience = rows(await db.execute(sql`
-    select distinct u.user_id from (
-      select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role = 'waitlist'
-      union
-      select sv.user_id from saved_venues sv where sv.venue_id = ${spot.venue_id}::uuid
-    ) u
-    where u.user_id <> ${joinerId}
-      and u.user_id not in (select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role in ('host','member'))`));
-  for (const a of audience) {
-    await notify(dbUrl, String(a.user_id), 'spots', 'spot_nearly_full', {
-      spotId: String(spot.id), name: spot.name, district: spot.district, seatsLeft: 1,
-    });
+  try {
+    const db = getDb(dbUrl);
+    const sp = rows(await db.execute(sql`
+      select s.id, s.name, s.max_headcount, s.venue_id, s.district_id, s.host_user_id, d.name_en as district
+        from spots s left join districts d on d.id = s.district_id
+       where s.id = ${spotId}::uuid`));
+    if (sp.length === 0) return;
+    const spot = sp[0];
+    const n = rows(await db.execute(sql`
+      select count(*)::int as n from spot_members
+       where spot_id = ${spotId}::uuid and state = 'active' and role in ('host','member')`))[0].n as number;
+    if (n !== (spot.max_headcount as number) - 1) return; // only at exactly 1 seat left
+    const venueId = (spot.venue_id as string | null) ?? null;
+    const districtId = (spot.district_id as string | null) ?? null;
+    const hostId = (spot.host_user_id as string | null) ?? null;
+    const audience = rows(await db.execute(sql`
+      select distinct u.user_id from (
+        select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role = 'waitlist'
+        union
+        select sv.user_id from saved_venues sv
+         where (${venueId}::uuid is not null and sv.venue_id = ${venueId}::uuid)
+            or (${venueId}::uuid is null and ${districtId}::uuid is not null
+                and sv.venue_id in (select id from venues where district_id = ${districtId}::uuid))
+      ) u
+      join users usr on usr.id = u.user_id and usr.deleted_at is null
+      where u.user_id <> ${joinerId}
+        and u.user_id not in (select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role in ('host','member'))
+        and not exists (select 1 from blocks b
+                         where (b.blocker_id = u.user_id and b.blocked_id in (${joinerId}::uuid, ${hostId}::uuid))
+                            or (b.blocked_id = u.user_id and b.blocker_id in (${joinerId}::uuid, ${hostId}::uuid)))
+        and not exists (select 1 from activity_items ai
+                         where ai.user_id = u.user_id and ai.type = 'spot_nearly_full'
+                           and (ai.payload->>'spotId' = ${spotId} or ai.created_at > now() - interval '24 hours'))`));
+    for (const a of audience) {
+      await notify(dbUrl, String(a.user_id), 'spots', 'spot_nearly_full', {
+        spotId: String(spot.id), name: spot.name, district: spot.district, seatsLeft: 1,
+      });
+    }
+  } catch (err) {
+    console.error('notifyNearlyFull failed (non-fatal)', err);
   }
 }
 

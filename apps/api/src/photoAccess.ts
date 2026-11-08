@@ -77,17 +77,11 @@ export async function resolveProfileView(
       return p?.hide ? { level: 'sketch' } : { level: 'primary' };
     }
     case 'event_room': {
+      // owner decision 8 Nov 2026: sketch only until the event ends. Co-membership is
+      // not attendance — non-attendees must never benefit from the reveal, so no
+      // photos while forming / confirmed / live (mutual poke still unlocks full).
       if (connected) return { level: 'full' };
-      // verify BOTH are active members of that spot
-      if (!contextId) return { level: 'sketch' };
-      const sm = await db.execute(sql`
-        SELECT count(*)::int AS n FROM spot_members m
-        JOIN spot_members s ON m.spot_id = s.spot_id
-        WHERE m.spot_id = ${contextId}
-          AND m.user_id = ${viewerId} AND m.state = 'active' AND m.role <> 'waitlist'
-          AND s.user_id = ${subjectId} AND s.state = 'active' AND s.role <> 'waitlist'`);
-      const inSpot = (sm as unknown as { rows: { n: number }[] }).rows[0].n > 0;
-      return inSpot ? { level: 'primary' } : { level: 'sketch' };
+      return { level: 'sketch' };
     }
     case 'event_done': {
       // same event, both attended (verified check-in) → full
@@ -99,7 +93,8 @@ export async function resolveProfileView(
           AND a.user_id = ${viewerId} AND a.status = 'attended'
           AND b.user_id = ${subjectId} AND b.status = 'attended'`);
       const n = (rows as unknown as { rows: { n: number }[] }).rows[0].n;
-      return n > 0 ? { level: 'full' } : { level: 'primary' };
+      // both attended → full; anyone else (no-shows, forgiven, bailed, strangers) → sketch
+      return n > 0 ? { level: 'full' } : { level: 'sketch' };
     }
     case 'profile':
       return connected ? { level: 'full' } : { level: 'sketch' };

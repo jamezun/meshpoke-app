@@ -182,7 +182,14 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
                 trailing: const Icon(Icons.calendar_month),
                 onTap: () async {
                   final d = await showDatePicker(context: context, initialDate: _dateStart, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)));
-                  if (d != null) setState(() { _dateStart = d; _datesTouched = true; });
+                  if (d != null) {
+                    setState(() {
+                      _dateStart = d;
+                      _datesTouched = true;
+                      // keep end >= start, otherwise the end picker asserts (initialDate < firstDate)
+                      if (_dateEnd.isBefore(d)) _dateEnd = d.add(const Duration(days: 2));
+                    });
+                  }
                 },
               ),
               ListTile(

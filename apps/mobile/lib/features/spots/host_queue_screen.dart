@@ -172,7 +172,8 @@ class _ScheduleSheetState extends ConsumerState<_ScheduleSheet> {
           trailing: const Icon(Icons.calendar_month),
           onTap: () async {
             final d = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)));
-            if (d != null) setState(() => _date = d);
+            // showDatePicker returns midnight — keep the template's default time of day.
+            if (d != null) setState(() => _date = DateTime(d.year, d.month, d.day, _date.hour, _date.minute));
           },
         ),
         const Text('Venue (required to confirm)'),
