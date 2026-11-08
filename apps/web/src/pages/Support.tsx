@@ -6,6 +6,7 @@ const faqs: [string, string][] = [
   ['How is this different from dating apps?', 'No swiping, no browsing faces, no pay-to-be-seen. You meet people in person at spots; the app just gets you there.'],
   ['What happens if I no-show?', 'The host records it; it lowers your Show-up Score, which hosts can filter on. Life happens — explain within 48h and the host can void it.'],
   ['Is my phone number visible?', 'Never. It\'s stored encrypted and used only for verification.'],
+  ['Is this private? What can people see about me?', 'Nobody is notified when you view or join anything. Other members only ever see your sketch — industry, one-liner, keywords and trust chips. Your face and full profile unlock only after you both poke.'],
   ['Does MeshPoke handle event payments?', 'No — and by design. Spots set their own price expectations; money changes hands between you and the venue only.'],
 ];
 

@@ -16,8 +16,11 @@ export function registerVenues(app: FastifyInstance, dbUrl: string) {
   app.get<{ Params: { id: string } }>('/venues/:id', { preHandler: [app.authenticate] }, async (req, reply) => {
     const id = req.params.id;
     const v = (await db.execute(sql`
-      select v.id, v.display_name, v.category, v.address, v.claimed_by_merchant_id,
-             coalesce(a.activity, 0) as activity_7d,
+      select v.id, v.display_name, v.category, v.address_en as address, v.claimed_by_merchant_id,
+             coalesce(a.activity7d, 0) as activity_7d,
+             (select count(*)::int from venue_pulse p where p.venue_id = v.id) as pulse_count,
+             (select round(100.0 * count(*) filter (where p2.enjoyed) / greatest(count(*),1))::int
+                from venue_pulse p2 where p2.venue_id = v.id) as pulse_pct,
              (select count(*)::int from memberships m where m.venue_id = v.id and m.status = 'active' and m.kind = 'member') as member_count
         from venues v
         left join venue_activity_7d a on a.venue_id = v.id

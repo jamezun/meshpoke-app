@@ -111,6 +111,14 @@ class _VenuePageScreenState extends ConsumerState<VenuePageScreen> {
                         subtitle: venue['claimed'] == true ? Text('${venue['member_count']} members') : null,
                       ),
                     ),
+                    if ((venue['pulse_count'] as num? ?? 0) > 0)
+                      Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.thumb_up_outlined),
+                          title: Text('${venue['pulse_pct']}% enjoyed'),
+                          subtitle: Text('${venue['pulse_count']} post-event ratings'),
+                        ),
+                      ),
                     if (venue['claimed'] == true) ..._membershipSection(ladder, mine),
                   ],
                 ),

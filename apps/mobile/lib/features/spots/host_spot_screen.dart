@@ -28,6 +28,7 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
   int _overbook = 1;
   DateTime _dateStart = DateTime.now().add(const Duration(days: 3));
   DateTime _dateEnd = DateTime.now().add(const Duration(days: 10));
+  bool _datesTouched = false;
   String? _error;
 
   @override
@@ -51,7 +52,19 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
                   initialValue: _template,
                   decoration: const InputDecoration(labelText: 'Template'),
                   items: [for (final t in ['dinner', 'drinks', 'coffee', 'hike', 'run', 'tennis', 'pickleball', 'badminton', 'board_games', 'industry_mingle', 'open_sport']) DropdownMenuItem(value: t, child: Text(t))],
-                  onChanged: (v) => setState(() => _template = v!),
+                  onChanged: (v) => setState(() {
+                    _template = v!;
+                    if (!_datesTouched) {
+                      // smart window (DineFirst TGIF study): evening templates → coming Fri–Sun; day templates → coming Sat–Mon
+                      final evening = !const ['hike', 'run', 'tennis', 'pickleball', 'badminton', 'coffee'].contains(v);
+                      var d = DateTime.now();
+                      do {
+                        d = d.add(const Duration(days: 1));
+                      } while (d.weekday != (evening ? DateTime.friday : DateTime.saturday));
+                      _dateStart = d;
+                      _dateEnd = d.add(const Duration(days: 2));
+                    }
+                  }),
                 ),
                 TextFormField(
                   controller: _name,
@@ -169,7 +182,7 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
                 trailing: const Icon(Icons.calendar_month),
                 onTap: () async {
                   final d = await showDatePicker(context: context, initialDate: _dateStart, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)));
-                  if (d != null) setState(() => _dateStart = d);
+                  if (d != null) setState(() { _dateStart = d; _datesTouched = true; });
                 },
               ),
               ListTile(
@@ -178,7 +191,7 @@ class _HostSpotScreenState extends ConsumerState<HostSpotScreen> {
                 trailing: const Icon(Icons.calendar_month),
                 onTap: () async {
                   final d = await showDatePicker(context: context, initialDate: _dateEnd, firstDate: _dateStart, lastDate: DateTime.now().add(const Duration(days: 120)));
-                  if (d != null) setState(() => _dateEnd = d);
+                  if (d != null) setState(() { _dateEnd = d; _datesTouched = true; });
                 },
               ),
               const Text('Date is pinned only when the spot fills — members confirm within 48h.', style: TextStyle(fontSize: 12)),

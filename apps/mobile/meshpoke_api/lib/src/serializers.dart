@@ -21,6 +21,7 @@ import 'package:meshpoke_api/src/model/v1_health_get200_response_checks.dart';
 import 'package:meshpoke_api/src/model/v1_health_get503_response.dart';
 import 'package:meshpoke_api/src/model/v1_health_get503_response_checks.dart';
 import 'package:meshpoke_api/src/model/v1_me_activity_read_post_request.dart';
+import 'package:meshpoke_api/src/model/v1_me_appeal_post_request.dart';
 import 'package:meshpoke_api/src/model/v1_me_location_ping_post_request.dart';
 import 'package:meshpoke_api/src/model/v1_me_notification_prefs_patch_request.dart';
 import 'package:meshpoke_api/src/model/v1_me_push_tokens_post_request.dart';
@@ -47,6 +48,7 @@ part 'serializers.g.dart';
   V1HealthGet503Response,
   V1HealthGet503ResponseChecks,
   V1MeActivityReadPostRequest,
+  V1MeAppealPostRequest,
   V1MeLocationPingPostRequest,
   V1MeNotificationPrefsPatchRequest,
   V1MePushTokensPostRequest,

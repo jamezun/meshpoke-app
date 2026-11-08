@@ -66,7 +66,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
           children: [
             if (_stage == PhoneStage.number) ...[
               Text(
-                'We verify every member with a phone number. This keeps the mesh real.',
+                'We verify every member with a phone number. This keeps the mesh real. Nobody is notified when you view or join — your number is never shown to anyone.',
                 style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 16),

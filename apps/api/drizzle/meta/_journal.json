@@ -142,6 +142,13 @@
       "when": 1793000000000,
       "tag": "0020_competitor_response",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794139312922,
+      "tag": "0021_venue_pulse",
+      "breakpoints": true
     }
   ]
 }

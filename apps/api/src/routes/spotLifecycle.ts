@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { notify } from '../notify.js';
+import { notifyNearlyFull } from './spotJoin.js';
 import { SPOT_RULES } from '@meshpoke/shared/constants';
 import { enforcementState } from './score.js';
 
@@ -63,6 +64,7 @@ export function registerSpotLifecycle(app: FastifyInstance, dbUrl: string) {
         insert into spot_members (spot_id, user_id, role, confirm_state) values (${a.spot_id}::uuid, ${a.user_id}, 'member', 'pending')
         on conflict (spot_id, user_id) do update set state = 'active', role = 'member', confirm_state = 'pending'`);
       await db.execute(sql`insert into room_members (room_id, user_id) select r.id, ${a.user_id} from rooms r where r.spot_id = ${a.spot_id}::uuid on conflict do nothing`);
+      await notifyNearlyFull(dbUrl, String(a.spot_id), String(a.user_id));
     }
     return { status };
   });

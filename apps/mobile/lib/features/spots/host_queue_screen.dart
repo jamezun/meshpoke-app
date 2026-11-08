@@ -49,7 +49,10 @@ class _HostQueueScreenState extends ConsumerState<HostQueueScreen> {
     final picked = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _ScheduleSheet(spotId: widget.spotId),
+      builder: (context) => _ScheduleSheet(
+        spotId: widget.spotId,
+        template: (ref.read(spotDetailProvider(widget.spotId)).valueOrNull?.template) ?? 'dinner',
+      ),
     );
     if (picked == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Spot scheduled — members have 48h to confirm')));
@@ -124,15 +127,34 @@ final _queueProvider = FutureProvider.autoDispose.family<List<Map<String, dynami
 });
 
 class _ScheduleSheet extends ConsumerStatefulWidget {
-  const _ScheduleSheet({required this.spotId});
+  const _ScheduleSheet({required this.spotId, required this.template});
   final String spotId;
+  final String template; // smart default time per template (DineFirst TGIF insight)
 
   @override
   ConsumerState<_ScheduleSheet> createState() => _ScheduleSheetState();
 }
 
+/// Smart defaults (DineFirst TGIF study): Fri 19:30 for evening templates,
+/// Sat 10:00 racket / 08:00 endurance / 15:00 coffee.
+(int weekday, int hour, int minute) _defaultWhen(String template) => switch (template) {
+      'hike' || 'run' => (DateTime.saturday, 8, 0),
+      'tennis' || 'pickleball' || 'badminton' => (DateTime.saturday, 10, 0),
+      'coffee' => (DateTime.saturday, 15, 0),
+      _ => (DateTime.friday, 19, 30),
+    };
+
+DateTime _nextDefaultDate(String template) {
+  final (weekday, hour, minute) = _defaultWhen(template);
+  var d = DateTime.now().add(const Duration(days: 1));
+  while (d.weekday != weekday) {
+    d = d.add(const Duration(days: 1));
+  }
+  return DateTime(d.year, d.month, d.day, hour, minute);
+}
+
 class _ScheduleSheetState extends ConsumerState<_ScheduleSheet> {
-  DateTime _date = DateTime.now().add(const Duration(days: 7));
+  late DateTime _date = _nextDefaultDate(widget.template);
   String? _venueId;
   String? _error;
   bool _busy = false;
@@ -175,7 +197,7 @@ class _ScheduleSheetState extends ConsumerState<_ScheduleSheet> {
                   try {
                     final dio = ref.read(apiClientProvider);
                     await dio.post('/spots/${widget.spotId}/schedule', data: {
-                      'startsAt': DateTime(_date.year, _date.month, _date.day, 19).toUtc().toIso8601String(),
+                      'startsAt': DateTime(_date.year, _date.month, _date.day, _date.hour, _date.minute).toUtc().toIso8601String(),
                       'venueId': _venueId,
                     });
                     if (context.mounted) Navigator.pop(context, true);

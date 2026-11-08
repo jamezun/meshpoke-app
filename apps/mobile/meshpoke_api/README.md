@@ -115,11 +115,14 @@ Class | Method | HTTP request | Description
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MapViewportGet**](doc/DefaultApi.md#v1mapviewportget) | **GET** /v1/map/viewport | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeActivityGet**](doc/DefaultApi.md#v1meactivityget) | **GET** /v1/me/activity | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeActivityReadPost**](doc/DefaultApi.md#v1meactivityreadpost) | **POST** /v1/me/activity/read | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1MeAppealPost**](doc/DefaultApi.md#v1meappealpost) | **POST** /v1/me/appeal | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeCapsGet**](doc/DefaultApi.md#v1mecapsget) | **GET** /v1/me/caps | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1MeConductGet**](doc/DefaultApi.md#v1meconductget) | **GET** /v1/me/conduct | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeCouponsGet**](doc/DefaultApi.md#v1mecouponsget) | **GET** /v1/me/coupons | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeDelete**](doc/DefaultApi.md#v1medelete) | **DELETE** /v1/me | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeExportGet**](doc/DefaultApi.md#v1meexportget) | **GET** /v1/me/export | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeGet**](doc/DefaultApi.md#v1meget) | **GET** /v1/me | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1MeHeartsGet**](doc/DefaultApi.md#v1meheartsget) | **GET** /v1/me/hearts | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeHostedGet**](doc/DefaultApi.md#v1mehostedget) | **GET** /v1/me/hosted | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeKeywordsGet**](doc/DefaultApi.md#v1mekeywordsget) | **GET** /v1/me/keywords | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeKeywordsPut**](doc/DefaultApi.md#v1mekeywordsput) | **PUT** /v1/me/keywords | 
@@ -135,7 +138,9 @@ Class | Method | HTTP request | Description
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MePushTokensPost**](doc/DefaultApi.md#v1mepushtokenspost) | **POST** /v1/me/push-tokens | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeQrGet**](doc/DefaultApi.md#v1meqrget) | **GET** /v1/me/qr | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeReferralsGet**](doc/DefaultApi.md#v1mereferralsget) | **GET** /v1/me/referrals | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1MeRegularsGet**](doc/DefaultApi.md#v1meregularsget) | **GET** /v1/me/regulars | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeSpotsAttendedGet**](doc/DefaultApi.md#v1mespotsattendedget) | **GET** /v1/me/spots/attended | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1MeStreakGet**](doc/DefaultApi.md#v1mestreakget) | **GET** /v1/me/streak | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MeWalletDropsGet**](doc/DefaultApi.md#v1mewalletdropsget) | **GET** /v1/me/wallet/drops | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MerchantBillingCancelPost**](doc/DefaultApi.md#v1merchantbillingcancelpost) | **POST** /v1/merchant/billing/cancel | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1MerchantBillingInvoicesGet**](doc/DefaultApi.md#v1merchantbillinginvoicesget) | **GET** /v1/merchant/billing/invoices | 
@@ -179,28 +184,40 @@ Class | Method | HTTP request | Description
 [*DefaultApi*](doc/DefaultApi.md) | [**v1RoomsIdLeavePost**](doc/DefaultApi.md#v1roomsidleavepost) | **POST** /v1/rooms/{id}/leave | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1RoomsIdMembersGet**](doc/DefaultApi.md#v1roomsidmembersget) | **GET** /v1/rooms/{id}/members | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1RoomsIdMessagesGet**](doc/DefaultApi.md#v1roomsidmessagesget) | **GET** /v1/rooms/{id}/messages | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1RoomsRoomIdMessagesIdReactPost**](doc/DefaultApi.md#v1roomsroomidmessagesidreactpost) | **POST** /v1/rooms/{roomId}/messages/{id}/react | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsEventsPost**](doc/DefaultApi.md#v1spotseventspost) | **POST** /v1/spots/events | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdApologyPost**](doc/DefaultApi.md#v1spotsidapologypost) | **POST** /v1/spots/{id}/apology | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdApplyPost**](doc/DefaultApi.md#v1spotsidapplypost) | **POST** /v1/spots/{id}/apply | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdArrivalsGet**](doc/DefaultApi.md#v1spotsidarrivalsget) | **GET** /v1/spots/{id}/arrivals | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdBailPost**](doc/DefaultApi.md#v1spotsidbailpost) | **POST** /v1/spots/{id}/bail | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdCancelPost**](doc/DefaultApi.md#v1spotsidcancelpost) | **POST** /v1/spots/{id}/cancel | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdConfirmPost**](doc/DefaultApi.md#v1spotsidconfirmpost) | **POST** /v1/spots/{id}/confirm | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdCrewPost**](doc/DefaultApi.md#v1spotsidcrewpost) | **POST** /v1/spots/{id}/crew | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdDietaryGet**](doc/DefaultApi.md#v1spotsiddietaryget) | **GET** /v1/spots/{id}/dietary | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdFinalisePost**](doc/DefaultApi.md#v1spotsidfinalisepost) | **POST** /v1/spots/{id}/finalise | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdForgivenessPost**](doc/DefaultApi.md#v1spotsidforgivenesspost) | **POST** /v1/spots/{id}/forgiveness | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdGet**](doc/DefaultApi.md#v1spotsidget) | **GET** /v1/spots/{id} | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdGroupDropPost**](doc/DefaultApi.md#v1spotsidgroupdroppost) | **POST** /v1/spots/{id}/group-drop | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdHandoverAcceptPost**](doc/DefaultApi.md#v1spotsidhandoveracceptpost) | **POST** /v1/spots/{id}/handover/accept | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdHandoverPost**](doc/DefaultApi.md#v1spotsidhandoverpost) | **POST** /v1/spots/{id}/handover | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdHandoverWithdrawPost**](doc/DefaultApi.md#v1spotsidhandoverwithdrawpost) | **POST** /v1/spots/{id}/handover/withdraw | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdImHerePost**](doc/DefaultApi.md#v1spotsidimherepost) | **POST** /v1/spots/{id}/im-here | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdJoinPost**](doc/DefaultApi.md#v1spotsidjoinpost) | **POST** /v1/spots/{id}/join | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdLeavePost**](doc/DefaultApi.md#v1spotsidleavepost) | **POST** /v1/spots/{id}/leave | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdPatch**](doc/DefaultApi.md#v1spotsidpatch) | **PATCH** /v1/spots/{id} | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdQueueGet**](doc/DefaultApi.md#v1spotsidqueueget) | **GET** /v1/spots/{id}/queue | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdRemoveMemberPost**](doc/DefaultApi.md#v1spotsidremovememberpost) | **POST** /v1/spots/{id}/remove-member | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdReportAbsentPost**](doc/DefaultApi.md#v1spotsidreportabsentpost) | **POST** /v1/spots/{id}/report-absent | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdReschedulePost**](doc/DefaultApi.md#v1spotsidreschedulepost) | **POST** /v1/spots/{id}/reschedule | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdRescheduleRespondPost**](doc/DefaultApi.md#v1spotsidreschedulerespondpost) | **POST** /v1/spots/{id}/reschedule/respond | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdRollCallGet**](doc/DefaultApi.md#v1spotsidrollcallget) | **GET** /v1/spots/{id}/roll-call | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdRollCallPost**](doc/DefaultApi.md#v1spotsidrollcallpost) | **POST** /v1/spots/{id}/roll-call | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdSafetyRatingPost**](doc/DefaultApi.md#v1spotsidsafetyratingpost) | **POST** /v1/spots/{id}/safety-rating | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdSchedulePost**](doc/DefaultApi.md#v1spotsidschedulepost) | **POST** /v1/spots/{id}/schedule | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdShareGet**](doc/DefaultApi.md#v1spotsidshareget) | **GET** /v1/spots/{id}/share | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdShareMySpotPost**](doc/DefaultApi.md#v1spotsidsharemyspotpost) | **POST** /v1/spots/{id}/share-my-spot | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdVenueChangePost**](doc/DefaultApi.md#v1spotsidvenuechangepost) | **POST** /v1/spots/{id}/venue-change | 
+[*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsIdVenuePulsePost**](doc/DefaultApi.md#v1spotsidvenuepulsepost) | **POST** /v1/spots/{id}/venue-pulse | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1SpotsPost**](doc/DefaultApi.md#v1spotspost) | **POST** /v1/spots | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1VenuesIdDropsGet**](doc/DefaultApi.md#v1venuesiddropsget) | **GET** /v1/venues/{id}/drops | 
 [*DefaultApi*](doc/DefaultApi.md) | [**v1VenuesIdGet**](doc/DefaultApi.md#v1venuesidget) | **GET** /v1/venues/{id} | 
@@ -226,6 +243,7 @@ Class | Method | HTTP request | Description
  - [V1HealthGet503Response](doc/V1HealthGet503Response.md)
  - [V1HealthGet503ResponseChecks](doc/V1HealthGet503ResponseChecks.md)
  - [V1MeActivityReadPostRequest](doc/V1MeActivityReadPostRequest.md)
+ - [V1MeAppealPostRequest](doc/V1MeAppealPostRequest.md)
  - [V1MeLocationPingPostRequest](doc/V1MeLocationPingPostRequest.md)
  - [V1MeNotificationPrefsPatchRequest](doc/V1MeNotificationPrefsPatchRequest.md)
  - [V1MePushTokensPostRequest](doc/V1MePushTokensPostRequest.md)

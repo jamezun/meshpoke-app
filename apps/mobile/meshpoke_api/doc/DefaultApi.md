@@ -61,11 +61,14 @@ Method | HTTP request | Description
 [**v1MapViewportGet**](DefaultApi.md#v1mapviewportget) | **GET** /v1/map/viewport | 
 [**v1MeActivityGet**](DefaultApi.md#v1meactivityget) | **GET** /v1/me/activity | 
 [**v1MeActivityReadPost**](DefaultApi.md#v1meactivityreadpost) | **POST** /v1/me/activity/read | 
+[**v1MeAppealPost**](DefaultApi.md#v1meappealpost) | **POST** /v1/me/appeal | 
 [**v1MeCapsGet**](DefaultApi.md#v1mecapsget) | **GET** /v1/me/caps | 
+[**v1MeConductGet**](DefaultApi.md#v1meconductget) | **GET** /v1/me/conduct | 
 [**v1MeCouponsGet**](DefaultApi.md#v1mecouponsget) | **GET** /v1/me/coupons | 
 [**v1MeDelete**](DefaultApi.md#v1medelete) | **DELETE** /v1/me | 
 [**v1MeExportGet**](DefaultApi.md#v1meexportget) | **GET** /v1/me/export | 
 [**v1MeGet**](DefaultApi.md#v1meget) | **GET** /v1/me | 
+[**v1MeHeartsGet**](DefaultApi.md#v1meheartsget) | **GET** /v1/me/hearts | 
 [**v1MeHostedGet**](DefaultApi.md#v1mehostedget) | **GET** /v1/me/hosted | 
 [**v1MeKeywordsGet**](DefaultApi.md#v1mekeywordsget) | **GET** /v1/me/keywords | 
 [**v1MeKeywordsPut**](DefaultApi.md#v1mekeywordsput) | **PUT** /v1/me/keywords | 
@@ -81,7 +84,9 @@ Method | HTTP request | Description
 [**v1MePushTokensPost**](DefaultApi.md#v1mepushtokenspost) | **POST** /v1/me/push-tokens | 
 [**v1MeQrGet**](DefaultApi.md#v1meqrget) | **GET** /v1/me/qr | 
 [**v1MeReferralsGet**](DefaultApi.md#v1mereferralsget) | **GET** /v1/me/referrals | 
+[**v1MeRegularsGet**](DefaultApi.md#v1meregularsget) | **GET** /v1/me/regulars | 
 [**v1MeSpotsAttendedGet**](DefaultApi.md#v1mespotsattendedget) | **GET** /v1/me/spots/attended | 
+[**v1MeStreakGet**](DefaultApi.md#v1mestreakget) | **GET** /v1/me/streak | 
 [**v1MeWalletDropsGet**](DefaultApi.md#v1mewalletdropsget) | **GET** /v1/me/wallet/drops | 
 [**v1MerchantBillingCancelPost**](DefaultApi.md#v1merchantbillingcancelpost) | **POST** /v1/merchant/billing/cancel | 
 [**v1MerchantBillingInvoicesGet**](DefaultApi.md#v1merchantbillinginvoicesget) | **GET** /v1/merchant/billing/invoices | 
@@ -125,28 +130,40 @@ Method | HTTP request | Description
 [**v1RoomsIdLeavePost**](DefaultApi.md#v1roomsidleavepost) | **POST** /v1/rooms/{id}/leave | 
 [**v1RoomsIdMembersGet**](DefaultApi.md#v1roomsidmembersget) | **GET** /v1/rooms/{id}/members | 
 [**v1RoomsIdMessagesGet**](DefaultApi.md#v1roomsidmessagesget) | **GET** /v1/rooms/{id}/messages | 
+[**v1RoomsRoomIdMessagesIdReactPost**](DefaultApi.md#v1roomsroomidmessagesidreactpost) | **POST** /v1/rooms/{roomId}/messages/{id}/react | 
 [**v1SpotsEventsPost**](DefaultApi.md#v1spotseventspost) | **POST** /v1/spots/events | 
+[**v1SpotsIdApologyPost**](DefaultApi.md#v1spotsidapologypost) | **POST** /v1/spots/{id}/apology | 
 [**v1SpotsIdApplyPost**](DefaultApi.md#v1spotsidapplypost) | **POST** /v1/spots/{id}/apply | 
+[**v1SpotsIdArrivalsGet**](DefaultApi.md#v1spotsidarrivalsget) | **GET** /v1/spots/{id}/arrivals | 
 [**v1SpotsIdBailPost**](DefaultApi.md#v1spotsidbailpost) | **POST** /v1/spots/{id}/bail | 
 [**v1SpotsIdCancelPost**](DefaultApi.md#v1spotsidcancelpost) | **POST** /v1/spots/{id}/cancel | 
 [**v1SpotsIdConfirmPost**](DefaultApi.md#v1spotsidconfirmpost) | **POST** /v1/spots/{id}/confirm | 
 [**v1SpotsIdCrewPost**](DefaultApi.md#v1spotsidcrewpost) | **POST** /v1/spots/{id}/crew | 
+[**v1SpotsIdDietaryGet**](DefaultApi.md#v1spotsiddietaryget) | **GET** /v1/spots/{id}/dietary | 
 [**v1SpotsIdFinalisePost**](DefaultApi.md#v1spotsidfinalisepost) | **POST** /v1/spots/{id}/finalise | 
 [**v1SpotsIdForgivenessPost**](DefaultApi.md#v1spotsidforgivenesspost) | **POST** /v1/spots/{id}/forgiveness | 
 [**v1SpotsIdGet**](DefaultApi.md#v1spotsidget) | **GET** /v1/spots/{id} | 
 [**v1SpotsIdGroupDropPost**](DefaultApi.md#v1spotsidgroupdroppost) | **POST** /v1/spots/{id}/group-drop | 
+[**v1SpotsIdHandoverAcceptPost**](DefaultApi.md#v1spotsidhandoveracceptpost) | **POST** /v1/spots/{id}/handover/accept | 
+[**v1SpotsIdHandoverPost**](DefaultApi.md#v1spotsidhandoverpost) | **POST** /v1/spots/{id}/handover | 
+[**v1SpotsIdHandoverWithdrawPost**](DefaultApi.md#v1spotsidhandoverwithdrawpost) | **POST** /v1/spots/{id}/handover/withdraw | 
 [**v1SpotsIdImHerePost**](DefaultApi.md#v1spotsidimherepost) | **POST** /v1/spots/{id}/im-here | 
 [**v1SpotsIdJoinPost**](DefaultApi.md#v1spotsidjoinpost) | **POST** /v1/spots/{id}/join | 
 [**v1SpotsIdLeavePost**](DefaultApi.md#v1spotsidleavepost) | **POST** /v1/spots/{id}/leave | 
+[**v1SpotsIdPatch**](DefaultApi.md#v1spotsidpatch) | **PATCH** /v1/spots/{id} | 
 [**v1SpotsIdQueueGet**](DefaultApi.md#v1spotsidqueueget) | **GET** /v1/spots/{id}/queue | 
 [**v1SpotsIdRemoveMemberPost**](DefaultApi.md#v1spotsidremovememberpost) | **POST** /v1/spots/{id}/remove-member | 
 [**v1SpotsIdReportAbsentPost**](DefaultApi.md#v1spotsidreportabsentpost) | **POST** /v1/spots/{id}/report-absent | 
+[**v1SpotsIdReschedulePost**](DefaultApi.md#v1spotsidreschedulepost) | **POST** /v1/spots/{id}/reschedule | 
+[**v1SpotsIdRescheduleRespondPost**](DefaultApi.md#v1spotsidreschedulerespondpost) | **POST** /v1/spots/{id}/reschedule/respond | 
 [**v1SpotsIdRollCallGet**](DefaultApi.md#v1spotsidrollcallget) | **GET** /v1/spots/{id}/roll-call | 
 [**v1SpotsIdRollCallPost**](DefaultApi.md#v1spotsidrollcallpost) | **POST** /v1/spots/{id}/roll-call | 
 [**v1SpotsIdSafetyRatingPost**](DefaultApi.md#v1spotsidsafetyratingpost) | **POST** /v1/spots/{id}/safety-rating | 
 [**v1SpotsIdSchedulePost**](DefaultApi.md#v1spotsidschedulepost) | **POST** /v1/spots/{id}/schedule | 
 [**v1SpotsIdShareGet**](DefaultApi.md#v1spotsidshareget) | **GET** /v1/spots/{id}/share | 
 [**v1SpotsIdShareMySpotPost**](DefaultApi.md#v1spotsidsharemyspotpost) | **POST** /v1/spots/{id}/share-my-spot | 
+[**v1SpotsIdVenueChangePost**](DefaultApi.md#v1spotsidvenuechangepost) | **POST** /v1/spots/{id}/venue-change | 
+[**v1SpotsIdVenuePulsePost**](DefaultApi.md#v1spotsidvenuepulsepost) | **POST** /v1/spots/{id}/venue-pulse | 
 [**v1SpotsPost**](DefaultApi.md#v1spotspost) | **POST** /v1/spots | 
 [**v1VenuesIdDropsGet**](DefaultApi.md#v1venuesiddropsget) | **GET** /v1/venues/{id}/drops | 
 [**v1VenuesIdGet**](DefaultApi.md#v1venuesidget) | **GET** /v1/venues/{id} | 
@@ -2134,6 +2151,46 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **v1MeAppealPost**
+> v1MeAppealPost(v1MeAppealPostRequest)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final V1MeAppealPostRequest v1MeAppealPostRequest = ; // V1MeAppealPostRequest | 
+
+try {
+    api.v1MeAppealPost(v1MeAppealPostRequest);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1MeAppealPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **v1MeAppealPostRequest** | [**V1MeAppealPostRequest**](V1MeAppealPostRequest.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **v1MeCapsGet**
 > v1MeCapsGet()
 
@@ -2149,6 +2206,42 @@ try {
     api.v1MeCapsGet();
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1MeCapsGet: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1MeConductGet**
+> v1MeConductGet()
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+
+try {
+    api.v1MeConductGet();
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1MeConductGet: $e\n');
 }
 ```
 
@@ -2293,6 +2386,42 @@ try {
     api.v1MeGet();
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1MeGet: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1MeHeartsGet**
+> v1MeHeartsGet()
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+
+try {
+    api.v1MeHeartsGet();
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1MeHeartsGet: $e\n');
 }
 ```
 
@@ -2866,6 +2995,42 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **v1MeRegularsGet**
+> v1MeRegularsGet()
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+
+try {
+    api.v1MeRegularsGet();
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1MeRegularsGet: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **v1MeSpotsAttendedGet**
 > v1MeSpotsAttendedGet()
 
@@ -2881,6 +3046,42 @@ try {
     api.v1MeSpotsAttendedGet();
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1MeSpotsAttendedGet: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1MeStreakGet**
+> v1MeStreakGet()
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+
+try {
+    api.v1MeStreakGet();
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1MeStreakGet: $e\n');
 }
 ```
 
@@ -4546,6 +4747,48 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **v1RoomsRoomIdMessagesIdReactPost**
+> v1RoomsRoomIdMessagesIdReactPost(roomId, id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String roomId = roomId_example; // String | 
+final String id = id_example; // String | 
+
+try {
+    api.v1RoomsRoomIdMessagesIdReactPost(roomId, id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1RoomsRoomIdMessagesIdReactPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **roomId** | **String**|  | 
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **v1SpotsEventsPost**
 > v1SpotsEventsPost()
 
@@ -4582,6 +4825,46 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **v1SpotsIdApologyPost**
+> v1SpotsIdApologyPost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdApologyPost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdApologyPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **v1SpotsIdApplyPost**
 > v1SpotsIdApplyPost(id)
 
@@ -4598,6 +4881,46 @@ try {
     api.v1SpotsIdApplyPost(id);
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1SpotsIdApplyPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdArrivalsGet**
+> v1SpotsIdArrivalsGet(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdArrivalsGet(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdArrivalsGet: $e\n');
 }
 ```
 
@@ -4758,6 +5081,46 @@ try {
     api.v1SpotsIdCrewPost(id);
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1SpotsIdCrewPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdDietaryGet**
+> v1SpotsIdDietaryGet(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdDietaryGet(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdDietaryGet: $e\n');
 }
 ```
 
@@ -4944,6 +5307,126 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **v1SpotsIdHandoverAcceptPost**
+> v1SpotsIdHandoverAcceptPost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdHandoverAcceptPost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdHandoverAcceptPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdHandoverPost**
+> v1SpotsIdHandoverPost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdHandoverPost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdHandoverPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdHandoverWithdrawPost**
+> v1SpotsIdHandoverWithdrawPost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdHandoverWithdrawPost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdHandoverWithdrawPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **v1SpotsIdImHerePost**
 > v1SpotsIdImHerePost(id)
 
@@ -5064,6 +5547,46 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **v1SpotsIdPatch**
+> v1SpotsIdPatch(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdPatch(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdPatch: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **v1SpotsIdQueueGet**
 > v1SpotsIdQueueGet(id)
 
@@ -5160,6 +5683,86 @@ try {
     api.v1SpotsIdReportAbsentPost(id);
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1SpotsIdReportAbsentPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdReschedulePost**
+> v1SpotsIdReschedulePost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdReschedulePost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdReschedulePost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdRescheduleRespondPost**
+> v1SpotsIdRescheduleRespondPost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdRescheduleRespondPost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdRescheduleRespondPost: $e\n');
 }
 ```
 
@@ -5402,6 +6005,86 @@ try {
     api.v1SpotsIdShareMySpotPost(id);
 } catch on DioException (e) {
     print('Exception when calling DefaultApi->v1SpotsIdShareMySpotPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdVenueChangePost**
+> v1SpotsIdVenueChangePost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdVenueChangePost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdVenueChangePost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **v1SpotsIdVenuePulsePost**
+> v1SpotsIdVenuePulsePost(id)
+
+
+
+### Example
+```dart
+import 'package:meshpoke_api/api.dart';
+
+final api = MeshpokeApi().getDefaultApi();
+final String id = id_example; // String | 
+
+try {
+    api.v1SpotsIdVenuePulsePost(id);
+} catch on DioException (e) {
+    print('Exception when calling DefaultApi->v1SpotsIdVenuePulsePost: $e\n');
 }
 ```
 

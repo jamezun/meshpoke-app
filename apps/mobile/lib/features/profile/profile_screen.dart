@@ -31,6 +31,11 @@ class ProfileScreen extends StatelessWidget {
                     'Member since 2026 · 0 spots · Unproven',
                     style: TextStyle(color: Colors.white54, fontSize: 13),
                   ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'What others see: sketch only — industry, one-liner, keywords, trust chips. Faces & full profile unlock after you both poke.',
+                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
                 ],
               ),
             ],

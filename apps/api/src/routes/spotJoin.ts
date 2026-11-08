@@ -8,9 +8,41 @@ import { capture } from '../analytics.js';
 import { z } from 'zod';
 import { getDb } from '../db/client.js';
 import { enforcementState } from './score.js';
+import { notify } from '../notify.js';
+import { POKE_RULES } from '@meshpoke/shared/constants';
 import { trustExpr } from '../trust.js';
 
 const Apply = z.object({ note: z.string().trim().max(500).optional() });
+
+const rows = (r: unknown) => (r as { rows: Record<string, unknown>[] }).rows;
+
+/** DineFirst #1: fire a nearly-full push when one seat remains (waitlisters + saved-venue users). */
+export async function notifyNearlyFull(dbUrl: string, spotId: string, joinerId: string): Promise<void> {
+  const db = getDb(dbUrl);
+  const sp = rows(await db.execute(sql`
+    select s.id, s.name, s.max_headcount, s.venue_id, d.name_en as district
+      from spots s left join districts d on d.id = s.district_id
+     where s.id = ${spotId}::uuid`));
+  if (sp.length === 0) return;
+  const spot = sp[0];
+  const n = rows(await db.execute(sql`
+    select count(*)::int as n from spot_members
+     where spot_id = ${spotId}::uuid and state = 'active' and role in ('host','member')`))[0].n as number;
+  if (n !== (spot.max_headcount as number) - 1) return; // only at exactly 1 seat left
+  const audience = rows(await db.execute(sql`
+    select distinct u.user_id from (
+      select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role = 'waitlist'
+      union
+      select sv.user_id from saved_venues sv where sv.venue_id = ${spot.venue_id}::uuid
+    ) u
+    where u.user_id <> ${joinerId}
+      and u.user_id not in (select user_id from spot_members where spot_id = ${spotId}::uuid and state = 'active' and role in ('host','member'))`));
+  for (const a of audience) {
+    await notify(dbUrl, String(a.user_id), 'spots', 'spot_nearly_full', {
+      spotId: String(spot.id), name: spot.name, district: spot.district, seatsLeft: 1,
+    });
+  }
+}
 
 export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
   const db = getDb(dbUrl);
@@ -64,6 +96,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
   }
 
   // open mode join
+
   app.post<{ Params: { id: string } }>('/spots/:id/join', { preHandler: [app.authenticate] }, async (req, reply) => {
     const userId = req.user!.id;
     const spot = rows(await db.execute(sql`select id, kind, join_mode, state, min_score, required_keywords, max_headcount, overbook_buffer from spots where id = ${req.params.id}::uuid`));
@@ -93,6 +126,7 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
       insert into spot_members (spot_id, user_id, role, confirm_state) values (${s.id}::uuid, ${userId}, ${role}::member_role, 'pending')
       on conflict (spot_id, user_id) do update set state = 'active', role = excluded.role, confirm_state = 'pending' returning role`);
     await db.execute(sql`insert into room_members (room_id, user_id) select r.id, ${userId} from rooms r where r.spot_id = ${s.id}::uuid on conflict do nothing`);
+    if (role === 'member') await notifyNearlyFull(dbUrl, String(s.id), userId);
     return { role: rows(res)[0].role };
   });
 
@@ -124,6 +158,32 @@ export function registerSpotJoin(app: FastifyInstance, dbUrl: string) {
       on conflict (spot_id, user_id) do update set status = 'pending', note = excluded.note, decided_at = null`);
     capture('application_submitted', req.user!.id, { spotId: req.params.id });
     return { status: 'pending' };
+  });
+
+  // DineFirst #2: venue pulse — attendees-only, done spot, 48h window (matches people-you-met).
+  app.post<{ Params: { id: string }; Body: unknown }>('/spots/:id/venue-pulse', { preHandler: [app.authenticate] }, async (req, reply) => {
+    const userId = req.user!.id;
+    const parsed = z.object({
+      enjoyed: z.boolean(),
+      note: z.string().trim().max(80).optional(),
+    }).safeParse(req.body ?? {});
+    if (!parsed.success) return reply.code(422).send({ problem: { title: 'Invalid pulse', status: 422 } });
+    const spot = rows(await db.execute(sql`select id, state, starts_at, venue_id from spots where id = ${req.params.id}::uuid`));
+    if (spot.length === 0) return reply.code(404).send({ problem: { title: 'Spot not found', status: 404 } });
+    const sp = spot[0];
+    if (sp.state !== 'done') return reply.code(422).send({ problem: { title: 'Spot not finished yet', status: 422 } });
+    if (!sp.venue_id || !sp.starts_at) return reply.code(422).send({ problem: { title: 'Spot has no scheduled venue', status: 422 } });
+    const closesAt = new Date(new Date(String(sp.starts_at)).getTime() + POKE_RULES.postSpotWindowHours * 3600_000);
+    if (closesAt < new Date()) return reply.code(422).send({ problem: { title: 'Feedback window closed', status: 422 } });
+    const att = rows(await db.execute(sql`
+      select 1 from attendance where spot_id = ${sp.id}::uuid and user_id = ${userId}
+        and status in ('attended','forgiven')`));
+    if (att.length === 0) return reply.code(403).send({ problem: { title: 'Only attendees can rate the venue', status: 403 } });
+    await db.execute(sql`
+      insert into venue_pulse (spot_id, user_id, venue_id, enjoyed, note)
+      values (${sp.id}::uuid, ${userId}, ${sp.venue_id}, ${parsed.data.enjoyed}, ${parsed.data.note ?? null})
+      on conflict (spot_id, user_id) do update set enjoyed = excluded.enjoyed, note = excluded.note`);
+    return { recorded: true };
   });
 
   // T9.5 spot detail (auth): all fields + my membership/application state + venue name

@@ -133,6 +133,10 @@ class _LiveSpotScreenState extends ConsumerState<LiveSpotScreen> {
               const SizedBox(height: 8),
               const Text('Check in at the venue — GPS confirms you showed up.', style: TextStyle(color: Colors.grey)),
             ],
+            if (isDone) ...[
+              const Divider(),
+              const _VenuePulseCard(),
+            ],
             if (isDone && isHost) ...[
               const Divider(),
               Text('Roll-call', style: Theme.of(context).textTheme.titleMedium),
@@ -233,5 +237,67 @@ class _RollCallState extends ConsumerState<_RollCall> {
         ]);
       },
     );
+  }
+}
+
+
+/// DineFirst #2: two-tap venue pulse on done spots (48h window, attendees only).
+class _VenuePulseCard extends ConsumerStatefulWidget {
+  const _VenuePulseCard();
+
+  @override
+  ConsumerState<_VenuePulseCard> createState() => _VenuePulseCardState();
+}
+
+class _VenuePulseCardState extends ConsumerState<_VenuePulseCard> {
+  bool? _enjoyed;
+  bool _sent = false;
+  bool _busy = false;
+  String? _error;
+
+  Future<void> _send(bool enjoyed) async {
+    setState(() { _busy = true; _enjoyed = enjoyed; });
+    final spotId = (context as Element).findAncestorStateOfType<_LiveSpotScreenState>()!.widget.spotId;
+    try {
+      await ref.read(apiClientProvider).post('/spots/$spotId/venue-pulse', data: {'enjoyed': enjoyed});
+      if (mounted) setState(() => _sent = true);
+    } catch (e) {
+      if (mounted) setState(() => _error = 'Window closed or not an attendee');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_sent) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(children: [
+          Icon(_enjoyed! ? Icons.thumb_up : Icons.thumb_down, size: 18, color: Colors.green),
+          const SizedBox(width: 8),
+          const Text('Thanks — venue noted 👍'),
+        ]),
+      );
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('How was the venue?', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      Row(children: [
+        FilledButton.tonalIcon(
+          onPressed: _busy ? null : () => _send(true),
+          icon: const Icon(Icons.thumb_up, size: 18),
+          label: const Text('Good'),
+        ),
+        const SizedBox(width: 12),
+        FilledButton.tonalIcon(
+          onPressed: _busy ? null : () => _send(false),
+          icon: const Icon(Icons.thumb_down, size: 18),
+          label: const Text('Not great'),
+        ),
+      ]),
+      if (_error != null)
+        Padding(padding: const EdgeInsets.only(top: 6), child: Text(_error!, style: const TextStyle(color: Colors.red))),
+    ]);
   }
 }
